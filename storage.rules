@@ -1,0 +1,11 @@
+rules_version = '2';
+
+// Nobles Commons does not use Cloud Storage in v1 (no image uploads).
+// Everything is denied.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,16 @@
+node_modules
+dist
+functions/lib
+package-lock.json
+playwright-report
+test-results
+docs/screens
+docs/reports
+BUILD_PROMPT.md
+Proposal.pdf
+# The design-system files are copied unchanged from the reference appendices.
+apps/web/src/styles/tokens.css
+apps/web/src/styles/components.css
+*.md
+.firebase
+ml

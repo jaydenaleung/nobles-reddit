@@ -1,0 +1,23 @@
+{
+  "name": "@commons/functions",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "main": "lib/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.3.0",
+    "firebase-admin": "13.10.0",
+    "firebase-functions": "7.4.0",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}

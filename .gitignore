@@ -1,0 +1,53 @@
+# Dependencies and build output
+node_modules/
+dist/
+functions/lib/
+*.tsbuildinfo
+
+# Secrets and local configuration. Never commit these.
+.env
+.env.local
+.env.*.local
+.env.production
+functions/.env
+functions/.env.*
+functions/.secret.local
+service-account*.json
+*-service-account.json
+*serviceAccount*.json
+*-firebase-adminsdk-*.json
+credentials/
+*.pem
+*.key
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+pubsub-debug.log
+database-debug.log
+emulator-data/
+
+# Test output
+test-results/
+playwright-report/
+blob-report/
+coverage/
+.lighthouseci/
+docs/reports/*.json
+
+# Python (ml/)
+__pycache__/
+*.pyc
+.venv/
+ml/data/*.jsonl
+!ml/data/sample.jsonl
+ml/models/
+
+# Editors and OS
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/

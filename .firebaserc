@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "default": "nobles-reddit",
+    "emulator": "demo-nobles-commons"
+  }
+}
