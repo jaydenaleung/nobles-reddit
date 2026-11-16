@@ -1,0 +1,5 @@
+# Only the server needs these. Steps 1 to 4 of the learning path use the standard library alone.
+# Pinned to exact versions. Python 3.11 or newer.
+fastapi==0.162.0
+uvicorn==0.54.0
+pydantic==2.14.2
