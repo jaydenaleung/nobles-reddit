@@ -13,6 +13,12 @@ export const SUMMARY_COMMENT_CHARS = 1200;
 export const SUMMARY_BODY_CHARS = 3000;
 export const SCREEN_TEXT_CHARS = 12_000;
 
+// Control characters and invisible direction-override characters.
+/* eslint-disable no-control-regex */
+const UNWANTED_CHARS =
+  /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g;
+/* eslint-enable no-control-regex */
+
 /**
  * Makes user text safe to place inside a delimited data block.
  *
@@ -23,11 +29,7 @@ export const SCREEN_TEXT_CHARS = 12_000;
  */
 export function neutralise(text: string, maxChars: number): string {
   const cleaned = String(text ?? '')
-    // eslint-disable-next-line no-control-regex
-    .replace(
-      /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g,
-      '',
-    )
+    .replace(UNWANTED_CHARS, '')
     .replace(/</g, '‹')
     .replace(/>/g, '›')
     .replace(/\{\{/g, '{ {')

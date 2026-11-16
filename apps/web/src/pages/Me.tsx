@@ -146,7 +146,12 @@ export default function Me() {
               </Link>
             </Empty>
           ) : (
-            <div className="tbl-wrap">
+            <div
+              className="tbl-wrap"
+              tabIndex={0}
+              role="group"
+              aria-label="Table. Scroll sideways to see every column."
+            >
               <table className="tbl">
                 <thead>
                   <tr>

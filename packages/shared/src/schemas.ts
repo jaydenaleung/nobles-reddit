@@ -2,18 +2,18 @@ import { z } from 'zod';
 import { ASSIGNABLE_ROLES, DIVISIONS, LIMITS, MOD_ACTIONS, REPORT_REASONS, ROLES } from './constants';
 
 /** Collapses stray whitespace and strips control characters that have no business in a post. */
+// Control characters and invisible direction-override characters.
+/* eslint-disable no-control-regex */
+const UNWANTED_CHARS =
+  /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g;
+/* eslint-enable no-control-regex */
+
 export function cleanText(input: string): string {
-  return (
-    input
-      .replace(/\r\n?/g, '\n')
-      // eslint-disable-next-line no-control-regex
-      .replace(
-        /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g,
-        '',
-      )
-      .replace(/\n{4,}/g, '\n\n\n')
-      .trim()
-  );
+  return input
+    .replace(/\r\n?/g, '\n')
+    .replace(UNWANTED_CHARS, '')
+    .replace(/\n{4,}/g, '\n\n\n')
+    .trim();
 }
 function cleanLine(input: string): string {
   return cleanText(input).replace(/\s+/g, ' ');

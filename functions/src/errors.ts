@@ -36,7 +36,12 @@ export function toHttpsError(error: unknown, functionName: string): HttpsError {
   if (error instanceof AppError) return new HttpsError(error.code, error.message);
   if (error instanceof ZodError) {
     const first = error.issues[0];
-    return new HttpsError('invalid-argument', first?.message ?? 'That does not look right.');
+    // Our own messages are written for people. Zod's built-in ones ("Expected string, received null") are not.
+    const builtIn = !first || /^(Expected|Required|Invalid|Unrecognized|Unexpected)/.test(first.message);
+    return new HttpsError(
+      'invalid-argument',
+      builtIn ? 'Something in that request was missing or not valid.' : first.message,
+    );
   }
   // Unknown errors are logged for the developers and hidden from the caller.
   logger.error(`${functionName} failed`, {

@@ -46,6 +46,16 @@ export async function signOut(page: Page): Promise<void> {
   await page.waitForURL((url) => url.pathname === '/sign-in');
 }
 
+/** Picks "your name" or "Anonymous" in an identity toggle. Nothing is ever preselected, so tests must choose. */
+export async function chooseIdentity(page: Page, group: 'Post as' | 'Reply as', text: string): Promise<void> {
+  await page
+    .getByRole('radiogroup', { name: group })
+    .first()
+    .locator('label')
+    .filter({ hasText: text })
+    .click();
+}
+
 export interface NewThread {
   space?: string;
   title: string;
@@ -57,13 +67,14 @@ export interface NewThread {
 /** Starts a text thread and returns its id once it is published. */
 export async function startThread(page: Page, thread: NewThread): Promise<string> {
   await page.goto('/new');
-  await page.getByLabel('Space').selectOption({ label: thread.space ?? 'Clubs' });
+  await page.getByLabel('Space', { exact: true }).selectOption({ label: thread.space ?? 'Clubs' });
   await page
     .getByRole('radiogroup', { name: 'Post as' })
-    .getByText(thread.as === 'anonymous' ? 'Anonymous' : thread.firstName, { exact: true })
+    .locator('label')
+    .filter({ hasText: thread.as === 'anonymous' ? 'Anonymous' : thread.firstName })
     .click();
-  await page.getByLabel('Title').fill(thread.title);
-  if (thread.body) await page.getByLabel('Your thoughts').fill(thread.body);
+  await page.getByLabel('Title', { exact: true }).fill(thread.title);
+  if (thread.body) await page.getByLabel('Your thoughts', { exact: true }).fill(thread.body);
   await page.getByRole('button', { name: 'Post', exact: true }).click();
   await page.waitForURL(/\/t\/[A-Za-z0-9]+$/, { timeout: 30_000 });
   await expect(page.getByRole('heading', { level: 1, name: thread.title })).toBeVisible();
@@ -80,7 +91,8 @@ export async function addComment(
   const composer = page.getByRole('region', { name: 'Add a comment' });
   await composer
     .getByRole('radiogroup', { name: 'Reply as' })
-    .getByText(as === 'anonymous' ? 'Anonymous' : firstName, { exact: true })
+    .locator('label')
+    .filter({ hasText: as === 'anonymous' ? 'Anonymous' : firstName })
     .click();
   await composer.getByLabel('Add a comment').fill(body);
   await composer.getByRole('button', { name: 'Post comment' }).click();

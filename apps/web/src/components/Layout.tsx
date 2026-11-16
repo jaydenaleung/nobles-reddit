@@ -45,10 +45,9 @@ export function TopBar() {
             <Link className="nb-btn nb-btn--primary nb-btn--sm" to="/new">
               Start a thread
             </Link>
-            <Link className="nb-top__me" to="/me" aria-label={`Your account, ${member.profile.displayName}`}>
-              <span className="nb-avatar" aria-hidden="true">
-                {initials(member.profile.displayName)}
-              </span>
+            <Link className="nb-top__me" to="/me">
+              <span className="nb-avatar">{initials(member.profile.displayName)}</span>
+              <span className="nb-sr">Your account, {member.profile.displayName}</span>
             </Link>
           </>
         ) : (

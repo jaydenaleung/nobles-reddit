@@ -170,7 +170,12 @@ function ReportsTab() {
     );
   }
   return (
-    <div className="tbl-wrap">
+    <div
+      className="tbl-wrap"
+      tabIndex={0}
+      role="group"
+      aria-label="Table. Scroll sideways to see every column."
+    >
       <table className="tbl">
         <thead>
           <tr>

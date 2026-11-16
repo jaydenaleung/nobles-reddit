@@ -34,6 +34,22 @@ if (!USE_EMULATORS && config.recaptchaSiteKey) {
   });
 }
 
+/**
+ * Removes keys whose value is undefined. The callable client would otherwise
+ * send them as null, which the server's strict input checks reject.
+ */
+function withoutUndefined<T>(value: T): T {
+  if (Array.isArray(value)) return value.map(withoutUndefined) as T;
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .filter(([, v]) => v !== undefined)
+        .map(([k, v]) => [k, withoutUndefined(v)]),
+    ) as T;
+  }
+  return value;
+}
+
 function fn<In, Out>(name: string) {
   const callable = httpsCallable<In, Out>(functions, name);
   return async (data: In): Promise<Out> => {
@@ -41,7 +57,7 @@ function fn<In, Out>(name: string) {
     if (typeof navigator !== 'undefined' && navigator.onLine === false) {
       throw new Error('You are offline, so nothing was sent. Try again when you are back online.');
     }
-    return (await callable(data)).data;
+    return (await callable(withoutUndefined(data))).data;
   };
 }
 
@@ -54,7 +70,8 @@ export function errorMessage(error: unknown): string {
   if (e?.code === 'functions/internal' || !e?.message) {
     return 'Something went wrong on our side. Please try again.';
   }
-  return e.message;
+  // Some SDK versions add the HTTP status to the end of the message.
+  return e.message.replace(/\s*\[\d{3}\]$/, '');
 }
 
 type Empty = Record<string, never>;

@@ -128,7 +128,12 @@ function RolesTab() {
           <p>Bootstrap admins are set in the deployment settings and are not listed here.</p>
         </Empty>
       ) : (
-        <div className="tbl-wrap">
+        <div
+          className="tbl-wrap"
+          tabIndex={0}
+          role="group"
+          aria-label="Table. Scroll sideways to see every column."
+        >
           <table className="tbl">
             <thead>
               <tr>
@@ -194,7 +199,12 @@ function SpacesTab() {
 
   return (
     <div className="stack">
-      <div className="tbl-wrap">
+      <div
+        className="tbl-wrap"
+        tabIndex={0}
+        role="group"
+        aria-label="Table. Scroll sideways to see every column."
+      >
         <table className="tbl">
           <thead>
             <tr>
@@ -419,7 +429,12 @@ function UsageTab() {
         </p>
       </section>
       {usage.days.length > 0 && (
-        <div className="tbl-wrap">
+        <div
+          className="tbl-wrap"
+          tabIndex={0}
+          role="group"
+          aria-label="Table. Scroll sideways to see every column."
+        >
           <table className="tbl">
             <thead>
               <tr>
@@ -604,7 +619,12 @@ export default function Admin() {
   return (
     <Page>
       <div className="page">
-        <h1 className="page-h">Administration</h1>
+        <div className="row row--between">
+          <h1 className="page-h">Administration</h1>
+          <Link className="nb-btn" to="/admin/audit">
+            Open the audit log
+          </Link>
+        </div>
         <div className="tabs" role="tablist" aria-label="Administration sections">
           {TABS.map(([value, label]) => (
             <button
@@ -617,7 +637,6 @@ export default function Admin() {
               {label}
             </button>
           ))}
-          <Link to="/admin/audit">Audit log</Link>
         </div>
         {tab === 'roles' && <RolesTab />}
         {tab === 'spaces' && <SpacesTab />}
@@ -683,7 +702,12 @@ export function AuditLog() {
         ) : entries.length === 0 ? (
           <Empty title="Nothing has been logged yet" />
         ) : (
-          <div className="tbl-wrap">
+          <div
+            className="tbl-wrap"
+            tabIndex={0}
+            role="group"
+            aria-label="Table. Scroll sideways to see every column."
+          >
             <table className="tbl">
               <thead>
                 <tr>
