@@ -92,9 +92,7 @@ export const onboardSchema = z
       .pipe(z.string().regex(/^\p{L}$/u, 'One letter')),
     classYear: z.number().int().min(2000).max(2100).nullable().optional(),
     divisions: z.array(z.enum(DIVISIONS)).max(DIVISIONS.length).optional(),
-    understood: z.literal(true, {
-      errorMap: () => ({ message: 'Please confirm you have read how it works' }),
-    }),
+    understood: z.literal(true, { error: 'Please confirm you have read how it works' }),
   })
   .strict();
 

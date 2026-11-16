@@ -37,7 +37,8 @@ export function toHttpsError(error: unknown, functionName: string): HttpsError {
   if (error instanceof ZodError) {
     const first = error.issues[0];
     // Our own messages are written for people. Zod's built-in ones ("Expected string, received null") are not.
-    const builtIn = !first || /^(Expected|Required|Invalid|Unrecognized|Unexpected)/.test(first.message);
+    const builtIn =
+      !first || /^(Expected|Required|Invalid|Unrecognized|Unexpected|Too (small|big))/.test(first.message);
     return new HttpsError(
       'invalid-argument',
       builtIn ? 'Something in that request was missing or not valid.' : first.message,

@@ -55,5 +55,10 @@
     "typescript": "5.9.3",
     "typescript-eslint": "8.72.1",
     "vitest": "5.0.5"
+  },
+  "overrides": {
+    "@firebase/firestore": {
+      "@grpc/grpc-js": "1.13.7"
+    }
   }
 }
