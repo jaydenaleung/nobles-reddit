@@ -96,7 +96,7 @@ The brief said: when something is not specified, pick the default given or the m
 | Decision | Why |
 | --- | --- |
 | The browser tests run against `vite preview` with the headers from `firebase.json` | So they run under the real Content-Security-Policy |
-| The "Local development" sign-in box exists only in emulator builds and is compiled out of production | It is how the tests sign in through the Auth emulator's Google provider |
+| The "Local development" sign-in box exists only in emulator builds and is compiled out of production (checked: its text and code are not in the production bundle) | It is how the tests sign in through the Auth emulator's Google provider |
 | Scheduled jobs (`refreshHotScores`, `archiveOldContent`, the 06:00 question schedule) are **not exercised by the tests** | The emulator does not run schedules. The question logic is tested through its manual trigger; the other two are not tested and should be watched after launch |
 | The real Google sign-in popup has **not been tested** | It needs the live project. It is the first thing to check after deploying |
 

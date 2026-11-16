@@ -1,4 +1,9 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from '@playwright/test';
+
+// The repo root. The preview server must start from here whichever config file is used.
+const repoRoot = path.dirname(fileURLToPath(import.meta.url));
 
 // End-to-end tests. Run with `npm run test:e2e`, which builds the app in
 // emulator mode, starts the Firebase emulators and seeds the sample data.
@@ -21,6 +26,7 @@ export default defineConfig({
   },
   webServer: {
     command: 'npm run preview -w apps/web',
+    cwd: repoRoot,
     url: 'http://127.0.0.1:5000/about',
     reuseExistingServer: true,
     timeout: 60_000,

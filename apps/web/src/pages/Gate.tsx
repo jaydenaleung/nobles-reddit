@@ -11,12 +11,15 @@ import { useEffect, useId, useState, type FormEvent } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { errorMessage } from '../api';
 import { useAuth } from '../auth/AuthContext';
-import { config } from '../config';
+import { USE_EMULATORS, config } from '../config';
 import { Icon } from '../components/Icon';
 import { PublicFrame } from '../components/Layout';
 import { Loading } from '../components/Ui';
 
-/** Emulator builds only: made-up people for local development and tests. */
+/**
+ * Emulator builds only: made-up people for local development and tests.
+ * It is rendered behind a build-time constant, so production builds leave it out entirely.
+ */
 function DevelopmentSignIn() {
   const { signInForDevelopment } = useAuth();
   const [email, setEmail] = useState('sample.student@nobles.edu');
@@ -170,7 +173,7 @@ export function SignIn() {
             </p>
           </section>
         )}
-        <DevelopmentSignIn />
+        {USE_EMULATORS && <DevelopmentSignIn />}
         <div className="nb-notice nb-notice--staff">
           <Icon name="shield" />
           <div>
