@@ -31,7 +31,11 @@ import { callable } from './guard';
  * can be followed; in another thread they get a different one.
  * Must run inside a transaction, before any write.
  */
-async function anonIndexFor(tx: Transaction, postId: string, uid: string): Promise<{ index: number; writes: () => void }> {
+async function anonIndexFor(
+  tx: Transaction,
+  postId: string,
+  uid: string,
+): Promise<{ index: number; writes: () => void }> {
   const threadRef = db.doc(`threadAnon/${postId}`);
   const memberRef = threadRef.collection('members').doc(uid);
   const [member, thread] = await Promise.all([tx.get(memberRef), tx.get(threadRef)]);
@@ -175,7 +179,10 @@ export const editOwnContent = callable(
       if (current.status === 'removed') throw errors.notFound('That');
       const createdMs = current.createdAt?.toMillis?.() ?? 0;
       if (Date.now() - createdMs > EDIT_WINDOW_MS) {
-        throw new AppError('failed-precondition', 'You can edit for 10 minutes after posting. That time has passed.');
+        throw new AppError(
+          'failed-precondition',
+          'You can edit for 10 minutes after posting. That time has passed.',
+        );
       }
       const update: Record<string, unknown> = {
         body: data.body,

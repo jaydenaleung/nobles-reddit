@@ -36,7 +36,10 @@ interface GuardOptions<S extends z.ZodTypeAny> {
  * rate limit. The role comes from the profile in Firestore, not from the token,
  * so a role change takes effect immediately.
  */
-async function authorise(request: CallableRequest<unknown>, roles: GuardOptions<z.ZodTypeAny>['roles']): Promise<Caller> {
+async function authorise(
+  request: CallableRequest<unknown>,
+  roles: GuardOptions<z.ZodTypeAny>['roles'],
+): Promise<Caller> {
   const token = request.auth?.token;
   if (!request.auth || !token) throw errors.signIn();
   const email = typeof token.email === 'string' ? token.email.toLowerCase() : '';

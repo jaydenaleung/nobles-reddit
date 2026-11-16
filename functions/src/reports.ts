@@ -61,9 +61,10 @@ export const reportContent = callable(
           reportReasons: FieldValue.arrayUnion(reason),
           snapshotText: snapshotOf(content.data()!),
           status: 'open',
-          createdAt: existingQueue.exists && existingQueue.data()!.status === 'open'
-            ? existingQueue.data()!.createdAt
-            : FieldValue.serverTimestamp(),
+          createdAt:
+            existingQueue.exists && existingQueue.data()!.status === 'open'
+              ? existingQueue.data()!.createdAt
+              : FieldValue.serverTimestamp(),
         },
         { merge: true },
       );

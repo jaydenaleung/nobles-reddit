@@ -149,7 +149,9 @@ export function parseSafeText(input: string): Paragraph[] {
 export function plainText(input: string): string {
   const out: string[] = [];
   const walk = (nodes: InlineNode[]): string =>
-    nodes.map((node) => (node.type === 'text' || node.type === 'link' ? node.text : walk(node.children))).join('');
+    nodes
+      .map((node) => (node.type === 'text' || node.type === 'link' ? node.text : walk(node.children)))
+      .join('');
   for (const paragraph of parseSafeText(input)) {
     out.push(paragraph.lines.map(walk).join(' '));
   }

@@ -92,7 +92,13 @@ describe('every other function needs an onboarded member', () => {
   it('refuses someone who signed in but did not finish onboarding', async () => {
     const p = await signIn('not.onboarded@nobles.edu');
     await expectError(
-      p.call('createPost', { spaceId: spaces['clubs'], kind: 'text', identityMode: 'named', title: 'Hello there', body: '' }),
+      p.call('createPost', {
+        spaceId: spaces['clubs'],
+        kind: 'text',
+        identityMode: 'named',
+        title: 'Hello there',
+        body: '',
+      }),
       'failed-precondition',
     );
     await expectError(p.call('listMyContent', {}), 'failed-precondition');
@@ -101,7 +107,10 @@ describe('every other function needs an onboarded member', () => {
   it('refuses another domain everywhere', async () => {
     const p = await signIn('outsider@example.com');
     for (const [name, data] of [
-      ['createPost', { spaceId: spaces['clubs'], kind: 'text', identityMode: 'named', title: 'Hello there', body: '' }],
+      [
+        'createPost',
+        { spaceId: spaces['clubs'], kind: 'text', identityMode: 'named', title: 'Hello there', body: '' },
+      ],
       ['toggleThoughtful', { contentKey: 'post:abc' }],
       ['revealAuthor', { contentKey: 'post:abc', reason: 'A long enough reason' }],
       ['modAction', { contentKey: 'post:abc', action: 'remove' }],
@@ -169,14 +178,23 @@ describe('my data', () => {
   it('lists and exports only my own content, including my anonymous posts', async () => {
     const me = await member('export.me@nobles.edu', { firstName: 'Exporta' });
     const other = await member('export.other@nobles.edu', { firstName: 'Otherly' });
-    const mine = await post(me, spaces['clubs']!, { identityMode: 'anonymous', title: 'My anonymous thread' });
+    const mine = await post(me, spaces['clubs']!, {
+      identityMode: 'anonymous',
+      title: 'My anonymous thread',
+    });
     await post(other, spaces['clubs']!, { title: 'Somebody else wrote this' });
 
-    const list = await me.call<{ items: { contentKey: string; identityMode: string }[] }>('listMyContent', {});
+    const list = await me.call<{ items: { contentKey: string; identityMode: string }[] }>(
+      'listMyContent',
+      {},
+    );
     expect(list.items.map((i) => i.contentKey)).toEqual([mine.contentKey]);
     expect(list.items[0]!.identityMode).toBe('anonymous');
 
-    const exported = await me.call<{ profile: { email: string }; postsAndComments: unknown[] }>('exportMyData', {});
+    const exported = await me.call<{ profile: { email: string }; postsAndComments: unknown[] }>(
+      'exportMyData',
+      {},
+    );
     expect(exported.profile.email).toBe('export.me@nobles.edu');
     expect(exported.postsAndComments).toHaveLength(1);
     expect(JSON.stringify(exported)).not.toContain('Somebody else wrote this');

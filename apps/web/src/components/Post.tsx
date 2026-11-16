@@ -85,8 +85,10 @@ function PostTop({ post, nowMs, spaceSlug }: { post: PostView; nowMs: number; sp
         </>
       )}
       <span>
-        {author.mode === 'named' && author.classYear !== undefined ? `${shortClassYear(author.classYear)} ` : ''}·{' '}
-        {when}
+        {author.mode === 'named' && author.classYear !== undefined
+          ? `${shortClassYear(author.classYear)} `
+          : ''}
+        · {when}
       </span>
     </div>
   );
@@ -105,29 +107,54 @@ export interface PostRowProps {
 }
 
 /** One row of the feed: vote rail on the left, then the thread. On phones the rail moves into the foot. */
-export function PostRow({ post, spaceSlug, nowMs, voted, onVote, read, saved, onSave, onShare }: PostRowProps) {
+export function PostRow({
+  post,
+  spaceSlug,
+  nowMs,
+  voted,
+  onVote,
+  read,
+  saved,
+  onSave,
+  onShare,
+}: PostRowProps) {
   const href = `/t/${post.id}`;
   const body = post.body ? excerpt(post.body) : '';
   const voteLabel = voted ? 'Thoughtful. Select to take it back' : 'Mark thoughtful';
   return (
     <article className={`nb-post${read ? ' nb-post--read' : ''}`}>
       <div className="nb-votes">
-        <button className="nb-vote" type="button" aria-pressed={voted} aria-label={voteLabel} onClick={onVote}>
+        <button
+          className="nb-vote"
+          type="button"
+          aria-pressed={voted}
+          aria-label={voteLabel}
+          onClick={onVote}
+        >
           <Icon name="up" />
         </button>
-        <span aria-label={plural(post.thoughtfulCount, 'person found this thoughtful', 'people found this thoughtful')}>
+        <span
+          aria-label={plural(
+            post.thoughtfulCount,
+            'person found this thoughtful',
+            'people found this thoughtful',
+          )}
+        >
           {post.thoughtfulCount}
         </span>
       </div>
       <div>
         {post.pinned && (
           <div className="nb-post__pin">
-            <Icon name="pin" /> {post.pinnedBy === 'administration' ? 'Pinned by the administration' : 'Pinned'}
+            <Icon name="pin" />{' '}
+            {post.pinnedBy === 'administration' ? 'Pinned by the administration' : 'Pinned'}
           </div>
         )}
         <PostTop post={post} nowMs={nowMs} spaceSlug={spaceSlug} />
         <h3 className="nb-post__title">
-          <Link to={href}>{post.questionOfTheDay ? <span className="nb-hl">{post.title}</span> : post.title}</Link>
+          <Link to={href}>
+            {post.questionOfTheDay ? <span className="nb-hl">{post.title}</span> : post.title}
+          </Link>
         </h3>
         {post.kind === 'poll' && post.poll ? (
           <PollBars options={post.poll.options} />
@@ -214,7 +241,9 @@ export function SummaryBox({
       )}
       {(basedOn !== undefined || children) && (
         <div className="nb-ai__foot">
-          {basedOn !== undefined && <span>Based on the first {basedOn} comments. It can miss things or get them wrong.</span>}
+          {basedOn !== undefined && (
+            <span>Based on the first {basedOn} comments. It can miss things or get them wrong.</span>
+          )}
           {children}
         </div>
       )}

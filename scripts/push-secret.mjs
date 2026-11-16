@@ -14,7 +14,16 @@ if (!key || !projectId) {
 
 const child = spawn(
   'npx',
-  ['firebase', 'functions:secrets:set', 'ANTHROPIC_API_KEY', '--project', projectId, '--data-file', '-', '--force'],
+  [
+    'firebase',
+    'functions:secrets:set',
+    'ANTHROPIC_API_KEY',
+    '--project',
+    projectId,
+    '--data-file',
+    '-',
+    '--force',
+  ],
   {
     cwd: repoRoot,
     stdio: ['pipe', 'inherit', 'inherit'],

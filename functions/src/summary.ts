@@ -5,8 +5,11 @@ import type { ThreadForSummary } from './ai/provider';
 import { errors } from './errors';
 import { callable } from './guard';
 
-function toResult(summary: ThreadSummary | (Omit<ThreadSummary, 'generatedAt'> & { generatedAtMs: number })): SummaryResult {
-  const generatedAtMs = 'generatedAtMs' in summary ? summary.generatedAtMs : (summary.generatedAt?.toMillis?.() ?? Date.now());
+function toResult(
+  summary: ThreadSummary | (Omit<ThreadSummary, 'generatedAt'> & { generatedAtMs: number }),
+): SummaryResult {
+  const generatedAtMs =
+    'generatedAtMs' in summary ? summary.generatedAtMs : (summary.generatedAt?.toMillis?.() ?? Date.now());
   return {
     available: true,
     summary: {

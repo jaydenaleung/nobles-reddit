@@ -137,7 +137,11 @@ export const updateConfig = callable(
   async (data, caller): Promise<{ saved: true }> => {
     const { doc, ...fields } = data;
     const batch = db.batch();
-    batch.set(db.doc(`config/${doc}`), { ...fields, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+    batch.set(
+      db.doc(`config/${doc}`),
+      { ...fields, updatedAt: FieldValue.serverTimestamp() },
+      { merge: true },
+    );
     auditIn(batch, {
       actorUid: caller.uid,
       actorEmail: caller.email,
@@ -155,7 +159,9 @@ export const getAiUsage = callable(
   { name: 'getAiUsage', schema: emptySchema, roles: ADMIN_ROLES, rate: 'admin' },
   async (): Promise<AiUsageResult> => {
     // The last 14 school dates, read by id (no index needed).
-    const dates = Array.from({ length: 14 }, (_, i) => schoolDate(new Date(Date.now() - i * 24 * 60 * 60 * 1000)));
+    const dates = Array.from({ length: 14 }, (_, i) =>
+      schoolDate(new Date(Date.now() - i * 24 * 60 * 60 * 1000)),
+    );
     const [{ used, calls }, recent] = await Promise.all([
       tokensUsedToday(),
       db.getAll(...dates.map((date) => db.doc(`usage/${date}`))),

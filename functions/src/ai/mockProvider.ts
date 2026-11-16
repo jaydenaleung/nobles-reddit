@@ -43,7 +43,8 @@ export class MockProvider implements AiProvider {
       disagreements: 'People differ on what should change.',
     };
     if (all.includes('[mock:malformed]')) raw = { text: 42, bullets: 'nope' };
-    if (all.includes('[mock:leak]')) raw = { ...(raw as object), text: 'The author is sample.student@nobles.edu.' };
+    if (all.includes('[mock:leak]'))
+      raw = { ...(raw as object), text: 'The author is sample.student@nobles.edu.' };
     return {
       output: validateSummary(raw),
       usage: { inputTokens: this.tokens(prompt.system + prompt.user), outputTokens: 60 },

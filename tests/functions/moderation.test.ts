@@ -26,7 +26,11 @@ beforeAll(async () => {
   await resetEmulators();
   spaces = await seedSpaces();
   await assignRoles({ 'mod.sample@nobles.edu': 'moderator' });
-  student = await member('mod.student@nobles.edu', { firstName: 'Studentsample', lastInitial: 'A', classYear: 2029 });
+  student = await member('mod.student@nobles.edu', {
+    firstName: 'Studentsample',
+    lastInitial: 'A',
+    classYear: 2029,
+  });
   other = await member('mod.other@nobles.edu', { firstName: 'Othersample', lastInitial: 'B' });
   moderator = await member('mod.sample@nobles.edu', { firstName: 'Modsample', lastInitial: 'M' });
   admin = await member('sample.admin@nobles.edu', { firstName: 'Adminsample', lastInitial: 'Z' });
@@ -34,23 +38,35 @@ beforeAll(async () => {
 afterAll(closeAll);
 
 const queueFor = async (contentKey: string) =>
-  (await adminDb.collection('moderationQueue').where('contentKey', '==', contentKey).get()).docs.map((d) => d.data());
+  (await adminDb.collection('moderationQueue').where('contentKey', '==', contentKey).get()).docs.map((d) =>
+    d.data(),
+  );
 const auditFor = async (contentKey: string) =>
-  (await adminDb.collection('auditLog').where('contentKey', '==', contentKey).get()).docs.map((d) => d.data());
+  (await adminDb.collection('auditLog').where('contentKey', '==', contentKey).get()).docs.map((d) =>
+    d.data(),
+  );
 
 describe('votes', () => {
   it('marks a thread thoughtful once per person, and takes it back', async () => {
     const thread = await post(student, spaces['clubs']!, { title: 'Vote on this thread' });
     const count = async () => (await adminDb.doc(`posts/${thread.postId}`).get()).data()!.thoughtfulCount;
 
-    expect(await other.call('toggleThoughtful', { contentKey: thread.contentKey })).toEqual({ thoughtful: true });
+    expect(await other.call('toggleThoughtful', { contentKey: thread.contentKey })).toEqual({
+      thoughtful: true,
+    });
     expect(await count()).toBe(1);
-    expect(await student.call('toggleThoughtful', { contentKey: thread.contentKey })).toEqual({ thoughtful: true });
+    expect(await student.call('toggleThoughtful', { contentKey: thread.contentKey })).toEqual({
+      thoughtful: true,
+    });
     expect(await count()).toBe(2);
     // The same person again takes their mark back: one per person, never two.
-    expect(await other.call('toggleThoughtful', { contentKey: thread.contentKey })).toEqual({ thoughtful: false });
+    expect(await other.call('toggleThoughtful', { contentKey: thread.contentKey })).toEqual({
+      thoughtful: false,
+    });
     expect(await count()).toBe(1);
-    expect(await student.call('toggleThoughtful', { contentKey: thread.contentKey })).toEqual({ thoughtful: false });
+    expect(await student.call('toggleThoughtful', { contentKey: thread.contentKey })).toEqual({
+      thoughtful: false,
+    });
     expect(await count()).toBe(0);
 
     // The trigger recounts from the vote documents and agrees, and the score never goes negative.
@@ -69,7 +85,9 @@ describe('votes', () => {
     await student.call('toggleThoughtful', { contentKey: reply.contentKey });
     const data = (await adminDb.doc(`posts/${thread.postId}/comments/${reply.commentId}`).get()).data()!;
     expect(data.thoughtfulCount).toBe(1);
-    const vote = (await adminDb.doc(`votes/${thread.postId}/comments/${reply.commentId}/by/${student.uid}`).get()).data()!;
+    const vote = (
+      await adminDb.doc(`votes/${thread.postId}/comments/${reply.commentId}/by/${student.uid}`).get()
+    ).data()!;
     expect(vote).toMatchObject({ uid: student.uid, postId: thread.postId, kind: 'comment' });
   });
 
@@ -115,7 +133,9 @@ describe('screening', () => {
     expect(data).toMatchObject({ status: 'held', screening: 'flagged' });
     const [item] = await queueFor(created.contentKey);
     expect(item).toMatchObject({ reason: 'ai-flag', priority: 1, status: 'open', labels: ['harassment'] });
-    expect(await student.call('getMyContentStatus', { contentKey: created.contentKey })).toEqual({ outcome: 'held' });
+    expect(await student.call('getMyContentStatus', { contentKey: created.contentKey })).toEqual({
+      outcome: 'held',
+    });
   });
 
   it('never publishes or deletes a wellbeing flag: it goes to the top of the queue and the school is emailed', async () => {
@@ -164,12 +184,16 @@ describe('screening', () => {
       status: 'held',
       screening: 'wellbeing',
     });
-    const fine = await post(student, spaces['clubs']!, { title: 'The model is down but this is fine [mock:down]' });
+    const fine = await post(student, spaces['clubs']!, {
+      title: 'The model is down but this is fine [mock:down]',
+    });
     expect((await adminDb.doc(`posts/${fine.postId}`).get()).data()).toMatchObject({
       status: 'visible',
       screening: 'skipped',
     });
-    const malformed = await post(student, spaces['clubs']!, { title: 'The model answers nonsense [mock:malformed]' });
+    const malformed = await post(student, spaces['clubs']!, {
+      title: 'The model answers nonsense [mock:malformed]',
+    });
     expect((await adminDb.doc(`posts/${malformed.postId}`).get()).data()).toMatchObject({
       status: 'visible',
       screening: 'skipped',
@@ -188,9 +212,13 @@ describe('screening', () => {
 describe('reports', () => {
   it('puts a reported post in the queue, once per reporter', async () => {
     const created = await post(student, spaces['clubs']!, { title: 'A post somebody reports' });
-    expect(await other.call('reportContent', { contentKey: created.contentKey, reason: 'unkind', note: 'Feels mean' })).toEqual(
-      { received: true },
-    );
+    expect(
+      await other.call('reportContent', {
+        contentKey: created.contentKey,
+        reason: 'unkind',
+        note: 'Feels mean',
+      }),
+    ).toEqual({ received: true });
     await other.call('reportContent', { contentKey: created.contentKey, reason: 'spam' });
     const reports = await adminDb.collection('reports').where('contentKey', '==', created.contentKey).get();
     expect(reports.size).toBe(1);
@@ -210,11 +238,21 @@ describe('reports', () => {
 
   it('rejects unknown reasons and missing content, and limits reports to 10 an hour', async () => {
     const created = await post(student, spaces['clubs']!, { title: 'Report validation' });
-    await expectError(other.call('reportContent', { contentKey: created.contentKey, reason: 'dislike' }), 'invalid-argument');
-    await expectError(other.call('reportContent', { contentKey: 'post:missingPost', reason: 'spam' }), 'not-found');
+    await expectError(
+      other.call('reportContent', { contentKey: created.contentKey, reason: 'dislike' }),
+      'invalid-argument',
+    );
+    await expectError(
+      other.call('reportContent', { contentKey: 'post:missingPost', reason: 'spam' }),
+      'not-found',
+    );
     await refill(other);
-    for (let i = 0; i < 10; i++) await other.call('reportContent', { contentKey: created.contentKey, reason: 'spam' });
-    await expectError(other.call('reportContent', { contentKey: created.contentKey, reason: 'spam' }), 'resource-exhausted');
+    for (let i = 0; i < 10; i++)
+      await other.call('reportContent', { contentKey: created.contentKey, reason: 'spam' });
+    await expectError(
+      other.call('reportContent', { contentKey: created.contentKey, reason: 'spam' }),
+      'resource-exhausted',
+    );
   });
 });
 
@@ -222,7 +260,10 @@ describe('moderator actions', () => {
   it('students and faculty cannot moderate', async () => {
     const created = await post(other, spaces['clubs']!, { title: 'Students cannot moderate this' });
     for (const action of ['hold', 'remove', 'restore', 'pin', 'approveForBoard']) {
-      await expectError(student.call('modAction', { contentKey: created.contentKey, action }), 'permission-denied');
+      await expectError(
+        student.call('modAction', { contentKey: created.contentKey, action }),
+        'permission-denied',
+      );
     }
     await expectError(student.call('resolveReport', { id: 'x', kind: 'report' }), 'permission-denied');
   });
@@ -231,15 +272,27 @@ describe('moderator actions', () => {
     const created = await post(student, spaces['clubs']!, { title: 'A post for the moderator' });
     const status = async () => (await adminDb.doc(`posts/${created.postId}`).get()).data()!;
 
-    await moderator.call('modAction', { contentKey: created.contentKey, action: 'hold', note: 'Checking this' });
+    await moderator.call('modAction', {
+      contentKey: created.contentKey,
+      action: 'hold',
+      note: 'Checking this',
+    });
     expect(await status()).toMatchObject({ status: 'held', screening: 'flagged' });
-    await moderator.call('modAction', { contentKey: created.contentKey, action: 'restore', note: 'It is fine' });
+    await moderator.call('modAction', {
+      contentKey: created.contentKey,
+      action: 'restore',
+      note: 'It is fine',
+    });
     expect(await status()).toMatchObject({ status: 'visible', screening: 'clear' });
     await moderator.call('modAction', { contentKey: created.contentKey, action: 'pin' });
     expect(await status()).toMatchObject({ pinned: true, pinnedBy: 'administration' });
     await moderator.call('modAction', { contentKey: created.contentKey, action: 'unpin' });
     expect((await status()).pinned).toBe(false);
-    await moderator.call('modAction', { contentKey: created.contentKey, action: 'remove', note: 'Breaks rule 2' });
+    await moderator.call('modAction', {
+      contentKey: created.contentKey,
+      action: 'remove',
+      note: 'Breaks rule 2',
+    });
     expect(await status()).toMatchObject({ status: 'removed', removedBy: 'moderator' });
 
     const actions = (await auditFor(created.contentKey)).map((e) => e.action).sort();
@@ -270,7 +323,10 @@ describe('moderator actions', () => {
     const created = await post(student, spaces['clubs']!, { title: 'A report to resolve' });
     await refill(other);
     await other.call('reportContent', { contentKey: created.contentKey, reason: 'other' });
-    const queue = await adminDb.collection('moderationQueue').where('contentKey', '==', created.contentKey).get();
+    const queue = await adminDb
+      .collection('moderationQueue')
+      .where('contentKey', '==', created.contentKey)
+      .get();
     await moderator.call('resolveReport', { id: queue.docs[0]!.id, kind: 'queue', note: 'Nothing wrong' });
     expect((await queue.docs[0]!.ref.get()).data()!.status).toBe('resolved');
     const reports = await adminDb.collection('reports').where('contentKey', '==', created.contentKey).get();
@@ -280,16 +336,28 @@ describe('moderator actions', () => {
   it('only threads can be pinned', async () => {
     const thread = await post(student, spaces['clubs']!, { title: 'Pin rules' });
     const reply = await comment(other, thread.postId);
-    await expectError(moderator.call('modAction', { contentKey: reply.contentKey, action: 'pin' }), 'invalid-argument');
-    await expectError(moderator.call('modAction', { contentKey: 'post:missingPost', action: 'hold' }), 'not-found');
+    await expectError(
+      moderator.call('modAction', { contentKey: reply.contentKey, action: 'pin' }),
+      'invalid-argument',
+    );
+    await expectError(
+      moderator.call('modAction', { contentKey: 'post:missingPost', action: 'hold' }),
+      'not-found',
+    );
   });
 });
 
 describe('revealAuthor', () => {
   it('a moderator cannot see who wrote something', async () => {
-    const created = await post(student, spaces['clubs']!, { identityMode: 'anonymous', title: 'Who wrote this one?' });
+    const created = await post(student, spaces['clubs']!, {
+      identityMode: 'anonymous',
+      title: 'Who wrote this one?',
+    });
     await expectError(
-      moderator.call('revealAuthor', { contentKey: created.contentKey, reason: 'I am curious about this one' }),
+      moderator.call('revealAuthor', {
+        contentKey: created.contentKey,
+        reason: 'I am curious about this one',
+      }),
       'permission-denied',
     );
     await expectError(
@@ -300,7 +368,10 @@ describe('revealAuthor', () => {
   });
 
   it('an admin must give a reason of at least 10 characters', async () => {
-    const created = await post(student, spaces['clubs']!, { identityMode: 'anonymous', title: 'A reason is required' });
+    const created = await post(student, spaces['clubs']!, {
+      identityMode: 'anonymous',
+      title: 'A reason is required',
+    });
     await expectError(admin.call('revealAuthor', { contentKey: created.contentKey }), 'invalid-argument');
     const message = await expectError(
       admin.call('revealAuthor', { contentKey: created.contentKey, reason: 'because' }),
@@ -311,7 +382,10 @@ describe('revealAuthor', () => {
   });
 
   it('an admin with a reason sees the author, and the look is written to the audit log', async () => {
-    const created = await post(student, spaces['clubs']!, { identityMode: 'anonymous', title: 'A logged reveal' });
+    const created = await post(student, spaces['clubs']!, {
+      identityMode: 'anonymous',
+      title: 'A logged reveal',
+    });
     const result = await admin.call<{ author: Record<string, unknown>; logged: boolean }>('revealAuthor', {
       contentKey: created.contentKey,
       reason: 'Safety concern raised by the dean of students',
@@ -332,13 +406,19 @@ describe('revealAuthor', () => {
       reason: 'Safety concern raised by the dean of students',
     });
     // Looking twice is logged twice.
-    await admin.call('revealAuthor', { contentKey: created.contentKey, reason: 'Checking again for the record' });
+    await admin.call('revealAuthor', {
+      contentKey: created.contentKey,
+      reason: 'Checking again for the record',
+    });
     expect((await auditFor(created.contentKey)).filter((e) => e.action === 'revealAuthor')).toHaveLength(2);
   });
 
   it('works for comments, and says not-found for content that does not exist', async () => {
     const thread = await post(other, spaces['clubs']!, { title: 'Reveal on a comment' });
-    const reply = await comment(student, thread.postId, { identityMode: 'anonymous', body: 'An anonymous reply' });
+    const reply = await comment(student, thread.postId, {
+      identityMode: 'anonymous',
+      body: 'An anonymous reply',
+    });
     const result = await admin.call<{ author: { email: string } }>('revealAuthor', {
       contentKey: reply.contentKey,
       reason: 'Following up on a report',
@@ -369,9 +449,19 @@ describe('other admin functions', () => {
       order: 20,
       postingRoles: ['student', 'faculty', 'moderator', 'admin'],
     });
-    expect((await adminDb.doc(`spaces/${created.spaceId}`).get()).data()).toMatchObject({ slug: 'robotics', postCount: 0 });
+    expect((await adminDb.doc(`spaces/${created.spaceId}`).get()).data()).toMatchObject({
+      slug: 'robotics',
+      postCount: 0,
+    });
     await expectError(
-      admin.call('manageSpace', { action: 'create', slug: 'robotics', name: 'Again', description: '', order: 1, postingRoles: ['admin'] }),
+      admin.call('manageSpace', {
+        action: 'create',
+        slug: 'robotics',
+        name: 'Again',
+        description: '',
+        order: 1,
+        postingRoles: ['admin'],
+      }),
       'already-exists',
     );
     await admin.call('manageSpace', {
@@ -384,7 +474,14 @@ describe('other admin functions', () => {
     });
     expect((await adminDb.doc(`spaces/${created.spaceId}`).get()).data()!.name).toBe('Robotics team');
     await expectError(
-      moderator.call('manageSpace', { action: 'create', slug: 'mods', name: 'Mods', description: '', order: 1, postingRoles: ['admin'] }),
+      moderator.call('manageSpace', {
+        action: 'create',
+        slug: 'mods',
+        name: 'Mods',
+        description: '',
+        order: 1,
+        postingRoles: ['admin'],
+      }),
       'permission-denied',
     );
   });
@@ -407,7 +504,9 @@ describe('other admin functions', () => {
 
   it('saves settings, and refuses to export training data', async () => {
     await admin.call('updateConfig', { doc: 'ai', bannedTopics: ['college admissions results'] });
-    expect((await adminDb.doc('config/ai').get()).data()!.bannedTopics).toEqual(['college admissions results']);
+    expect((await adminDb.doc('config/ai').get()).data()!.bannedTopics).toEqual([
+      'college admissions results',
+    ]);
     await expectError(student.call('updateConfig', { doc: 'ai', bannedTopics: [] }), 'permission-denied');
     const message = await expectError(admin.call('exportTrainingData', {}), 'failed-precondition');
     expect(message).toMatch(/switched off/);
@@ -415,7 +514,10 @@ describe('other admin functions', () => {
 
   it('screened() helper sees edits re-screened into a hold', async () => {
     const created = await post(student, spaces['clubs']!, { title: 'Fine at first', body: 'Nothing to see' });
-    await student.call('editOwnContent', { contentKey: created.contentKey, body: 'Now it is not fine [mock:hold]' });
+    await student.call('editOwnContent', {
+      contentKey: created.contentKey,
+      body: 'Now it is not fine [mock:hold]',
+    });
     const data = await waitFor(
       async () => (await adminDb.doc(`posts/${created.postId}`).get()).data()!,
       (p) => p.screening === 'flagged',

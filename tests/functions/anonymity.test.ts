@@ -63,14 +63,25 @@ beforeAll(async () => {
   a = await member(A_EMAIL, { firstName: A_FIRST, lastInitial: A_INITIAL, classYear: A_YEAR });
   b = await member('anon.other@nobles.edu', { firstName: 'Bystander', lastInitial: 'B', classYear: 2028 });
   moderator = await member('anon.mod@nobles.edu', { firstName: 'Modsample', lastInitial: 'M' });
-  secrets = [a.uid, A_FIRST, `${A_FIRST} ${A_INITIAL}.`, A_EMAIL, 'anon.zephyrine', String(A_YEAR), `’${String(A_YEAR).slice(-2)}`];
+  secrets = [
+    a.uid,
+    A_FIRST,
+    `${A_FIRST} ${A_INITIAL}.`,
+    A_EMAIL,
+    'anon.zephyrine',
+    String(A_YEAR),
+    `’${String(A_YEAR).slice(-2)}`,
+  ];
 
   thread = await post(a, spaces['middle-school']!, {
     identityMode: 'anonymous',
     title: 'Quokka question about asking for help',
     body: 'I am new this year and do not know who to ask.',
   });
-  reply = await comment(a, thread.postId, { identityMode: 'anonymous', body: 'Adding a quokka detail to my own thread.' });
+  reply = await comment(a, thread.postId, {
+    identityMode: 'anonymous',
+    body: 'Adding a quokka detail to my own thread.',
+  });
   await comment(b, thread.postId, { body: 'A named reply from someone else.' });
   await waitFor(
     async () => (await adminDb.doc(`posts/${thread.postId}`).get()).data()!.commentCount,
@@ -90,7 +101,11 @@ describe('what student B can fetch contains no trace of anonymous student A', ()
 
   it('the thread: every comment', async () => {
     const snap = await getDocs(
-      query(collection(b.db, `posts/${thread.postId}/comments`), where('status', '==', 'visible'), orderBy('createdAt', 'asc')),
+      query(
+        collection(b.db, `posts/${thread.postId}/comments`),
+        where('status', '==', 'visible'),
+        orderBy('createdAt', 'asc'),
+      ),
     );
     expect(snap.size).toBe(2);
     const mine = snap.docs.find((d) => d.id === reply.commentId)!;
@@ -105,8 +120,20 @@ describe('what student B can fetch contains no trace of anonymous student A', ()
   it('the feed, in every sort order', async () => {
     const base = [where('status', '==', 'visible')];
     const queries = [
-      query(collection(b.db, 'posts'), ...base, orderBy('pinned', 'desc'), orderBy('hotScore', 'desc'), limit(20)),
-      query(collection(b.db, 'posts'), ...base, orderBy('pinned', 'desc'), orderBy('createdAt', 'desc'), limit(20)),
+      query(
+        collection(b.db, 'posts'),
+        ...base,
+        orderBy('pinned', 'desc'),
+        orderBy('hotScore', 'desc'),
+        limit(20),
+      ),
+      query(
+        collection(b.db, 'posts'),
+        ...base,
+        orderBy('pinned', 'desc'),
+        orderBy('createdAt', 'desc'),
+        limit(20),
+      ),
       query(
         collection(b.db, 'posts'),
         where('spaceId', '==', spaces['middle-school']),
@@ -142,7 +169,10 @@ describe('what student B can fetch contains no trace of anonymous student A', ()
     // Searching for A's name, email or class year finds nothing: authorship is never indexed.
     for (const text of [A_FIRST, 'zephyrine', 'anon.zephyrine@nobles.edu', String(A_YEAR)]) {
       const snap = await find(text);
-      expect(snap.docs.some((d) => d.id === thread.postId), `search for "${text}"`).toBe(false);
+      expect(
+        snap.docs.some((d) => d.id === thread.postId),
+        `search for "${text}"`,
+      ).toBe(false);
     }
   });
 
@@ -176,7 +206,10 @@ describe('what student B can fetch contains no trace of anonymous student A', ()
     });
     responses.toggleThoughtful = await b.call('toggleThoughtful', { contentKey: reply.contentKey });
     responses.toggleThoughtfulPost = await b.call('toggleThoughtful', { contentKey: thread.contentKey });
-    responses.reportContent = await b.call('reportContent', { contentKey: reply.contentKey, reason: 'other' });
+    responses.reportContent = await b.call('reportContent', {
+      contentKey: reply.contentKey,
+      reason: 'other',
+    });
     responses.requestSummary = await b.call('requestSummary', { postId: thread.postId });
     responses.listMyContent = await b.call('listMyContent', {});
     responses.exportMyData = await b.call('exportMyData', {});
@@ -185,7 +218,10 @@ describe('what student B can fetch contains no trace of anonymous student A', ()
 
   it('error messages give nothing away either', async () => {
     const messages = [
-      await expectError(b.call('editOwnContent', { contentKey: thread.contentKey, body: 'Mine now' }), 'permission-denied'),
+      await expectError(
+        b.call('editOwnContent', { contentKey: thread.contentKey, body: 'Mine now' }),
+        'permission-denied',
+      ),
       await expectError(b.call('deleteOwnContent', { contentKey: reply.contentKey }), 'permission-denied'),
       await expectError(b.call('getMyContentStatus', { contentKey: thread.contentKey }), 'permission-denied'),
       await expectError(
@@ -198,9 +234,15 @@ describe('what student B can fetch contains no trace of anonymous student A', ()
 
   it('a moderator sees the queue and the content, and still no author', async () => {
     const queue = await getDocs(collection(moderator.db, 'moderationQueue'));
-    assertNoTrace('moderation queue', queue.docs.map((d) => d.data()));
+    assertNoTrace(
+      'moderation queue',
+      queue.docs.map((d) => d.data()),
+    );
     const reports = await getDocs(collection(moderator.db, 'reports'));
-    assertNoTrace('reports', reports.docs.map((d) => d.data()));
+    assertNoTrace(
+      'reports',
+      reports.docs.map((d) => d.data()),
+    );
     await expect(getDoc(doc(moderator.db, `authorship/${thread.contentKey}`))).rejects.toBeTruthy();
     await expect(getDoc(doc(moderator.db, `users/${a.uid}`))).rejects.toBeTruthy();
   });
@@ -215,8 +257,12 @@ describe('the places that do know the author are closed to B', () => {
     await expect(getDoc(doc(b.db, `threadAnon/${thread.postId}/members/${a.uid}`))).rejects.toBeTruthy();
     await expect(getDocs(collection(b.db, `threadAnon/${thread.postId}/members`))).rejects.toBeTruthy();
     await expect(getDoc(doc(b.db, `users/${a.uid}`))).rejects.toBeTruthy();
-    await expect(getDocs(query(collection(b.db, 'users'), where('email', '==', A_EMAIL)))).rejects.toBeTruthy();
-    await expect(getDocs(query(collectionGroup(b.db, 'by'), where('postId', '==', thread.postId)))).rejects.toBeTruthy();
+    await expect(
+      getDocs(query(collection(b.db, 'users'), where('email', '==', A_EMAIL))),
+    ).rejects.toBeTruthy();
+    await expect(
+      getDocs(query(collectionGroup(b.db, 'by'), where('postId', '==', thread.postId))),
+    ).rejects.toBeTruthy();
     await expect(getDoc(doc(b.db, `rateLimits/${a.uid}`))).rejects.toBeTruthy();
   });
 });
@@ -229,7 +275,8 @@ describe('ids and timestamps give no extra signal', () => {
     }
     // Ids do not sort in creation order, so they cannot be used to line up activity.
     const ids: string[] = [];
-    for (let i = 0; i < 4; i++) ids.push((await post(a, spaces['clubs']!, { title: `Ordering check number ${i}` })).postId);
+    for (let i = 0; i < 4; i++)
+      ids.push((await post(a, spaces['clubs']!, { title: `Ordering check number ${i}` })).postId);
     expect([...ids].sort()).not.toEqual(ids);
   });
 
@@ -238,7 +285,10 @@ describe('ids and timestamps give no extra signal', () => {
       [`posts/${thread.postId}`, thread.contentKey],
       [`posts/${thread.postId}/comments/${reply.commentId}`, reply.contentKey],
     ] as const) {
-      const [content, authorship] = await Promise.all([adminDb.doc(contentPath).get(), adminDb.doc(`authorship/${key}`).get()]);
+      const [content, authorship] = await Promise.all([
+        adminDb.doc(contentPath).get(),
+        adminDb.doc(`authorship/${key}`).get(),
+      ]);
       expect(authorship.data()!.createdAt.isEqual(content.data()!.createdAt)).toBe(true);
       expect(Object.keys(authorship.data()!).sort()).toEqual(['authorUid', 'contentKey', 'createdAt']);
     }
@@ -246,8 +296,14 @@ describe('ids and timestamps give no extra signal', () => {
 
   it('an anonymous post and a named post have the same fields apart from the author display', async () => {
     const named = await post(b, spaces['clubs']!, { title: 'A named post to compare shapes' });
-    const anon = await post(a, spaces['clubs']!, { identityMode: 'anonymous', title: 'An anonymous post to compare shapes' });
-    const [n, an] = await Promise.all([adminDb.doc(`posts/${named.postId}`).get(), adminDb.doc(`posts/${anon.postId}`).get()]);
+    const anon = await post(a, spaces['clubs']!, {
+      identityMode: 'anonymous',
+      title: 'An anonymous post to compare shapes',
+    });
+    const [n, an] = await Promise.all([
+      adminDb.doc(`posts/${named.postId}`).get(),
+      adminDb.doc(`posts/${anon.postId}`).get(),
+    ]);
     expect(Object.keys(an.data()!).sort()).toEqual(Object.keys(n.data()!).sort());
     expect(Object.keys(an.data()!.authorDisplay).sort()).toEqual(['anonLabel', 'mode']);
   });
@@ -260,12 +316,23 @@ describe('ids and timestamps give no extra signal', () => {
 describe('the administration can always see, and it is logged', () => {
   it('reveals the anonymous author to an admin and writes the audit entry', async () => {
     const admin = await member('sample.admin@nobles.edu');
-    const result = await admin.call<{ author: { email: string; displayName: string; classYear: number } }>('revealAuthor', {
-      contentKey: thread.contentKey,
-      reason: 'End-to-end check of the reveal flow',
+    const result = await admin.call<{ author: { email: string; displayName: string; classYear: number } }>(
+      'revealAuthor',
+      {
+        contentKey: thread.contentKey,
+        reason: 'End-to-end check of the reveal flow',
+      },
+    );
+    expect(result.author).toMatchObject({
+      email: A_EMAIL,
+      displayName: `${A_FIRST} ${A_INITIAL}.`,
+      classYear: A_YEAR,
     });
-    expect(result.author).toMatchObject({ email: A_EMAIL, displayName: `${A_FIRST} ${A_INITIAL}.`, classYear: A_YEAR });
-    const audit = await adminDb.collection('auditLog').where('contentKey', '==', thread.contentKey).where('action', '==', 'revealAuthor').get();
+    const audit = await adminDb
+      .collection('auditLog')
+      .where('contentKey', '==', thread.contentKey)
+      .where('action', '==', 'revealAuthor')
+      .get();
     expect(audit.size).toBe(1);
     // A can see their own anonymous posts in "my content".
     const mine = await a.call<{ items: { contentKey: string }[] }>('listMyContent', {});

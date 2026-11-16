@@ -16,8 +16,7 @@ export type IdentityMode = 'named' | 'anonymous';
  * stored on a post or comment. It never contains a uid or an email.
  */
 export type AuthorDisplay =
-  | { mode: 'named'; name: string; classYear?: number; role?: Role }
-  | { mode: 'anonymous'; anonLabel: string };
+  { mode: 'named'; name: string; classYear?: number; role?: Role } | { mode: 'anonymous'; anonLabel: string };
 
 export interface UserProfile {
   email: string;

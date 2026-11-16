@@ -133,8 +133,13 @@ export const approveDailyQuestion = callable(
     if (data.action === 'reject') {
       const snap = await questionRef.get();
       if (!snap.exists) throw errors.notFound('That question');
-      if (snap.data()!.status !== 'proposed') throw new AppError('failed-precondition', 'That question was already decided.');
-      await questionRef.update({ status: 'rejected', decidedBy: caller.uid, decidedAt: FieldValue.serverTimestamp() });
+      if (snap.data()!.status !== 'proposed')
+        throw new AppError('failed-precondition', 'That question was already decided.');
+      await questionRef.update({
+        status: 'rejected',
+        decidedBy: caller.uid,
+        decidedAt: FieldValue.serverTimestamp(),
+      });
       return { status: 'rejected' };
     }
 
@@ -148,7 +153,8 @@ export const approveDailyQuestion = callable(
       const question = await tx.get(questionRef);
       if (!question.exists) throw errors.notFound('That question');
       const q = question.data()!;
-      if (q.status !== 'proposed') throw new AppError('failed-precondition', 'That question was already decided.');
+      if (q.status !== 'proposed')
+        throw new AppError('failed-precondition', 'That question was already decided.');
       // Yesterday's question stops being pinned when today's goes up.
       const previous = await tx.get(
         db.collection('posts').where('questionOfTheDay', '==', true).where('pinned', '==', true).limit(10),
@@ -182,7 +188,12 @@ export const approveDailyQuestion = callable(
       // The approving moderator is recorded as the author, like any other post.
       tx.create(db.doc(`authorship/${key}`), { contentKey: key, authorUid: caller.uid, createdAt: now });
       for (const old of previous.docs) tx.update(old.ref, { pinned: false, pinnedBy: FieldValue.delete() });
-      tx.update(questionRef, { status: 'approved', approvedBy: caller.uid, postId: postRef.id, decidedAt: now });
+      tx.update(questionRef, {
+        status: 'approved',
+        approvedBy: caller.uid,
+        postId: postRef.id,
+        decidedAt: now,
+      });
       tx.set(db.doc('config/board'), { questionPostId: postRef.id, updatedAt: now }, { merge: true });
       auditIn(tx, {
         actorUid: caller.uid,

@@ -38,14 +38,26 @@ const admin = () => member('adminA', 'admin');
 const anonymous = () => env.unauthenticatedContext().firestore();
 /** Signed in with a Nobles address, but the email is not verified. */
 const unverified = () =>
-  env.authenticatedContext('unverified', { email: 'unverified@nobles.edu', email_verified: false, role: 'student' }).firestore();
+  env
+    .authenticatedContext('unverified', {
+      email: 'unverified@nobles.edu',
+      email_verified: false,
+      role: 'student',
+    })
+    .firestore();
 /** Signed in with a verified address from somewhere else. Even a forged role claim must not help. */
 const offDomain = () =>
-  env.authenticatedContext('outsider', { email: 'outsider@example.com', email_verified: true, role: 'admin' }).firestore();
+  env
+    .authenticatedContext('outsider', { email: 'outsider@example.com', email_verified: true, role: 'admin' })
+    .firestore();
 /** A look-alike domain. */
 const lookalike = () =>
   env
-    .authenticatedContext('lookalike', { email: 'someone@nobles.edu.example.com', email_verified: true, role: 'student' })
+    .authenticatedContext('lookalike', {
+      email: 'someone@nobles.edu.example.com',
+      email_verified: true,
+      role: 'student',
+    })
     .firestore();
 /** A Nobles address that has signed in but has not been onboarded, so has no role claim. */
 const notOnboarded = () =>
@@ -86,24 +98,68 @@ beforeEach(async () => {
   await env.clearFirestore();
   await env.withSecurityRulesDisabled(async (ctx) => {
     const db = ctx.firestore();
-    await setDoc(doc(db, 'users/studentA'), { email: 'studentA@nobles.edu', displayName: 'Sample A.', role: 'student' });
-    await setDoc(doc(db, 'users/studentB'), { email: 'studentB@nobles.edu', displayName: 'Sample B.', role: 'student' });
+    await setDoc(doc(db, 'users/studentA'), {
+      email: 'studentA@nobles.edu',
+      displayName: 'Sample A.',
+      role: 'student',
+    });
+    await setDoc(doc(db, 'users/studentB'), {
+      email: 'studentB@nobles.edu',
+      displayName: 'Sample B.',
+      role: 'student',
+    });
     await setDoc(doc(db, 'spaces/space1'), { name: 'School news', slug: 'school-news', order: 1 });
     await setDoc(doc(db, 'posts/visible1'), post('visible'));
     await setDoc(doc(db, 'posts/held1'), post('held'));
     await setDoc(doc(db, 'posts/removed1'), post('removed'));
-    await setDoc(doc(db, 'posts/visible1/comments/c1'), { body: 'Hi', status: 'visible', createdAt: new Date() });
-    await setDoc(doc(db, 'posts/visible1/comments/c2'), { body: 'Held', status: 'held', createdAt: new Date() });
+    await setDoc(doc(db, 'posts/visible1/comments/c1'), {
+      body: 'Hi',
+      status: 'visible',
+      createdAt: new Date(),
+    });
+    await setDoc(doc(db, 'posts/visible1/comments/c2'), {
+      body: 'Held',
+      status: 'held',
+      createdAt: new Date(),
+    });
     await setDoc(doc(db, 'authorship/post:visible1'), { contentKey: 'post:visible1', authorUid: 'studentA' });
-    await setDoc(doc(db, 'authorship/comment:visible1:c1'), { contentKey: 'comment:visible1:c1', authorUid: 'studentA' });
+    await setDoc(doc(db, 'authorship/comment:visible1:c1'), {
+      contentKey: 'comment:visible1:c1',
+      authorUid: 'studentA',
+    });
     await setDoc(doc(db, 'threadAnon/visible1'), { count: 1 });
     await setDoc(doc(db, 'threadAnon/visible1/members/studentA'), { index: 0 });
-    await setDoc(doc(db, 'votes/visible1/by/studentA'), { uid: 'studentA', postId: 'visible1', kind: 'post' });
-    await setDoc(doc(db, 'votes/visible1/comments/c1/by/studentA'), { uid: 'studentA', postId: 'visible1', kind: 'comment' });
-    await setDoc(doc(db, 'pollVotes/visible1/by/studentA'), { uid: 'studentA', postId: 'visible1', kind: 'poll', optionId: 'a' });
-    await setDoc(doc(db, 'reports/r1'), { contentKey: 'post:visible1', reporterUid: 'studentB', status: 'open' });
-    await setDoc(doc(db, 'moderationQueue/q1'), { contentKey: 'post:held1', reason: 'ai-flag', status: 'open' });
-    await setDoc(doc(db, 'auditLog/a1'), { actorUid: 'adminA', action: 'revealAuthor', reason: 'A sample reason' });
+    await setDoc(doc(db, 'votes/visible1/by/studentA'), {
+      uid: 'studentA',
+      postId: 'visible1',
+      kind: 'post',
+    });
+    await setDoc(doc(db, 'votes/visible1/comments/c1/by/studentA'), {
+      uid: 'studentA',
+      postId: 'visible1',
+      kind: 'comment',
+    });
+    await setDoc(doc(db, 'pollVotes/visible1/by/studentA'), {
+      uid: 'studentA',
+      postId: 'visible1',
+      kind: 'poll',
+      optionId: 'a',
+    });
+    await setDoc(doc(db, 'reports/r1'), {
+      contentKey: 'post:visible1',
+      reporterUid: 'studentB',
+      status: 'open',
+    });
+    await setDoc(doc(db, 'moderationQueue/q1'), {
+      contentKey: 'post:held1',
+      reason: 'ai-flag',
+      status: 'open',
+    });
+    await setDoc(doc(db, 'auditLog/a1'), {
+      actorUid: 'adminA',
+      action: 'revealAuthor',
+      reason: 'A sample reason',
+    });
     await setDoc(doc(db, 'dailyQuestions/2026-11-16-1'), { text: 'A sample question?', status: 'proposed' });
     await setDoc(doc(db, 'config/roles'), { emailToRole: {} });
     await setDoc(doc(db, 'config/ai'), { bannedTopics: [] });
@@ -167,7 +223,13 @@ describe('votes: you can see your own, nobody else can', () => {
     await assertSucceeds(getDoc(doc(student(), 'votes/visible1/comments/c1/by/studentA')));
     await assertSucceeds(getDoc(doc(student(), 'pollVotes/visible1/by/studentA')));
     await assertSucceeds(
-      getDocs(query(collectionGroup(student(), 'by'), where('uid', '==', 'studentA'), where('postId', '==', 'visible1'))),
+      getDocs(
+        query(
+          collectionGroup(student(), 'by'),
+          where('uid', '==', 'studentA'),
+          where('postId', '==', 'visible1'),
+        ),
+      ),
     );
   });
   it('a student cannot read another person’s votes', async () => {
@@ -176,7 +238,9 @@ describe('votes: you can see your own, nobody else can', () => {
     await assertFails(getDoc(doc(otherStudent(), 'pollVotes/visible1/by/studentA')));
     await assertFails(getDocs(collection(otherStudent(), 'votes/visible1/by')));
     await assertFails(getDocs(query(collectionGroup(otherStudent(), 'by'), where('uid', '==', 'studentA'))));
-    await assertFails(getDocs(query(collectionGroup(otherStudent(), 'by'), where('postId', '==', 'visible1'))));
+    await assertFails(
+      getDocs(query(collectionGroup(otherStudent(), 'by'), where('postId', '==', 'visible1'))),
+    );
     await assertFails(getDocs(collectionGroup(otherStudent(), 'by')));
   });
   it('moderators and admins cannot read who voted either', async () => {
@@ -185,7 +249,9 @@ describe('votes: you can see your own, nobody else can', () => {
   });
   it('nobody can write a vote directly, not even their own', async () => {
     await assertFails(setDoc(doc(student(), 'votes/visible1/by/studentA'), { uid: 'studentA' }));
-    await assertFails(setDoc(doc(otherStudent(), 'votes/visible1/by/studentB'), { uid: 'studentB', postId: 'visible1' }));
+    await assertFails(
+      setDoc(doc(otherStudent(), 'votes/visible1/by/studentB'), { uid: 'studentB', postId: 'visible1' }),
+    );
     await assertFails(deleteDoc(doc(student(), 'votes/visible1/by/studentA')));
     await assertFails(setDoc(doc(student(), 'pollVotes/visible1/by/studentA'), { optionId: 'b' }));
     await assertFails(setDoc(doc(student(), 'votes/visible1/comments/c1/by/studentA'), { uid: 'studentA' }));
@@ -218,7 +284,9 @@ describe('posts and comments: read what is visible, write nothing', () => {
   it('a student cannot create a post or comment directly', async () => {
     await assertFails(addDoc(collection(student(), 'posts'), post('visible')));
     await assertFails(setDoc(doc(student(), 'posts/mine'), post('visible')));
-    await assertFails(addDoc(collection(student(), 'posts/visible1/comments'), { body: 'x', status: 'visible' }));
+    await assertFails(
+      addDoc(collection(student(), 'posts/visible1/comments'), { body: 'x', status: 'visible' }),
+    );
   });
   it('a student cannot edit or delete a post or comment directly', async () => {
     await assertFails(updateDoc(doc(student(), 'posts/visible1'), { title: 'Changed' }));
@@ -244,7 +312,9 @@ describe('users: private profiles', () => {
   it('a member cannot read anyone else’s profile or list users', async () => {
     await assertFails(getDoc(doc(student(), 'users/studentB')));
     await assertFails(getDocs(collection(student(), 'users')));
-    await assertFails(getDocs(query(collection(student(), 'users'), where('email', '==', 'studentB@nobles.edu'))));
+    await assertFails(
+      getDocs(query(collection(student(), 'users'), where('email', '==', 'studentB@nobles.edu'))),
+    );
   });
   it('a moderator cannot read profiles (so cannot work out authors)', async () => {
     await assertFails(getDoc(doc(moderator(), 'users/studentA')));
@@ -355,7 +425,9 @@ describe('moderation, audit and configuration', () => {
     await assertSucceeds(getDoc(doc(admin(), 'config/roles')));
     await assertSucceeds(getDoc(doc(admin(), 'config/ai')));
     await assertFails(setDoc(doc(admin(), 'config/roles'), { emailToRole: { 'x@nobles.edu': 'admin' } }));
-    await assertFails(setDoc(doc(student(), 'config/roles'), { emailToRole: { 'studentA@nobles.edu': 'admin' } }));
+    await assertFails(
+      setDoc(doc(student(), 'config/roles'), { emailToRole: { 'studentA@nobles.edu': 'admin' } }),
+    );
   });
   it('function-only collections are closed to every client', async () => {
     for (const db of [student(), moderator(), admin()]) {

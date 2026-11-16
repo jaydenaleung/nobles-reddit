@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { anonLabel, anonLetter, buildAuthorDisplay, formatDisplayName, initials, shortClassYear } from './authorDisplay';
+import {
+  anonLabel,
+  anonLetter,
+  buildAuthorDisplay,
+  formatDisplayName,
+  initials,
+  shortClassYear,
+} from './authorDisplay';
 import { commentKey, contentPath, parseContentKey, postKey } from './contentKey';
 import { RATE_LIMITS } from './constants';
 import { takeToken } from './rateLimit';
@@ -20,7 +27,11 @@ describe('authorDisplay', () => {
     });
   });
   it('named faculty show name and role, no class year', () => {
-    expect(buildAuthorDisplay(faculty, 'named', 0)).toEqual({ mode: 'named', name: 'Maya H.', role: 'faculty' });
+    expect(buildAuthorDisplay(faculty, 'named', 0)).toEqual({
+      mode: 'named',
+      name: 'Maya H.',
+      role: 'faculty',
+    });
   });
   it('anonymous shows only the label: no name, no class year, no role', () => {
     const display = buildAuthorDisplay(student, 'anonymous', 1);
@@ -52,7 +63,11 @@ describe('authorDisplay', () => {
 describe('contentKey', () => {
   it('round-trips post and comment keys', () => {
     expect(parseContentKey(postKey('abc'))).toEqual({ kind: 'post', postId: 'abc' });
-    expect(parseContentKey(commentKey('abc', 'def'))).toEqual({ kind: 'comment', postId: 'abc', commentId: 'def' });
+    expect(parseContentKey(commentKey('abc', 'def'))).toEqual({
+      kind: 'comment',
+      postId: 'abc',
+      commentId: 'def',
+    });
   });
   it('rejects anything else', () => {
     expect(parseContentKey('post:a/b')).toBeNull();

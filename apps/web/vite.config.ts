@@ -111,6 +111,8 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), joinQrPlugin(appConfig.publicUrl), hostingHeadersPlugin()],
     define: {
       __APP_CONFIG__: JSON.stringify(appConfig),
+      // A plain boolean, so the emulator-only sign-in code is removed from production builds.
+      __USE_EMULATORS__: JSON.stringify(useEmulators),
     },
     // No env files are auto-loaded into import.meta.env: everything goes through __APP_CONFIG__.
     envDir: path.join(here, 'no-env-here'),

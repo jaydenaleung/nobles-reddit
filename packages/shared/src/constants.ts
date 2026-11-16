@@ -146,7 +146,15 @@ export const REPORT_REASONS = [
 ] as const;
 export type ReportReason = (typeof REPORT_REASONS)[number]['id'];
 
-export const MOD_ACTIONS = ['hold', 'remove', 'restore', 'pin', 'unpin', 'approveForBoard', 'removeFromBoard'] as const;
+export const MOD_ACTIONS = [
+  'hold',
+  'remove',
+  'restore',
+  'pin',
+  'unpin',
+  'approveForBoard',
+  'removeFromBoard',
+] as const;
 export type ModAction = (typeof MOD_ACTIONS)[number];
 
 /** Moderation screening: the labels the classifier can return. */
@@ -171,8 +179,14 @@ export const DEFAULT_WELLBEING_RESOURCES = {
   message:
     'Thank you for writing this. It has not been posted, and it has gone to an adult at school who will read it and follow up with care. You are not in trouble.',
   items: [
-    { label: 'Talk to someone at school', detail: 'Your advisor, the counseling office or the health office.' },
-    { label: '988 Suicide and Crisis Lifeline', detail: 'Call or text 988, any time, free and confidential.' },
+    {
+      label: 'Talk to someone at school',
+      detail: 'Your advisor, the counseling office or the health office.',
+    },
+    {
+      label: '988 Suicide and Crisis Lifeline',
+      detail: 'Call or text 988, any time, free and confidential.',
+    },
     { label: 'If anyone is in immediate danger', detail: 'Call 911.' },
   ],
 };

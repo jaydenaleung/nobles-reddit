@@ -19,7 +19,10 @@ export type ScreenDecision =
  *
  * The classifier is a helper. Reports and moderators remain.
  */
-export function decideScreening(findings: ScreenFinding[], threshold = SCREEN_HOLD_THRESHOLD): ScreenDecision {
+export function decideScreening(
+  findings: ScreenFinding[],
+  threshold = SCREEN_HOLD_THRESHOLD,
+): ScreenDecision {
   const strong = findings.filter((f) => f.confidence >= threshold);
   if (strong.length === 0) return { outcome: 'publish' };
   const labels = [...new Set(strong.map((f) => f.label))];
@@ -35,8 +38,14 @@ export function decideScreening(findings: ScreenFinding[], threshold = SCREEN_HO
  * the clearest safety signals still reach a person. It is deliberately narrow.
  */
 const SAFETY_PHRASES: { label: ScreenLabel; re: RegExp }[] = [
-  { label: 'self_harm', re: /\b(kill(ing)? myself|end(ing)? my (own )?life|suicid(e|al)|hurt(ing)? myself|self[- ]harm|want to die|don'?t want to (be alive|live))\b/i },
-  { label: 'harm_to_others', re: /\b(shoot up|bring a (gun|knife|weapon) to|going to (kill|shoot|stab|hurt) (him|her|them|you|everyone|someone))\b/i },
+  {
+    label: 'self_harm',
+    re: /\b(kill(ing)? myself|end(ing)? my (own )?life|suicid(e|al)|hurt(ing)? myself|self[- ]harm|want to die|don'?t want to (be alive|live))\b/i,
+  },
+  {
+    label: 'harm_to_others',
+    re: /\b(shoot up|bring a (gun|knife|weapon) to|going to (kill|shoot|stab|hurt) (him|her|them|you|everyone|someone))\b/i,
+  },
 ];
 
 export function fallbackScreen(text: string): ScreenFinding[] {

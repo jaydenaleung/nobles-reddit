@@ -179,31 +179,37 @@ export const onCommentVoteWritten = onDocumentWritten(
 );
 
 /** Keeps each space's thread count right, and the hall screen in step with its question. */
-export const onPostWritten = onDocumentWritten({ ...triggerOptions, document: 'posts/{postId}' }, async (event) => {
-  const before = event.data?.before.data();
-  const after = event.data?.after.data();
-  const spaceIds = new Set<string>();
-  if (before?.status !== after?.status || before?.spaceId !== after?.spaceId) {
-    if (before?.spaceId) spaceIds.add(before.spaceId);
-    if (after?.spaceId) spaceIds.add(after.spaceId);
-  }
-  for (const spaceId of spaceIds) {
-    const count = await db
-      .collection('posts')
-      .where('spaceId', '==', spaceId)
-      .where('status', '==', 'visible')
-      .count()
-      .get();
-    try {
-      await db.doc(`spaces/${spaceId}`).update({ postCount: count.data().count });
-    } catch {
-      logger.warn('A thread points at a space that does not exist');
+export const onPostWritten = onDocumentWritten(
+  { ...triggerOptions, document: 'posts/{postId}' },
+  async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    const spaceIds = new Set<string>();
+    if (before?.status !== after?.status || before?.spaceId !== after?.spaceId) {
+      if (before?.spaceId) spaceIds.add(before.spaceId);
+      if (after?.spaceId) spaceIds.add(after.spaceId);
     }
-  }
-  await refreshBoardIfQuestion(event.params.postId);
-});
+    for (const spaceId of spaceIds) {
+      const count = await db
+        .collection('posts')
+        .where('spaceId', '==', spaceId)
+        .where('status', '==', 'visible')
+        .count()
+        .get();
+      try {
+        await db.doc(`spaces/${spaceId}`).update({ postCount: count.data().count });
+      } catch {
+        logger.warn('A thread points at a space that does not exist');
+      }
+    }
+    await refreshBoardIfQuestion(event.params.postId);
+  },
+);
 
 /** `refreshBoardFeed`: rebuilds the hall screen whenever its question changes. */
-export const refreshBoardFeed = onDocumentWritten({ ...triggerOptions, document: 'config/board' }, async () => {
-  await rebuildBoardFeed();
-});
+export const refreshBoardFeed = onDocumentWritten(
+  { ...triggerOptions, document: 'config/board' },
+  async () => {
+    await rebuildBoardFeed();
+  },
+);

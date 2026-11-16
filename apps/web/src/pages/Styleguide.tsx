@@ -98,8 +98,36 @@ const posts: PostView[] = [
   },
 ];
 
-const icons: IconName[] = ['up', 'comment', 'search', 'pin', 'flag', 'mask', 'shield', 'home', 'grid', 'plus', 'tv', 'user', 'ext', 'check'];
-const swatches = ['surface', 'surface-raised', 'surface-sunken', 'masthead', 'brand', 'sky', 'gold', 'orange', 'staff-tint', 'kind-tint', 'anon-tint', 'auto-tint'];
+const icons: IconName[] = [
+  'up',
+  'comment',
+  'search',
+  'pin',
+  'flag',
+  'mask',
+  'shield',
+  'home',
+  'grid',
+  'plus',
+  'tv',
+  'user',
+  'ext',
+  'check',
+];
+const swatches = [
+  'surface',
+  'surface-raised',
+  'surface-sunken',
+  'masthead',
+  'brand',
+  'sky',
+  'gold',
+  'orange',
+  'staff-tint',
+  'kind-tint',
+  'anon-tint',
+  'auto-tint',
+];
 
 function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
   const [mode, setMode] = useState<IdentityMode | null>(null);
@@ -123,7 +151,18 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
       <h3 className="sg-h">Colour roles</h3>
       <div className="sw">
         {swatches.map((name) => (
-          <div key={name} style={{ background: `var(--${name})`, color: name === 'masthead' ? 'var(--on-masthead)' : name === 'brand' ? 'var(--on-brand)' : 'var(--ink)' }}>
+          <div
+            key={name}
+            style={{
+              background: `var(--${name})`,
+              color:
+                name === 'masthead'
+                  ? 'var(--on-masthead)'
+                  : name === 'brand'
+                    ? 'var(--on-brand)'
+                    : 'var(--ink)',
+            }}
+          >
             {name}
           </div>
         ))}
@@ -143,16 +182,32 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
 
       <h3 className="sg-h">Buttons and badges</h3>
       <div className="row">
-        <button className="nb-btn nb-btn--primary" type="button">Start a thread</button>
-        <button className="nb-btn" type="button">Post</button>
-        <button className="nb-btn nb-btn--quiet" type="button">Cancel</button>
-        <button className="nb-btn nb-btn--sm" type="button">Small</button>
-        <button className="nb-btn" type="button" disabled>Disabled</button>
+        <button className="nb-btn nb-btn--primary" type="button">
+          Start a thread
+        </button>
+        <button className="nb-btn" type="button">
+          Post
+        </button>
+        <button className="nb-btn nb-btn--quiet" type="button">
+          Cancel
+        </button>
+        <button className="nb-btn nb-btn--sm" type="button">
+          Small
+        </button>
+        <button className="nb-btn" type="button" disabled>
+          Disabled
+        </button>
       </div>
       <div className="row">
-        <span className="nb-badge nb-badge--staff"><Icon name="shield" /> Faculty</span>
-        <span className="nb-badge nb-badge--anon"><Icon name="mask" /> Anonymous</span>
-        <span className="nb-badge nb-badge--live"><Icon name="tv" /> Live now</span>
+        <span className="nb-badge nb-badge--staff">
+          <Icon name="shield" /> Faculty
+        </span>
+        <span className="nb-badge nb-badge--anon">
+          <Icon name="mask" /> Anonymous
+        </span>
+        <span className="nb-badge nb-badge--live">
+          <Icon name="tv" /> Live now
+        </span>
         <span className="nb-badge nb-badge--kind">Kind</span>
         <span className="nb-badge nb-badge--ai">Auto-summary</span>
       </div>
@@ -179,14 +234,26 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
       <h3 className="sg-h">Notices</h3>
       <div className="stack">
         <AdminNotice />
-        <div className="nb-notice nb-notice--kind"><Icon name="check" /><div><b>Be kind. Be honest.</b></div></div>
-        <div className="nb-notice nb-notice--anon"><Icon name="mask" /><div>You are posting as Anonymous B in this thread.</div></div>
-        <div className="nb-notice"><div>A plain notice.</div></div>
+        <div className="nb-notice nb-notice--kind">
+          <Icon name="check" />
+          <div>
+            <b>Be kind. Be honest.</b>
+          </div>
+        </div>
+        <div className="nb-notice nb-notice--anon">
+          <Icon name="mask" />
+          <div>You are posting as Anonymous B in this thread.</div>
+        </div>
+        <div className="nb-notice">
+          <div>A plain notice.</div>
+        </div>
       </div>
 
       <h3 className="sg-h">Sort tabs (wavy underline on the active one)</h3>
       <nav className="nb-sort" aria-label={`Sort example, ${theme}`}>
-        <a href="#styleguide" aria-current="true">Hot</a>
+        <a href="#styleguide" aria-current="true">
+          Hot
+        </a>
         <a href="#styleguide">New</a>
         <a href="#styleguide">Top this week</a>
         <a href="#styleguide">No replies yet</a>
@@ -221,18 +288,30 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
         <Avatar author={student} />
         <div>
           <Byline author={student} when="2 hours ago" avatar={false} />
-          <SafeText className="nb-comment__body" text={'Later starts help, but *only* if bedtimes move too. **Really.** https://example.org/sleep'} />
+          <SafeText
+            className="nb-comment__body"
+            text={'Later starts help, but *only* if bedtimes move too. **Really.** https://example.org/sleep'}
+          />
           <div className="nb-comment__actions">
-            <button type="button" aria-pressed="false"><Icon name="up" /> Thoughtful · 18</button>
-            <button type="button"><Icon name="comment" /> Reply</button>
-            <button type="button"><Icon name="flag" /> Report</button>
+            <button type="button" aria-pressed="false">
+              <Icon name="up" /> Thoughtful · 18
+            </button>
+            <button type="button">
+              <Icon name="comment" /> Reply
+            </button>
+            <button type="button">
+              <Icon name="flag" /> Report
+            </button>
           </div>
           <div className="nb-comment__replies">
             <div className="nb-comment">
               <Avatar author={anon} />
               <div>
                 <Byline author={anon} when="1 hour ago" avatar={false} />
-                <SafeText className="nb-comment__body" text="I commute 50 minutes. Thirty extra minutes is real for me." />
+                <SafeText
+                  className="nb-comment__body"
+                  text="I commute 50 minutes. Thirty extra minutes is real for me."
+                />
               </div>
             </div>
           </div>
@@ -265,17 +344,33 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
       <h3 className="sg-h">Fields</h3>
       <div className="nb-composer">
         <div>
-          <label className="nb-label" htmlFor={`sg-title-${theme}`}>Title</label>
-          <input className="nb-input" id={`sg-title-${theme}`} defaultValue="Is it okay to ask upperclassmen for help?" />
+          <label className="nb-label" htmlFor={`sg-title-${theme}`}>
+            Title
+          </label>
+          <input
+            className="nb-input"
+            id={`sg-title-${theme}`}
+            defaultValue="Is it okay to ask upperclassmen for help?"
+          />
         </div>
         <div>
-          <label className="nb-label" htmlFor={`sg-body-${theme}`}>Your thoughts</label>
-          <textarea className="nb-textarea" id={`sg-body-${theme}`} defaultValue="I’m new this year and don’t know who to ask." />
+          <label className="nb-label" htmlFor={`sg-body-${theme}`}>
+            Your thoughts
+          </label>
+          <textarea
+            className="nb-textarea"
+            id={`sg-body-${theme}`}
+            defaultValue="I’m new this year and don’t know who to ask."
+          />
           <p className="nb-help">Plain text. *italic*, **bold** and https links work.</p>
         </div>
         <div className="nb-composer__foot">
-          <button className="nb-btn nb-btn--quiet" type="button">Cancel</button>
-          <button className="nb-btn nb-btn--primary" type="button">Post</button>
+          <button className="nb-btn nb-btn--quiet" type="button">
+            Cancel
+          </button>
+          <button className="nb-btn nb-btn--primary" type="button">
+            Post
+          </button>
         </div>
       </div>
     </section>

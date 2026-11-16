@@ -27,6 +27,10 @@ export default tseslint.config(
     },
   },
   {
+    files: ['apps/web/public/**/*.js', 'scripts/shot.mjs', 'e2e/**/*.ts', 'scripts/lighthouse.ts'],
+    languageOptions: { globals: { ...globals.browser, ...globals.node } },
+  },
+  {
     files: ['apps/web/src/**/*.{ts,tsx}'],
     languageOptions: { globals: { ...globals.browser } },
     plugins: { 'react-hooks': reactHooks },

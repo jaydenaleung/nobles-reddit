@@ -58,7 +58,10 @@ export class ClaudeProvider implements AiProvider {
       });
     } catch (error) {
       // Log the kind of failure only. Never the prompt, which holds students' words.
-      if (error instanceof Anthropic.AuthenticationError || error instanceof Anthropic.PermissionDeniedError) {
+      if (
+        error instanceof Anthropic.AuthenticationError ||
+        error instanceof Anthropic.PermissionDeniedError
+      ) {
         logger.error('Claude rejected the API key or its permissions', { status: error.status });
         throw new AiUnavailable('config', 'authentication');
       }
@@ -92,9 +95,7 @@ export class ClaudeProvider implements AiProvider {
     if (response.stop_reason === 'refusal') throw new AiUnavailable('refusal');
     if (response.stop_reason === 'max_tokens') throw new AiUnavailable('malformed', 'cut off');
 
-    const text = response.content
-      .flatMap((block) => (block.type === 'text' ? [block.text] : []))
-      .join('');
+    const text = response.content.flatMap((block) => (block.type === 'text' ? [block.text] : [])).join('');
     let output: unknown;
     try {
       output = JSON.parse(text);

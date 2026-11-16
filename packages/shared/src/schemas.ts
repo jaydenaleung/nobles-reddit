@@ -3,12 +3,17 @@ import { ASSIGNABLE_ROLES, DIVISIONS, LIMITS, MOD_ACTIONS, REPORT_REASONS, ROLES
 
 /** Collapses stray whitespace and strips control characters that have no business in a post. */
 export function cleanText(input: string): string {
-  return input
-    .replace(/\r\n?/g, '\n')
-    // eslint-disable-next-line no-control-regex
-    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F​-‏‪-‮⁦-⁩﻿]/g, '')
-    .replace(/\n{4,}/g, '\n\n\n')
-    .trim();
+  return (
+    input
+      .replace(/\r\n?/g, '\n')
+      // eslint-disable-next-line no-control-regex
+      .replace(
+        /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g,
+        '',
+      )
+      .replace(/\n{4,}/g, '\n\n\n')
+      .trim()
+  );
 }
 function cleanLine(input: string): string {
   return cleanText(input).replace(/\s+/g, ' ');
@@ -20,7 +25,10 @@ const firestoreId = z.string().regex(/^[A-Za-z0-9_-]{1,64}$/, 'Not a valid id');
 export const contentKeySchema = z
   .string()
   .max(160)
-  .regex(/^(post:[A-Za-z0-9_-]{1,64}|comment:[A-Za-z0-9_-]{1,64}:[A-Za-z0-9_-]{1,64})$/, 'Not a valid content key');
+  .regex(
+    /^(post:[A-Za-z0-9_-]{1,64}|comment:[A-Za-z0-9_-]{1,64}:[A-Za-z0-9_-]{1,64})$/,
+    'Not a valid content key',
+  );
 
 export const identityModeSchema = z.enum(['named', 'anonymous']);
 
@@ -70,7 +78,10 @@ export const pollOptionsSchema = z
   )
   .min(LIMITS.pollMinOptions, `Polls need at least ${LIMITS.pollMinOptions} options`)
   .max(LIMITS.pollMaxOptions, `Polls can have up to ${LIMITS.pollMaxOptions} options`)
-  .refine((options) => new Set(options.map((o) => o.toLowerCase())).size === options.length, 'Options must be different');
+  .refine(
+    (options) => new Set(options.map((o) => o.toLowerCase())).size === options.length,
+    'Options must be different',
+  );
 
 export const onboardSchema = z
   .object({
@@ -81,7 +92,9 @@ export const onboardSchema = z
       .pipe(z.string().regex(/^\p{L}$/u, 'One letter')),
     classYear: z.number().int().min(2000).max(2100).nullable().optional(),
     divisions: z.array(z.enum(DIVISIONS)).max(DIVISIONS.length).optional(),
-    understood: z.literal(true, { errorMap: () => ({ message: 'Please confirm you have read how it works' }) }),
+    understood: z.literal(true, {
+      errorMap: () => ({ message: 'Please confirm you have read how it works' }),
+    }),
   })
   .strict();
 
@@ -131,7 +144,9 @@ export const contentKeyOnlySchema = z.object({ contentKey: contentKeySchema }).s
 export const toggleThoughtfulSchema = contentKeyOnlySchema;
 export const deleteOwnContentSchema = contentKeyOnlySchema;
 
-export const votePollSchema = z.object({ postId: firestoreId, optionId: z.string().regex(/^[a-z0-9]{1,8}$/) }).strict();
+export const votePollSchema = z
+  .object({ postId: firestoreId, optionId: z.string().regex(/^[a-z0-9]{1,8}$/) })
+  .strict();
 
 export const reportContentSchema = z
   .object({
@@ -150,7 +165,11 @@ export const modActionSchema = z
   .strict();
 
 export const resolveReportSchema = z
-  .object({ id: firestoreId, kind: z.enum(['report', 'queue']), note: z.string().max(LIMITS.reasonMax).optional() })
+  .object({
+    id: firestoreId,
+    kind: z.enum(['report', 'queue']),
+    note: z.string().max(LIMITS.reasonMax).optional(),
+  })
   .strict();
 
 export const revealAuthorSchema = z
@@ -203,14 +222,14 @@ export const dailyQuestionActionSchema = z
   })
   .strict();
 
-export const proposeHumanQuestionSchema = z
-  .object({ text: titleSchema })
-  .strict();
+export const proposeHumanQuestionSchema = z.object({ text: titleSchema }).strict();
 
 export const requestSummarySchema = z.object({ postId: firestoreId }).strict();
 export const emptySchema = z.object({}).strict();
 
-export const exportAuditLogSchema = z.object({ limit: z.number().int().min(1).max(1000).optional() }).strict();
+export const exportAuditLogSchema = z
+  .object({ limit: z.number().int().min(1).max(1000).optional() })
+  .strict();
 
 export const updateConfigSchema = z.discriminatedUnion('doc', [
   z

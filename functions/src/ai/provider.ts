@@ -111,7 +111,10 @@ export const classifyJsonSchema = {
 function clampWords(text: string, maxWords: number): string {
   const words = text.trim().split(/\s+/).filter(Boolean);
   if (words.length <= maxWords) return words.join(' ');
-  return `${words.slice(0, maxWords).join(' ').replace(/[,;:]$/, '')}…`;
+  return `${words
+    .slice(0, maxWords)
+    .join(' ')
+    .replace(/[,;:]$/, '')}…`;
 }
 /** Model output is shown as plain text. Markup and control characters are removed anyway. */
 function plain(text: string): string {

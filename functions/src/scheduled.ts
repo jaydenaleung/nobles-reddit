@@ -54,7 +54,12 @@ export async function archiveRemovedContent(now = Date.now()): Promise<number> {
   const before = Timestamp.fromDate(cutoff);
   const [posts, comments] = await Promise.all([
     db.collection('posts').where('status', '==', 'removed').where('removedAt', '<', before).limit(200).get(),
-    db.collectionGroup('comments').where('status', '==', 'removed').where('removedAt', '<', before).limit(200).get(),
+    db
+      .collectionGroup('comments')
+      .where('status', '==', 'removed')
+      .where('removedAt', '<', before)
+      .limit(200)
+      .get(),
   ]);
   let archived = 0;
   for (const doc of [...posts.docs, ...comments.docs]) {

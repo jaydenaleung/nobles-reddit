@@ -17,6 +17,10 @@ export interface AppConfig {
 }
 
 declare const __APP_CONFIG__: AppConfig;
+declare const __USE_EMULATORS__: boolean;
+
+/** True only in `--mode emulator` builds. A build-time constant, so dead code is dropped in production. */
+export const USE_EMULATORS: boolean = __USE_EMULATORS__;
 
 /** Built from the env file at build time. Contains only values that are public by design. */
 export const config: AppConfig = __APP_CONFIG__;

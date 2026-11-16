@@ -23,7 +23,8 @@ export function setProviderForTests(provider: AiProvider | null): void {
 
 export function getProvider(): AiProvider {
   if (cached) return cached;
-  const claude = () => new ClaudeProvider(ANTHROPIC_API_KEY.value(), { fast: env.modelFast, smart: env.modelSmart });
+  const claude = () =>
+    new ClaudeProvider(ANTHROPIC_API_KEY.value(), { fast: env.modelFast, smart: env.modelSmart });
   switch (env.aiProvider) {
     case 'mock':
       cached = new MockProvider();

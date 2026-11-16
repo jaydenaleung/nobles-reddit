@@ -10,7 +10,7 @@
     } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       theme = 'night';
     }
-  } catch (e) {
+  } catch {
     /* storage can be blocked; Paper is fine */
   }
   document.documentElement.setAttribute('data-theme', theme);

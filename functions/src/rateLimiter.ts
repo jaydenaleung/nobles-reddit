@@ -6,7 +6,11 @@ import { AppError } from './errors';
  * Takes one token from the caller's bucket for this kind of action, or throws.
  * Buckets live in rateLimits/{uid}, which no client can read or write.
  */
-export async function consumeRateLimit(uid: string, action: RateLimitAction, nowMs = Date.now()): Promise<void> {
+export async function consumeRateLimit(
+  uid: string,
+  action: RateLimitAction,
+  nowMs = Date.now(),
+): Promise<void> {
   const ref = db.doc(`rateLimits/${uid}`);
   const config = RATE_LIMITS[action];
   const result = await db.runTransaction(async (tx) => {

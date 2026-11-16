@@ -34,7 +34,10 @@ export const modAction = callable(
       if (!snap.exists) throw errors.notFound('That');
       const current = snap.data()!;
       const openQueue = await tx.get(
-        db.collection('moderationQueue').where('contentKey', '==', data.contentKey).where('status', '==', 'open'),
+        db
+          .collection('moderationQueue')
+          .where('contentKey', '==', data.contentKey)
+          .where('status', '==', 'open'),
       );
 
       const closeQueue = () => {
@@ -103,7 +106,11 @@ export const modAction = callable(
           break;
         case 'removeFromBoard':
           if (isPost) {
-            tx.set(db.doc('config/board'), { questionPostId: null, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+            tx.set(
+              db.doc('config/board'),
+              { questionPostId: null, updatedAt: FieldValue.serverTimestamp() },
+              { merge: true },
+            );
           } else {
             tx.update(ref, { boardApproved: false });
           }

@@ -32,7 +32,11 @@ beforeAll(async () => {
   await resetEmulators();
   spaces = await seedSpaces();
   await assignRoles({ 'ai.mod@nobles.edu': 'moderator' });
-  author = await member('ai.author@nobles.edu', { firstName: 'Authorsample', lastInitial: 'Q', classYear: 2030 });
+  author = await member('ai.author@nobles.edu', {
+    firstName: 'Authorsample',
+    lastInitial: 'Q',
+    classYear: 2030,
+  });
   reader = await member('ai.reader@nobles.edu', { firstName: 'Readersample', lastInitial: 'R' });
   moderator = await member('ai.mod@nobles.edu', { firstName: 'Modsample', lastInitial: 'M' });
 });
@@ -104,17 +108,37 @@ describe('requestSummary', () => {
     expect(result.available).toBe(true);
     // The same shape as always: the injected text did not change the output format.
     expect(Object.keys(result.summary!).sort()).toEqual(
-      ['agreements', 'bullets', 'commentCountAtGeneration', 'disagreements', 'generatedAtMs', 'model', 'text'].sort(),
+      [
+        'agreements',
+        'bullets',
+        'commentCountAtGeneration',
+        'disagreements',
+        'generatedAtMs',
+        'model',
+        'text',
+      ].sort(),
     );
     const everything = allStrings(result).join(' | ');
-    for (const secret of [author.uid, reader.uid, 'Authorsample', 'Readersample', 'ai.author', 'ai.reader', '@nobles.edu', '2030']) {
+    for (const secret of [
+      author.uid,
+      reader.uid,
+      'Authorsample',
+      'Readersample',
+      'ai.author',
+      'ai.reader',
+      '@nobles.edu',
+      '2030',
+    ]) {
       expect(everything).not.toContain(secret);
     }
   });
 
   it('refuses a summary that contains an email address, and anything malformed', async () => {
     const leaky = await threadWithComments('The model misbehaves [mock:leak]', 'Body', 10);
-    expect(await reader.call('requestSummary', { postId: leaky.postId })).toEqual({ available: false, reason: 'unavailable' });
+    expect(await reader.call('requestSummary', { postId: leaky.postId })).toEqual({
+      available: false,
+      reason: 'unavailable',
+    });
     expect((await adminDb.doc(`posts/${leaky.postId}`).get()).data()!.summary).toBeUndefined();
 
     const malformed = await threadWithComments('The model returns nonsense [mock:malformed]', 'Body', 10);
@@ -126,10 +150,15 @@ describe('requestSummary', () => {
 
   it('says "unavailable" when the model is down, and the thread still works', async () => {
     const thread = await threadWithComments('The model is down [mock:down]', 'Body', 10);
-    expect(await reader.call('requestSummary', { postId: thread.postId })).toEqual({ available: false, reason: 'unavailable' });
+    expect(await reader.call('requestSummary', { postId: thread.postId })).toEqual({
+      available: false,
+      reason: 'unavailable',
+    });
     // Nothing else broke: people can still comment and vote.
     await comment(reader, thread.postId, { body: 'Still talking' });
-    expect(await reader.call('toggleThoughtful', { contentKey: thread.contentKey })).toEqual({ thoughtful: true });
+    expect(await reader.call('toggleThoughtful', { contentKey: thread.contentKey })).toEqual({
+      thoughtful: true,
+    });
   });
 
   it('stops for the day when the budget is spent, and nothing else breaks', async () => {
@@ -149,8 +178,13 @@ describe('requestSummary', () => {
         screening: 'skipped',
       });
       // And the safety net still catches the clearest signals.
-      const worrying = await post(reader, spaces['clubs']!, { title: 'Budget spent', body: 'I want to end my life.' });
-      expect((await adminDb.doc(`posts/${worrying.postId}`).get()).data()).toMatchObject({ screening: 'wellbeing' });
+      const worrying = await post(reader, spaces['clubs']!, {
+        title: 'Budget spent',
+        body: 'I want to end my life.',
+      });
+      expect((await adminDb.doc(`posts/${worrying.postId}`).get()).data()).toMatchObject({
+        screening: 'wellbeing',
+      });
       // The ledger did not move: the breaker stopped the calls.
       expect((await ref.get()).data()!.calls).toBe(500);
     } finally {
@@ -181,9 +215,14 @@ describe('question of the day', () => {
       expect(d.data().text.endsWith('?')).toBe(true);
     }
     // Never auto-published.
-    expect((await adminDb.collection('posts').where('questionOfTheDay', '==', true).get()).size).toBe(postsBefore);
+    expect((await adminDb.collection('posts').where('questionOfTheDay', '==', true).get()).size).toBe(
+      postsBefore,
+    );
     // Asking twice in a day does not pile up more.
-    expect(await moderator.call('proposeDailyQuestionNow', {})).toEqual({ proposed: 0, reason: 'already-proposed' });
+    expect(await moderator.call('proposeDailyQuestionNow', {})).toEqual({
+      proposed: 0,
+      reason: 'already-proposed',
+    });
     // Students cannot read the proposals.
     await expect(getDoc(doc(reader.db, `dailyQuestions/${proposed.docs[0]!.id}`))).rejects.toBeTruthy();
   });
@@ -191,7 +230,10 @@ describe('question of the day', () => {
   it('approving one makes a pinned thread in Current events by "Administration" and puts it on the hall screen', async () => {
     const proposed = await adminDb.collection('dailyQuestions').where('status', '==', 'proposed').get();
     const chosen = proposed.docs[0]!;
-    await expectError(reader.call('approveDailyQuestion', { id: chosen.id, action: 'approve' }), 'permission-denied');
+    await expectError(
+      reader.call('approveDailyQuestion', { id: chosen.id, action: 'approve' }),
+      'permission-denied',
+    );
     const result = await moderator.call<{ status: string; postId: string }>('approveDailyQuestion', {
       id: chosen.id,
       action: 'approve',
@@ -210,12 +252,17 @@ describe('question of the day', () => {
       authorDisplay: { mode: 'named', name: 'Administration', role: 'admin' },
     });
     // The approving moderator is recorded as the author, in the private collection only.
-    expect((await adminDb.doc(`authorship/post:${result.postId}`).get()).data()!.authorUid).toBe(moderator.uid);
+    expect((await adminDb.doc(`authorship/post:${result.postId}`).get()).data()!.authorUid).toBe(
+      moderator.uid,
+    );
     expect(allStrings(created).join(' | ')).not.toContain(moderator.uid);
     // The other two suggestions are closed.
     const still = await adminDb.collection('dailyQuestions').where('status', '==', 'proposed').get();
     expect(still.size).toBe(0);
-    await expectError(moderator.call('approveDailyQuestion', { id: chosen.id, action: 'approve' }), 'failed-precondition');
+    await expectError(
+      moderator.call('approveDailyQuestion', { id: chosen.id, action: 'approve' }),
+      'failed-precondition',
+    );
 
     const board = await waitFor(
       async () => (await adminDb.doc('boardFeed/current').get()).data() ?? {},
@@ -227,13 +274,23 @@ describe('question of the day', () => {
   });
 
   it('a moderator can write their own question, and reject one', async () => {
-    const own = await moderator.call<{ id: string }>('proposeHumanQuestion', { text: 'What should the next assembly be about?' });
-    expect((await adminDb.doc(`dailyQuestions/${own.id}`).get()).data()).toMatchObject({ source: 'human', status: 'proposed' });
-    expect(await moderator.call('approveDailyQuestion', { id: own.id, action: 'reject' })).toEqual({ status: 'rejected' });
+    const own = await moderator.call<{ id: string }>('proposeHumanQuestion', {
+      text: 'What should the next assembly be about?',
+    });
+    expect((await adminDb.doc(`dailyQuestions/${own.id}`).get()).data()).toMatchObject({
+      source: 'human',
+      status: 'proposed',
+    });
+    expect(await moderator.call('approveDailyQuestion', { id: own.id, action: 'reject' })).toEqual({
+      status: 'rejected',
+    });
   });
 
   it('keeps banned topics out of what is proposed', async () => {
-    await adminDb.collection('dailyQuestions').get().then((s) => Promise.all(s.docs.map((d) => d.ref.delete())));
+    await adminDb
+      .collection('dailyQuestions')
+      .get()
+      .then((s) => Promise.all(s.docs.map((d) => d.ref.delete())));
     await adminDb.doc('config/ai').set({ bannedTopics: ['lunch table'] });
     const result = await moderator.call<{ proposed: number }>('proposeDailyQuestionNow', {});
     expect(result.proposed).toBe(2);

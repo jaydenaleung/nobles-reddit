@@ -17,7 +17,7 @@ const basePost = { spaceId: 'space1', identityMode: 'named', title: 'A perfectly
 
 describe('cleanText', () => {
   it('removes control and bidi-override characters and trims', () => {
-    expect(cleanText('  hi\u0000‮there​  ')).toBe('hithere');
+    expect(cleanText('  hi\u0000\u202Ethere\u200B  ')).toBe('hithere');
   });
   it('normalises line endings and collapses long runs of blank lines', () => {
     expect(cleanText('a\r\nb\n\n\n\n\n\nc')).toBe('a\nb\n\n\nc');
@@ -30,29 +30,39 @@ describe('createPostSchema', () => {
     expect(parsed.kind).toBe('text');
   });
   it('rejects a title that is too short or too long', () => {
-    expect(createPostSchema.safeParse({ ...basePost, kind: 'text', body: '', title: 'Hey' }).success).toBe(false);
-    expect(createPostSchema.safeParse({ ...basePost, kind: 'text', body: '', title: 'x'.repeat(141) }).success).toBe(
+    expect(createPostSchema.safeParse({ ...basePost, kind: 'text', body: '', title: 'Hey' }).success).toBe(
       false,
     );
+    expect(
+      createPostSchema.safeParse({ ...basePost, kind: 'text', body: '', title: 'x'.repeat(141) }).success,
+    ).toBe(false);
   });
   it('measures the title after cleaning whitespace', () => {
-    expect(createPostSchema.safeParse({ ...basePost, kind: 'text', body: '', title: '  a   b  ' }).success).toBe(false);
+    expect(
+      createPostSchema.safeParse({ ...basePost, kind: 'text', body: '', title: '  a   b  ' }).success,
+    ).toBe(false);
   });
   it('rejects a body over 10,000 characters', () => {
-    expect(createPostSchema.safeParse({ ...basePost, kind: 'text', body: 'x'.repeat(10_001) }).success).toBe(false);
+    expect(createPostSchema.safeParse({ ...basePost, kind: 'text', body: 'x'.repeat(10_001) }).success).toBe(
+      false,
+    );
   });
   it('requires an identity mode and never defaults it', () => {
     const { identityMode: _omit, ...rest } = basePost;
     expect(createPostSchema.safeParse({ ...rest, kind: 'text', body: 'Hello' }).success).toBe(false);
   });
   it('rejects unknown fields such as a smuggled author', () => {
-    expect(createPostSchema.safeParse({ ...basePost, kind: 'text', body: 'x', authorUid: 'someone' }).success).toBe(
-      false,
-    );
-    expect(createPostSchema.safeParse({ ...basePost, kind: 'text', body: 'x', status: 'visible' }).success).toBe(false);
+    expect(
+      createPostSchema.safeParse({ ...basePost, kind: 'text', body: 'x', authorUid: 'someone' }).success,
+    ).toBe(false);
+    expect(
+      createPostSchema.safeParse({ ...basePost, kind: 'text', body: 'x', status: 'visible' }).success,
+    ).toBe(false);
   });
   it('accepts https links only', () => {
-    expect(createPostSchema.safeParse({ ...basePost, kind: 'link', url: 'https://example.org/a' }).success).toBe(true);
+    expect(
+      createPostSchema.safeParse({ ...basePost, kind: 'link', url: 'https://example.org/a' }).success,
+    ).toBe(true);
     for (const url of [
       'http://example.org',
       'javascript:alert(1)',
@@ -66,7 +76,8 @@ describe('createPostSchema', () => {
     }
   });
   it('accepts polls with 2 to 6 different options of up to 80 characters', () => {
-    const ok = (options: string[]) => createPostSchema.safeParse({ ...basePost, kind: 'poll', options }).success;
+    const ok = (options: string[]) =>
+      createPostSchema.safeParse({ ...basePost, kind: 'poll', options }).success;
     expect(ok(['Yes', 'No'])).toBe(true);
     expect(ok(['Only one'])).toBe(false);
     expect(ok(['1', '2', '3', '4', '5', '6', '7'])).toBe(false);
@@ -101,16 +112,19 @@ describe('contentKeySchema', () => {
 
 describe('httpsUrlSchema', () => {
   it('trims and accepts a normal link', () => {
-    expect(httpsUrlSchema.parse('  https://www.example.org/story?id=1  ')).toBe('https://www.example.org/story?id=1');
+    expect(httpsUrlSchema.parse('  https://www.example.org/story?id=1  ')).toBe(
+      'https://www.example.org/story?id=1',
+    );
   });
 });
 
 describe('other inputs', () => {
   it('reveal needs a reason of at least 10 characters', () => {
     expect(revealAuthorSchema.safeParse({ contentKey: 'post:a', reason: 'because' }).success).toBe(false);
-    expect(revealAuthorSchema.safeParse({ contentKey: 'post:a', reason: 'Safety concern raised by a dean' }).success).toBe(
-      true,
-    );
+    expect(
+      revealAuthorSchema.safeParse({ contentKey: 'post:a', reason: 'Safety concern raised by a dean' })
+        .success,
+    ).toBe(true);
   });
   it('onboarding needs the "I understand" box and a one-letter initial', () => {
     const ok = { firstName: 'Priya', lastInitial: 'N', classYear: 2027, understood: true };
@@ -128,9 +142,15 @@ describe('other inputs', () => {
     expect(modActionSchema.safeParse({ contentKey: 'post:a', action: 'reveal' }).success).toBe(false);
   });
   it('setRole lowercases the email and needs a known role', () => {
-    const parsed = setRoleSchema.parse({ email: ' Sample.Teacher@Nobles.edu ', role: 'faculty', reason: 'Joined staff' });
+    const parsed = setRoleSchema.parse({
+      email: ' Sample.Teacher@Nobles.edu ',
+      role: 'faculty',
+      reason: 'Joined staff',
+    });
     expect(parsed.email).toBe('sample.teacher@nobles.edu');
-    expect(setRoleSchema.safeParse({ email: 'x@nobles.edu', role: 'owner', reason: 'abc' }).success).toBe(false);
+    expect(setRoleSchema.safeParse({ email: 'x@nobles.edu', role: 'owner', reason: 'abc' }).success).toBe(
+      false,
+    );
   });
   it('poll votes need a short option id', () => {
     expect(votePollSchema.safeParse({ postId: 'p1', optionId: 'o1' }).success).toBe(true);

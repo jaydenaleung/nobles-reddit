@@ -3,7 +3,13 @@ import { getApps as getAdminApps, initializeApp as initializeAdminApp } from 'fi
 import { getAuth as getAdminAuth } from 'firebase-admin/auth';
 import { FieldValue, getFirestore as getAdminFirestore } from 'firebase-admin/firestore';
 import { deleteApp, initializeApp, type FirebaseApp } from 'firebase/app';
-import { GoogleAuthProvider, connectAuthEmulator, getAuth, signInWithCredential, type User } from 'firebase/auth';
+import {
+  GoogleAuthProvider,
+  connectAuthEmulator,
+  getAuth,
+  signInWithCredential,
+  type User,
+} from 'firebase/auth';
 import { connectFirestoreEmulator, getFirestore, type Firestore } from 'firebase/firestore';
 import { connectFunctionsEmulator, getFunctions, httpsCallable, type Functions } from 'firebase/functions';
 import { expect } from 'vitest';
@@ -44,9 +50,15 @@ let counter = 0;
 const apps: FirebaseApp[] = [];
 
 /** Signs someone in through the Auth emulator's Google provider. No onboarding yet. */
-export async function signIn(email: string, options: { verified?: boolean; name?: string } = {}): Promise<Persona> {
+export async function signIn(
+  email: string,
+  options: { verified?: boolean; name?: string } = {},
+): Promise<Persona> {
   counter += 1;
-  const app = initializeApp({ projectId: PROJECT_ID, apiKey: 'emulator-fake-web-key', appId: 'test' }, `persona-${counter}`);
+  const app = initializeApp(
+    { projectId: PROJECT_ID, apiKey: 'emulator-fake-web-key', appId: 'test' },
+    `persona-${counter}`,
+  );
   apps.push(app);
   const auth = getAuth(app);
   connectAuthEmulator(auth, `http://${AUTH_HOST}:${AUTH_PORT}`, { disableWarnings: true });
@@ -98,10 +110,15 @@ export async function member(
 }
 
 export async function resetEmulators(): Promise<void> {
-  await fetch(`http://${FS_HOST}:${FS_PORT}/emulator/v1/projects/${PROJECT_ID}/databases/(default)/documents`, {
+  await fetch(
+    `http://${FS_HOST}:${FS_PORT}/emulator/v1/projects/${PROJECT_ID}/databases/(default)/documents`,
+    {
+      method: 'DELETE',
+    },
+  );
+  await fetch(`http://${AUTH_HOST}:${AUTH_PORT}/emulator/v1/projects/${PROJECT_ID}/accounts`, {
     method: 'DELETE',
   });
-  await fetch(`http://${AUTH_HOST}:${AUTH_PORT}/emulator/v1/projects/${PROJECT_ID}/accounts`, { method: 'DELETE' });
 }
 
 export async function closeAll(): Promise<void> {

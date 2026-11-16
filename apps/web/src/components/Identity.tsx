@@ -120,7 +120,12 @@ export function IdentityToggle({
         <span className="nb-label" id={`${name}-label`}>
           {label}
         </span>
-        <div className="nb-identity" role="radiogroup" aria-labelledby={`${name}-label`} aria-describedby={noticeId}>
+        <div
+          className="nb-identity"
+          role="radiogroup"
+          aria-labelledby={`${name}-label`}
+          aria-describedby={noticeId}
+        >
           <label className="nb-identity__opt">
             <input
               type="radio"
