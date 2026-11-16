@@ -14,7 +14,11 @@ export default defineConfig({
     },
   ],
   test: {
-    include: ['packages/shared/src/**/*.test.ts', 'functions/src/**/*.test.ts', 'apps/web/src/**/*.test.{ts,tsx}'],
+    include: [
+      'packages/shared/src/**/*.test.ts',
+      'functions/src/**/*.test.ts',
+      'apps/web/src/**/*.test.{ts,tsx}',
+    ],
     environment: 'node',
   },
 });

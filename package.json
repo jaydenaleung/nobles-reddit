@@ -31,7 +31,8 @@
     "check:secrets": "bash scripts/check-secrets.sh",
     "deploy:secrets": "node scripts/push-secret.mjs",
     "deploy": "node scripts/deploy.mjs",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "test:live": "vitest run -c tests/live/vitest.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
