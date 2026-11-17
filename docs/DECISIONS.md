@@ -13,9 +13,9 @@ The brief said: when something is not specified, pick the default given or the m
 | Decision | Why | Where |
 | --- | --- | --- |
 | Every dependency is pinned to an exact version published on or before 2026-11-01 (two weeks before the build) | The brief | `package.json` files |
-| Development needs **Node 22.12 or newer** | Vitest 5 requires it. The brief fixes Node 20 only for the functions | `README.md`, CI |
-| The functions runtime stays **Node 20**, which meant `firebase-admin` 13 and the `firebase` web SDK 12 rather than the newest majors | The newest majors need Node 22 or 24 | `functions/package.json` |
-| Google is retiring the Node 20 runtime. If a deploy is rejected, change one line to `nodejs22` | Stated, not worked around | `docs/DEPLOY.md` |
+| Development needs **Node 22.12 or newer** | Vitest 5 requires it, and the functions now run on Node 22 too | `README.md`, CI |
+| The functions run on **Node 22**, not the Node 20 the brief asked for | Google decommissioned the Node 20 runtime on 2026-10-30 and the first real deploy was refused. Everything was already tested locally on Node 22 | `firebase.json`, `functions/package.json` |
+| `firebase-admin` 13 and the `firebase` web SDK 12, not the newest majors | They were chosen while the functions targeted Node 20. Now that they run on Node 22, upgrading to `firebase-admin` 14 is possible and would clear most of the remaining moderate audit advisories; not done yet | `functions/package.json` |
 | `legacy-peer-deps=true` in `.npmrc` | npm 10 crashes resolving Vitest 5's optional peers in a workspace. Every peer we need is listed explicitly | `.npmrc` |
 | TypeScript 5.9, not 7 | Tooling support | root `package.json` |
 | zod 3, not 4 | Stable and supported by the Anthropic SDK | `packages/shared` |

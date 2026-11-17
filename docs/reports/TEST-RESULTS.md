@@ -18,6 +18,10 @@ Run on 2026-11-16 on Windows, Node 22.18, against the Firebase emulators.
 | Smoke test against the local preview and emulators | Pass |
 | `ml/` skeleton tests (Python) | 8 passed |
 
-Not run: anything against the live Firebase project (nothing is deployed), the real Google sign-in popup, and the scheduled jobs (`refreshHotScores`, `archiveOldContent`, the 06:00 question schedule), which the emulator does not trigger.
+## Live deploy (2026-11-17)
+
+Deployed to https://nobles-reddit.web.app. All 35 functions are active on Node 22. The smoke test passed against the live site: the sign-in page and hall screen load, every security header is set, and `createPost` and `revealAuthor` refuse a caller who is not signed in. Both pages render with no console errors.
+
+Not run: the real Google sign-in popup (the Google provider is not switched on yet), and the scheduled jobs (`refreshHotScores`, `archiveOldContent`, the 06:00 question schedule), which the emulator does not trigger.
 
 The screenshots in `docs/screens` were regenerated with `npm run screens` after the last fixes.

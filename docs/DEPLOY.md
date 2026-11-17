@@ -53,9 +53,9 @@ To run the smoke test by itself:
 npm run smoke
 ```
 
-### If Google rejects the Node 20 runtime
+### The functions runtime
 
-The brief fixes the functions runtime at Node 20, and `firebase.json` says `nodejs20`. Google is retiring that runtime. If the deploy fails with a message about an unsupported or decommissioned runtime, change `"runtime": "nodejs20"` to `"nodejs22"` in `firebase.json` and `"node": "20"` to `"22"` in `functions/package.json`, then deploy again. The functions were developed and tested locally on Node 22, so nothing else changes.
+The functions run on **Node 22** (`"runtime": "nodejs22"` in `firebase.json`). The brief asked for Node 20, but Google decommissioned that runtime on 2026-10-30 and refuses to deploy it. Everything had already been developed and tested locally on Node 22, so nothing else changed.
 
 ### Indexes
 

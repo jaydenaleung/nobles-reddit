@@ -7,7 +7,7 @@ Two ideas shape everything:
 - **Kind and honest, both.** Disagree freely, about ideas and not people.
 - **Anonymous by choice, and honest about what that means.** Anonymous hides your name from other students. The administration can always see who wrote every post and comment, and each time they look it is logged.
 
-> **Not launched.** This is a complete build that runs on the Firebase emulators. It has not been deployed. `docs/PRIVACY.md` and `docs/SAFETY.md` are drafts for the school to review before any student uses it. See "Before the first deploy" below.
+> **Deployed, not launched.** The site is live at https://nobles-reddit.web.app, but it is not open to students yet: Google sign-in still has to be switched on in the Firebase console, and `docs/PRIVACY.md` and `docs/SAFETY.md` are drafts for the school to review before any student uses it. See `docs/LAUNCH.md`.
 
 ## The site
 

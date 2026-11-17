@@ -15,7 +15,7 @@ await build({
   outfile: path.join(here, 'lib/index.js'),
   bundle: true,
   platform: 'node',
-  target: 'node20',
+  target: 'node22',
   format: 'cjs',
   sourcemap: true,
   external,
