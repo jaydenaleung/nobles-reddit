@@ -203,7 +203,7 @@ export const exportTrainingData = callable(
     });
     throw new AppError(
       'failed-precondition',
-      'Training-data export is switched off. It needs consent from every author, moderator approval and anonymisation first. See ml/data/README.md.',
+      'Training-data export is switched off until the school sets up consent and review. See ml/data/README.md.',
     );
   },
 );

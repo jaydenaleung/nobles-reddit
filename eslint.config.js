@@ -27,7 +27,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['apps/web/public/**/*.js', 'scripts/shot.mjs', 'e2e/**/*.ts', 'scripts/lighthouse.ts'],
+    files: ['apps/web/public/**/*.js', 'e2e/**/*.ts', 'scripts/lighthouse.ts'],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
   },
   {

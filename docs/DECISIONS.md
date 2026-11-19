@@ -30,8 +30,8 @@ The brief said: when something is not specified, pick the default given or the m
 | Off-domain accounts are not blocked from existing in Firebase Auth; they get no role and can read and do nothing | Blocking at sign-in needs Google Identity Platform (a paid upgrade). The website signs them straight out with a kind message | `apps/web/src/auth/AuthContext.tsx` |
 | Functions read the role from the profile in Firestore; rules read it from the sign-in token | A role change takes effect at once in functions; the token catches up on the next page load | `functions/src/guard.ts` |
 | An administrator cannot change their own role | Avoids locking everyone out | `functions/src/users.ts` |
-| Everyone's name shows as "First L.", faculty included, with a Faculty badge | The brief specifies first name and last initial. "Ms. Haddad"-style names would need a second field. **The school may prefer honorifics for faculty** | `packages/shared/src/authorDisplay.ts` |
-| Ticking "faculty or staff" at onboarding does not give the Faculty badge; an administrator does | Students must not be able to make themselves faculty | `functions/src/users.ts` |
+| Everyone's name shows as "First L.", faculty included, with a small "faculty" tag | The brief specifies first name and last initial. "Ms. Haddad"-style names would need a second field. **The school may prefer honorifics for faculty** | `packages/shared/src/authorDisplay.ts` |
+| Ticking "faculty or staff" at onboarding does not give the faculty tag; an administrator does | Students must not be able to make themselves faculty | `functions/src/users.ts` |
 
 ## Posting and anonymity
 
@@ -70,33 +70,35 @@ The brief said: when something is not specified, pick the default given or the m
 
 | Decision | Why |
 | --- | --- |
-| A summary is made when someone asks ("Summarise this thread"), not automatically | Saves budget; the box still appears for everyone once it exists |
+| A summary is made when someone presses "Summarize", not automatically | Saves budget; the box still appears for everyone once it exists |
 | Comments are shortened to 1,200 characters for the summary, with a marker | Keeps one long thread from using the day's budget |
 | Structured output (a JSON schema) plus our own validation | The model's reply is never trusted |
 | Server-side refusal fallbacks are not enabled | Model ids are configurable, and a declined suggestion is harmless: a moderator writes the question |
 | Question ids are `{date}-{n}` because there are three candidates a day | The brief's single-id-per-day did not fit three |
 | Moderators, not only administrators, approve the question | The brief says "a moderator approves one" |
-| The Nobleman adapter is a stub that returns sample headlines; no domain is treated as "the Nobleman" yet | The brief: do not scrape, real feed later |
+| The Nobleman adapter returns no headlines until a real feed is connected, and the Nobleman box and TV ticker stay hidden until then | The brief says not to scrape, and made-up headlines would read as real |
 | The wellbeing email is written to a `mail` collection for the Firebase "Trigger Email" extension | No mail provider was specified. **Until the extension is installed, no email is sent** |
 
 ## Design
 
 | Decision | Why |
 | --- | --- |
-| Thread titles and footer links are Nobles Blue, not navy | That is what the reference CSS produces for links without a class, and the reference page was the approved look |
-| Inter 700 is loaded as well as 400/500/600 | The design system sets several labels in 700; without the file browsers fake the bold |
-| The hall screen is the 1280x720 reference scaled to fill the TV, so text is at least 33px at 1080p; on a phone it reads as a normal page | Keeps the reference proportions exactly |
-| The hall screen shows two approved replies and up to four poll options | That is what fits the reference layout |
+| Navy and white, with yellow as the only accent colour | One accent keeps it from looking like a template; yellow is a Nobles colour and passes contrast on navy |
+| Newsreader for headlines and post text, Libre Franklin for labels, both served from the site | A serif with some character for reading, a plain sans for small text; no outside font requests |
+| A faint hand-drawn doodle tile sits behind the page, and text that sits directly on the page gets a paper backing | Gives the page some personality without ever running under words |
+| The feed loads more as you scroll, but each load is a real page of 20 posts behind a Firestore cursor, and `?page=` in the address records how many are loaded | Feels continuous, survives a refresh, and never repeats or invents posts |
+| "Top this week" ranks up to the 200 newest posts of the week in the browser | Firestore cannot order by one field while filtering a range on another; 200 is more than a week has had in testing |
+| The TV screen is the 1280x720 reference scaled to fill the TV, so text is at least 33px at 1080p; on a phone it reads as a normal page | Keeps the reference proportions exactly |
+| The TV screen shows two approved replies and up to four poll options | That is what fits the reference layout |
 | No logo anywhere; the favicon is a plain italic "C" | `assets/brand/` was empty, and the brief says not to draw one |
 | The whole question-of-the-day title is highlighted | The reference highlights part of a title; which part cannot be chosen automatically |
-| The styleguide page exists only in development builds | The brief |
 
 ## Testing
 
 | Decision | Why |
 | --- | --- |
 | The browser tests run against `vite preview` with the headers from `firebase.json` | So they run under the real Content-Security-Policy |
-| The "Local development" sign-in box exists only in emulator builds and is compiled out of production (checked: its text and code are not in the production bundle) | It is how the tests sign in through the Auth emulator's Google provider |
+| The "Emulator" sign-in box exists only in emulator builds and is compiled out of production (checked: its text and code are not in the production bundle) | It is how the tests sign in through the Auth emulator's Google provider |
 | Scheduled jobs (`refreshHotScores`, `archiveOldContent`, the 06:00 question schedule) are **not exercised by the tests** | The emulator does not run schedules. The question logic is tested through its manual trigger; the other two are not tested and should be watched after launch |
 | The real Google sign-in popup has **not been tested** | It needs the live project. It is the first thing to check after deploying |
 

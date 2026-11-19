@@ -43,8 +43,8 @@ function useLive<T>(
 
 const QUEUE_WORDS = {
   wellbeing: 'Wellbeing',
-  'ai-flag': 'Flagged by the automatic check',
-  reported: 'Reported by a member',
+  'ai-flag': 'Held by the computer check',
+  reported: 'Reported',
 } as const;
 
 function QueueTab() {
@@ -63,61 +63,60 @@ function QueueTab() {
   const resolve = async (id: string) => {
     try {
       await api.resolveReport({ id, kind: 'queue' });
-      toast('Marked as dealt with.');
+      toast('Done.');
     } catch (error) {
       toast(errorMessage(error));
     }
   };
 
-  if (load === 'loading') return <Loading label="Loading the queue" />;
-  if (load === 'error') return <ErrorState title="The queue did not load" />;
+  if (load === 'loading') return <Loading label="Loading" />;
+  if (load === 'error') return <ErrorState title="The queue didn’t load" />;
   if (items.length === 0) {
     return (
-      <Empty title="Nothing is waiting">
-        <p>New reports and flagged posts will show up here.</p>
+      <Empty title="Queue’s empty">
+        <p>Reports and held posts show up here.</p>
       </Empty>
     );
   }
   return (
     <>
-      <div className="nb-feed" style={{ display: 'block' }}>
+      <div className="q-list">
         {items.map((item) => {
           const parsed = parseContentKey(item.contentKey);
           const wellbeing = item.reason === 'wellbeing';
           return (
             <article className="q-item" key={item.id}>
               <div className="row">
-                <span className={`nb-badge ${wellbeing ? 'nb-badge--live' : 'nb-badge--staff'}`}>
-                  {wellbeing && <Icon name="shield" />} {QUEUE_WORDS[item.reason]}
-                </span>
-                <span className="nb-meta">
-                  {parsed?.kind === 'comment' ? 'Comment' : 'Thread'} ·{' '}
-                  {relativeTime(item.createdAt?.toMillis?.() ?? now, now)}
-                  {item.labels?.length ? ` · ${item.labels.join(', ').replace(/_/g, ' ')}` : ''}
-                  {item.reportReasons?.length
-                    ? ` · ${item.reportReasons.map((r) => REPORT_REASONS.find((x) => x.id === r)?.label ?? r).join('; ')}`
-                    : ''}
-                </span>
+                <span className={wellbeing ? 'flag' : 'role'}>{QUEUE_WORDS[item.reason]}</span>
+                <span className="muted">{parsed?.kind === 'comment' ? 'Reply' : 'Post'}</span>
+                <span className="muted">{relativeTime(item.createdAt?.toMillis?.() ?? now, now)}</span>
+                {item.labels?.length ? (
+                  <span className="muted">{item.labels.join(', ').replace(/_/g, ' ')}</span>
+                ) : null}
+                {item.reportReasons?.length ? (
+                  <span className="muted">
+                    {item.reportReasons
+                      .map((r) => REPORT_REASONS.find((x) => x.id === r)?.label ?? r)
+                      .join('; ')}
+                  </span>
+                ) : null}
               </div>
               {wellbeing && (
-                <div className="nb-notice nb-notice--kind">
-                  <Icon name="check" />
-                  <div>
-                    <b>Someone may need a caring adult.</b> This has not been published and must not be
-                    deleted. Follow the school’s steps for a student of concern. An administrator can find out
-                    who wrote it; that lookup is logged.
-                  </div>
-                </div>
+                <p className="notice">
+                  Someone might need an adult to check in. This didn’t go up, and don’t delete it. Follow the
+                  school’s steps for a student of concern. An admin can look up who wrote it (that gets
+                  logged).
+                </p>
               )}
               <blockquote>{item.snapshotText}</blockquote>
               <div className="row">
                 {parsed && (
-                  <Link className="nb-btn nb-btn--sm" to={`/t/${parsed.postId}`}>
-                    Open the thread
+                  <Link className="btn btn--sm" to={`/t/${parsed.postId}`}>
+                    Open
                   </Link>
                 )}
                 <button
-                  className="nb-btn nb-btn--sm"
+                  className="btn btn--sm"
                   type="button"
                   onClick={() =>
                     setTarget({
@@ -127,14 +126,15 @@ function QueueTab() {
                     })
                   }
                 >
-                  <Icon name="shield" /> Moderate
+                  <Icon name="shield" />
+                  Moderate
                 </button>
                 <button
-                  className="nb-btn nb-btn--quiet nb-btn--sm"
+                  className="btn btn--quiet btn--sm"
                   type="button"
                   onClick={() => void resolve(item.id)}
                 >
-                  Mark as dealt with
+                  Done
                 </button>
               </div>
             </article>
@@ -155,17 +155,17 @@ function ReportsTab() {
   const resolve = async (id: string) => {
     try {
       await api.resolveReport({ id, kind: 'report' });
-      toast('Report closed.');
+      toast('Closed.');
     } catch (error) {
       toast(errorMessage(error));
     }
   };
-  if (load === 'loading') return <Loading label="Loading reports" />;
-  if (load === 'error') return <ErrorState title="Reports did not load" />;
+  if (load === 'loading') return <Loading label="Loading" />;
+  if (load === 'error') return <ErrorState title="Reports didn’t load" />;
   if (items.length === 0) {
     return (
       <Empty title="No open reports">
-        <p>When someone reports a post or comment, it is listed here.</p>
+        <p>When someone reports a post or reply, it shows up here.</p>
       </Empty>
     );
   }
@@ -174,7 +174,7 @@ function ReportsTab() {
       className="tbl-wrap"
       tabIndex={0}
       role="group"
-      aria-label="Table. Scroll sideways to see every column."
+      aria-label="Open reports. Scroll sideways for more columns."
     >
       <table className="tbl">
         <thead>
@@ -182,7 +182,9 @@ function ReportsTab() {
             <th scope="col">Reason</th>
             <th scope="col">Note</th>
             <th scope="col">When</th>
-            <th scope="col">Actions</th>
+            <th scope="col">
+              <span className="nb-sr">Actions</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -193,11 +195,11 @@ function ReportsTab() {
               <td className="num">{relativeTime(report.createdAt?.toMillis?.() ?? now, now)}</td>
               <td>
                 <div className="row">
-                  <Link className="nb-btn nb-btn--sm" to={`/t/${report.postId}`}>
-                    Open the thread
+                  <Link className="btn btn--sm" to={`/t/${report.postId}`}>
+                    Open
                   </Link>
                   <button
-                    className="nb-btn nb-btn--quiet nb-btn--sm"
+                    className="btn btn--quiet btn--sm"
                     type="button"
                     onClick={() => void resolve(report.id)}
                   >
@@ -236,10 +238,10 @@ export function QuestionApprovals() {
         result.proposed > 0
           ? `${result.proposed} suggestions added.`
           : result.reason === 'already-proposed'
-            ? 'Today’s suggestions were already made.'
+            ? 'Already got today’s suggestions.'
             : result.reason === 'budget'
-              ? 'Suggestions are unavailable for the rest of today. You can write your own.'
-              : 'Suggestions are not available right now. You can write your own.',
+              ? 'Suggestions are off for the rest of today. Write your own.'
+              : 'Couldn’t get suggestions. Write your own.',
       );
     } catch (error) {
       toast(errorMessage(error));
@@ -258,11 +260,7 @@ export function QuestionApprovals() {
         action,
         pollOptions: action === 'approve' && options.length >= 2 ? options : undefined,
       });
-      toast(
-        action === 'approve'
-          ? 'Published, pinned in Current events and sent to the hall screen.'
-          : 'Rejected.',
-      );
+      toast(action === 'approve' ? 'Posted to Current events and put on the Gleason TV.' : 'Rejected.');
     } catch (error) {
       toast(errorMessage(error));
     }
@@ -272,7 +270,7 @@ export function QuestionApprovals() {
     try {
       await api.proposeHumanQuestion({ text: own });
       setOwn('');
-      toast('Added. Approve it below when you are ready.');
+      toast('Added to the list below.');
     } catch (error) {
       toast(errorMessage(error));
     }
@@ -280,25 +278,22 @@ export function QuestionApprovals() {
 
   return (
     <div className="stack">
-      <div className="nb-notice">
-        <div>
-          <b>You decide.</b> A model suggests three questions each school morning. Nothing is published until
-          you approve one. Approving turns it into a pinned thread in Current events, posted by
-          “Administration”, and puts it on the hall screen.
-        </div>
-      </div>
+      <p className="notice">
+        Each school morning a computer model suggests a few questions. Nothing goes up until a mod approves
+        one. The one you approve gets pinned in Current events and shows on the Gleason TV.
+      </p>
       <div className="row">
-        <button className="nb-btn" type="button" onClick={() => void suggest()} disabled={busy}>
-          {busy ? 'Asking' : 'Suggest today’s questions'}
+        <button className="btn" type="button" onClick={() => void suggest()} disabled={busy}>
+          {busy ? 'Asking' : 'Get suggestions'}
         </button>
       </div>
       <form className="panel" onSubmit={(event) => void addOwn(event)}>
         <div className="field">
-          <label className="nb-label" htmlFor="own-question">
-            Or write your own question
+          <label className="label" htmlFor="own-question">
+            Write your own
           </label>
           <input
-            className="nb-input"
+            className="input"
             id="own-question"
             value={own}
             maxLength={140}
@@ -306,54 +301,49 @@ export function QuestionApprovals() {
           />
         </div>
         <div className="row">
-          <button className="nb-btn" type="submit" disabled={own.trim().length < 5}>
-            Add it to the list
+          <button className="btn" type="submit" disabled={own.trim().length < 5}>
+            Add
           </button>
         </div>
       </form>
       {load === 'loading' ? (
-        <Loading label="Loading questions" />
+        <Loading label="Loading" />
       ) : load === 'error' ? (
-        <ErrorState title="Questions did not load" />
+        <ErrorState title="Questions didn’t load" />
       ) : items.length === 0 ? (
-        <Empty title="No questions are waiting">
-          <p>Ask for suggestions or write your own.</p>
+        <Empty title="No questions waiting">
+          <p>Get suggestions or write one.</p>
         </Empty>
       ) : (
-        <div className="nb-feed" style={{ display: 'block' }}>
+        <div className="q-list">
           {items.map((question) => (
             <article className="q-item" key={question.id}>
               <div className="row">
-                <span className="nb-badge nb-badge--ai">
-                  {question.source === 'ai' ? 'Suggested by our model' : 'Written by a moderator'}
-                </span>
-                <span className="nb-meta">{question.date}</span>
+                <span className="role">{question.source === 'ai' ? 'From the model' : 'From a mod'}</span>
+                <span className="muted">{question.date}</span>
               </div>
-              <p className="nb-starter__q" style={{ margin: 0 }}>
-                {question.text}
-              </p>
+              <p className="q-item__text">{question.text}</p>
               <div className="field">
-                <label className="nb-label" htmlFor={`poll-${question.id}`}>
-                  Poll options, separated by commas (optional)
+                <label className="label" htmlFor={`poll-${question.id}`}>
+                  Poll options, with commas between them (optional)
                 </label>
                 <input
-                  className="nb-input"
+                  className="input"
                   id={`poll-${question.id}`}
-                  placeholder="Yes, Not sure, No"
                   value={poll[question.id] ?? ''}
                   onChange={(e) => setPoll((current) => ({ ...current, [question.id]: e.target.value }))}
                 />
               </div>
               <div className="row">
                 <button
-                  className="nb-btn nb-btn--primary nb-btn--sm"
+                  className="btn btn--primary btn--sm"
                   type="button"
                   onClick={() => void decide(question.id, 'approve')}
                 >
-                  Approve and publish
+                  Approve
                 </button>
                 <button
-                  className="nb-btn nb-btn--quiet nb-btn--sm"
+                  className="btn btn--quiet btn--sm"
                   type="button"
                   onClick={() => void decide(question.id, 'reject')}
                 >
@@ -373,15 +363,15 @@ type Tab = 'queue' | 'reports' | 'question';
 export default function Mod() {
   const [tab, setTab] = useState<Tab>('queue');
   useEffect(() => {
-    document.title = `Moderation · ${APP_NAME}`;
+    document.title = `Moderation | ${APP_NAME}`;
   }, []);
   return (
     <Page>
       <div className="page">
-        <h1 className="page-h">Moderation</h1>
+        <h1 className="page-h">Mod queue</h1>
         <p className="page-lede">
-          Wellbeing flags come first. You can hold, remove, restore and pin, and choose replies for the hall
-          screen. You cannot see who wrote something: ask an administrator if you need to know.
+          Wellbeing flags are at the top. You can’t see who wrote anything here. If you need to know, ask an
+          admin.
         </p>
         <div className="tabs" role="tablist" aria-label="Moderation sections">
           {(

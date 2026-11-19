@@ -165,8 +165,6 @@ export interface BoardReply {
 export interface NoblemanItem {
   title: string;
   url: string;
-  minutes?: number;
-  sample: boolean;
 }
 export interface BoardFeed {
   questionPostId: string | null;
@@ -190,7 +188,7 @@ export interface WellbeingResources {
   items: { label: string; detail: string }[];
 }
 
-/* ---------- Callable results. Only safe fields: never a uid. ---------- */
+// Callable results. Only safe fields: never a uid.
 
 export interface OnboardResult {
   role: Role;

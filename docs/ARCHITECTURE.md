@@ -57,7 +57,7 @@ sequenceDiagram
 
 What this buys:
 
-- **Nothing about the author is on the post.** `authorDisplay` for an anonymous post is `{ mode, anonLabel }` and nothing else. A faculty member posting anonymously has no Faculty badge either.
+- **Nothing about the author is on the post.** `authorDisplay` for an anonymous post is `{ mode, anonLabel }` and nothing else. A faculty member posting anonymously has no faculty tag either.
 - **The record of who wrote it exists once**, in `authorship`, which no client can read: not students, not moderators, not administrators. The rules tests prove each of those separately.
 - **The only way to it is `revealAuthor`**, which needs the admin role, needs a reason, and writes the audit entry in the same transaction that reads the author. If the log cannot be written, nothing is revealed.
 - **Ids and timestamps give nothing away.** Post and comment ids are random Firestore ids. The authorship record carries the same timestamp as the content, no finer.
@@ -112,7 +112,7 @@ score = thoughtfulCount + 0.5 * commentCount
 hot   = log10(max(score, 1)) + (createdAtSeconds - 1767225600) / 45000
 ```
 
-Pinned threads sort first in every sort order. The sorts are Hot, New, Top this week and No replies yet, 20 threads a page with a cursor. Counts are updated in the same transaction as a vote and then recounted from the source by a trigger, so they repair themselves.
+Pinned threads sort first in every sort order. The sorts are Hot, New, Top this week and No replies, 20 posts a page with a cursor. The website asks for the next page when the reader nears the bottom and writes the page count into the address (`?page=3`), so a refresh reloads the same pages; it stops at the last post. Counts are updated in the same transaction as a vote and then recounted from the source by a trigger, so they repair themselves.
 
 ## The hall screen
 

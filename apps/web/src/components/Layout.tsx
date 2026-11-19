@@ -1,4 +1,4 @@
-import { ANONYMITY_NOTICE, APP_NAME, GROUND_RULES, initials, isModeratorRole } from '@commons/shared';
+import { ANONYMITY_NOTICE, GROUND_RULES, initials, isModeratorRole } from '@commons/shared';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
@@ -19,8 +19,8 @@ function SearchBox() {
       <Icon name="search" />
       <input
         type="search"
-        aria-label="Search threads and spaces"
-        placeholder="Search threads and spaces"
+        aria-label="Search posts"
+        placeholder="Search posts"
         value={text}
         onChange={(event) => setText(event.target.value)}
         maxLength={120}
@@ -39,39 +39,27 @@ export function TopBar() {
       <div className="nb-top__right">
         {member ? (
           <>
-            <Link className="nb-top__icon" to="/spaces" aria-label="Search and spaces">
+            <Link className="nb-top__icon" to="/spaces" aria-label="Search">
               <Icon name="search" />
             </Link>
-            <Link className="nb-btn nb-btn--primary nb-btn--sm" to="/new">
-              Start a thread
+            <Link className="btn btn--primary btn--sm" to="/new">
+              Post
             </Link>
             <Link className="nb-top__me" to="/me">
               <span className="nb-avatar">{initials(member.profile.displayName)}</span>
-              <span className="nb-sr">Your account, {member.profile.displayName}</span>
+              <span className="nb-sr">You, {member.profile.displayName}</span>
             </Link>
           </>
         ) : (
-          <>
-            <Link className="nb-btn nb-btn--sm" to="/about">
-              About
-            </Link>
-            {state.status === 'signedOut' && (
-              <Link
-                className="nb-btn nb-btn--primary nb-btn--sm"
-                to="/sign-in"
-                style={{ display: 'inline-flex' }}
-              >
-                Sign in
-              </Link>
-            )}
-          </>
+          <Link className="btn btn--sm" to="/about">
+            How this works
+          </Link>
         )}
       </div>
     </header>
   );
 }
 
-/** Left column: the list of spaces. */
 export function SpaceNav() {
   const { spaces } = useSpaces();
   const { state } = useAuth();
@@ -80,13 +68,13 @@ export function SpaceNav() {
   const mod = state.status === 'member' && isModeratorRole(state.role);
   const admin = state.status === 'member' && state.role === 'admin';
   return (
-    <aside className="fp-side" aria-label="Spaces">
+    <aside className="side" aria-label="Spaces">
       <nav aria-label="Spaces">
-        <h2 className="fp-side__h">Spaces</h2>
-        <ul className="nb-spaces">
+        <h2 className="side__h">Spaces</h2>
+        <ul className="spaces">
           <li>
             <Link to="/" aria-current={pathname === '/' ? 'page' : undefined}>
-              <span>Front page</span>
+              <span>All</span>
               <span>{total}</span>
             </Link>
           </li>
@@ -103,150 +91,96 @@ export function SpaceNav() {
           ))}
         </ul>
       </nav>
-      {(mod || admin) && (
+      {mod && (
         <nav aria-label="Moderation">
-          <h2 className="fp-side__h">For moderators</h2>
-          <ul className="nb-spaces">
+          <h2 className="side__h">Mods</h2>
+          <ul className="spaces">
             <li>
               <Link to="/mod" aria-current={pathname === '/mod' ? 'page' : undefined}>
-                <span>Moderation queue</span>
-                <span />
+                <span>Mod queue</span>
               </Link>
             </li>
             {admin && (
               <li>
                 <Link to="/admin" aria-current={pathname.startsWith('/admin') ? 'page' : undefined}>
-                  <span>Administration</span>
-                  <span />
+                  <span>Admin</span>
                 </Link>
               </li>
             )}
           </ul>
         </nav>
       )}
-      <p className="fp-foot">
-        Need a space for your team or club? Ask a moderator and it will usually be up by the next day.
-      </p>
-      <p className="fp-foot">
-        <Link to="/about">How {APP_NAME} works</Link>
+      <p className="side__note">Want a space for your team or club? Ask an admin.</p>
+      <p className="side__note">
+        <Link to="/about">How anonymous works</Link>
       </p>
     </aside>
   );
 }
 
-/** Right column: about, ground rules, who can see what, the hall screen, the Nobleman. */
-export function Sidebar({ spaceName, spaceDescription }: { spaceName?: string; spaceDescription?: string }) {
+export function Sidebar({ spaceDescription }: { spaceDescription?: string }) {
   const { feed } = useBoardFeed();
   return (
-    <aside className="fp-side" aria-label="About">
-      <section className="nb-box">
-        <h2 className="nb-box__head" style={{ margin: 0 }}>
-          {spaceName ? `About ${spaceName}` : `About ${APP_NAME}`}
-        </h2>
-        <div className="nb-box__body">
-          <p>
-            {spaceDescription ??
-              'A place for all of us, students and faculty, to talk about school news, what’s going on in the world, and whatever else is on our minds.'}
-          </p>
-          <Link className="nb-btn nb-btn--primary" to="/new" style={{ width: '100%' }}>
-            Start a thread
-          </Link>
-        </div>
+    <aside className="aside" aria-label="Sidebar">
+      {spaceDescription && (
+        <section className="box">
+          <p>{spaceDescription}</p>
+        </section>
+      )}
+      <section className="box">
+        <h2>On the Gleason TV</h2>
+        <Link className="tv" to="/board">
+          {feed?.questionText || 'Nothing up yet. A mod picks the question each morning.'}
+        </Link>
+        <p className="muted">Reply from your phone. A mod can put your reply on the screen.</p>
       </section>
-      <section className="nb-box">
-        <h2 className="nb-box__head" style={{ margin: 0 }}>
-          Ground rules
-        </h2>
-        <div className="nb-box__body">
-          <ol className="fp-rules">
-            {GROUND_RULES.map((rule) => (
-              <li key={rule}>{rule}</li>
-            ))}
-          </ol>
-        </div>
+      <section className="box">
+        <h2>Rules</h2>
+        <ol className="rules">
+          {GROUND_RULES.map((rule) => (
+            <li key={rule}>{rule}</li>
+          ))}
+        </ol>
       </section>
-      <div className="nb-notice nb-notice--staff">
-        <div>
-          <b>Who can see what.</b> {ANONYMITY_NOTICE}
-        </div>
-      </div>
-      <section className="nb-box">
-        <h2 className="nb-box__head" style={{ margin: 0 }}>
-          On the Gleason Hall screen
-        </h2>
-        <div className="nb-box__body fp-tv">
-          <Link className="scr" data-theme="board" to="/board">
-            <span className="nb-badge nb-badge--live">
-              <Icon name="tv" /> Live now
-            </span>
-            <p>{feed?.questionText || 'Today’s question will show here.'}</p>
-          </Link>
-          <span className="nb-meta">Comment from your phone and it can show up on the hall screen.</span>
-        </div>
-      </section>
+      <p className="muted">{ANONYMITY_NOTICE}</p>
       {feed && feed.nobleman.length > 0 && (
-        <section className="nb-box">
-          <h2 className="nb-box__head" style={{ margin: 0 }}>
-            From the Nobleman
-          </h2>
-          <div className="nb-box__body fp-src">
-            {feed.nobleman.map((item) => {
-              const inner = (
-                <>
-                  <div className="nb-source__title">{item.title}</div>
-                  <div className="nb-source__meta">
-                    {item.sample ? 'Sample headline' : 'The Nobleman'}
-                    {item.minutes ? ` · ${item.minutes} min read` : ''}
-                  </div>
-                </>
-              );
-              return item.url ? (
-                <a
-                  className="nb-source"
-                  key={item.title}
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer nofollow"
-                >
-                  {inner}
+        <section className="box">
+          <h2>In the Nobleman</h2>
+          <ul className="spaces">
+            {feed.nobleman.map((item) => (
+              <li key={item.url}>
+                <a href={item.url} target="_blank" rel="noopener noreferrer nofollow">
+                  {item.title}
                 </a>
-              ) : (
-                <div className="nb-source" key={item.title}>
-                  {inner}
-                </div>
-              );
-            })}
-          </div>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
     </aside>
   );
 }
 
-/** Bottom tab bar on phones: Home, Spaces, Post, Board, You. */
 export function TabBar() {
-  const tab = ({ isActive }: { isActive: boolean }) => `ph-tab${isActive ? ' on' : ''}`;
   return (
     <nav className="ph-tabs" aria-label="Main">
-      <NavLink className={tab} to="/" end>
+      <NavLink className="ph-tab" to="/" end>
         <Icon name="home" />
-        Home
+        Feed
       </NavLink>
-      <NavLink className={tab} to="/spaces">
+      <NavLink className="ph-tab" to="/spaces">
         <Icon name="grid" />
         Spaces
       </NavLink>
-      <NavLink className={({ isActive }) => `ph-tab plus${isActive ? ' on' : ''}`} to="/new">
-        <span className="fab">
-          <Icon name="plus" />
-        </span>
+      <NavLink className="ph-tab plus" to="/new">
+        <Icon name="plus" />
         Post
       </NavLink>
-      <NavLink className={tab} to="/board">
+      <NavLink className="ph-tab" to="/board">
         <Icon name="tv" />
-        Board
+        TV
       </NavLink>
-      <NavLink className={tab} to="/me">
+      <NavLink className="ph-tab" to="/me">
         <Icon name="user" />
         You
       </NavLink>
@@ -254,23 +188,11 @@ export function TabBar() {
   );
 }
 
-/**
- * The page frame for members: top bar, spaces on the left, the page in the
- * middle, and (when a page asks for one) the sidebar on the right.
- */
-export function Page({
-  children,
-  sidebar,
-  label,
-}: {
-  children: ReactNode;
-  sidebar?: ReactNode;
-  label?: string;
-}) {
+export function Page({ children, sidebar }: { children: ReactNode; sidebar?: ReactNode }) {
   return (
-    <div className={sidebar ? 'fp-grid' : 'fp-grid fp-grid--wide'}>
+    <div className={sidebar ? 'grid' : 'grid grid--wide'}>
       <SpaceNav />
-      <main className="fp-col" id="main" tabIndex={-1} aria-label={label}>
+      <main className="col" id="main" tabIndex={-1}>
         {children}
       </main>
       {sidebar}
@@ -282,7 +204,7 @@ export function Shell() {
   return (
     <>
       <a className="skip" href="#main">
-        Skip to the content
+        Skip to content
       </a>
       <IconSprite />
       <TopBar />
@@ -292,17 +214,16 @@ export function Shell() {
   );
 }
 
-/** A plain frame for public pages (sign-in, about, not found). */
 export function PublicFrame({ children }: { children: ReactNode }) {
   return (
     <>
       <a className="skip" href="#main">
-        Skip to the content
+        Skip to content
       </a>
       <IconSprite />
       <TopBar />
-      <div className="fp-grid fp-grid--solo">
-        <main className="fp-col" id="main" tabIndex={-1}>
+      <div className="grid grid--solo">
+        <main className="col" id="main" tabIndex={-1}>
           {children}
         </main>
       </div>

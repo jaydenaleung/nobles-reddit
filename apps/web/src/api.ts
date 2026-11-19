@@ -55,7 +55,7 @@ function fn<In, Out>(name: string) {
   return async (data: In): Promise<Out> => {
     // Nothing is queued while offline: say so plainly instead.
     if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-      throw new Error('You are offline, so nothing was sent. Try again when you are back online.');
+      throw new Error('You’re offline, so nothing got sent. Try again once you’re back online.');
     }
     return (await callable(withoutUndefined(data))).data;
   };
@@ -65,10 +65,10 @@ function fn<In, Out>(name: string) {
 export function errorMessage(error: unknown): string {
   const e = error as { code?: string; message?: string };
   if (e?.code === 'functions/unavailable' || e?.code === 'functions/deadline-exceeded') {
-    return 'We could not reach Nobles Commons. Check your connection and try again.';
+    return 'Couldn’t reach the site. Check your wifi and try again.';
   }
   if (e?.code === 'functions/internal' || !e?.message) {
-    return 'Something went wrong on our side. Please try again.';
+    return 'Something broke on our end. Try again.';
   }
   // Some SDK versions add the HTTP status to the end of the message.
   return e.message.replace(/\s*\[\d{3}\]$/, '');

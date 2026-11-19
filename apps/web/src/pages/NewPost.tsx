@@ -2,7 +2,6 @@ import {
   APP_NAME,
   LIMITS,
   createPostSchema,
-  isStaffRole,
   type ContentStatusResult,
   type CreatePostInput,
   type IdentityMode,
@@ -45,7 +44,7 @@ export default function NewPost() {
   const [outcome, setOutcome] = useState<ContentStatusResult | null>(null);
 
   useEffect(() => {
-    document.title = `Start a thread · ${APP_NAME}`;
+    document.title = `New post | ${APP_NAME}`;
   }, []);
 
   // Preselect the space from ?space=slug, or the first one the person can post in.
@@ -68,11 +67,11 @@ export default function NewPost() {
     setError(null);
     if (!mode) {
       setNeedMode(true);
-      setError('Choose whether to post under your name or as Anonymous.');
+      setError('Pick your name or Anonymous.');
       return;
     }
     if (!spaceId) {
-      setError('Choose a space for your thread.');
+      setError('Pick a space.');
       return;
     }
     const base = { spaceId, identityMode: mode, title };
@@ -85,7 +84,7 @@ export default function NewPost() {
     // The same checks the server runs, so mistakes are caught before anything is sent.
     const checked = createPostSchema.safeParse(input);
     if (!checked.success) {
-      setError(checked.error.issues[0]?.message ?? 'Something in the form is not right.');
+      setError(checked.error.issues[0]?.message ?? 'Something in the form isn’t right.');
       return;
     }
     setBusy('sending');
@@ -111,27 +110,22 @@ export default function NewPost() {
     return (
       <Page>
         <div className="page">
-          <h1 className="page-h">
-            {outcome.outcome === 'wellbeing' ? 'Thank you for writing this' : 'Your thread is saved'}
-          </h1>
+          <h1 className="page-h">{outcome.outcome === 'wellbeing' ? 'Thanks for writing this' : 'Saved'}</h1>
           {outcome.outcome === 'wellbeing' && outcome.resources ? (
             <WellbeingPanel resources={outcome.resources} />
           ) : outcome.outcome === 'held' ? (
             <HeldNotice />
           ) : (
-            <div className="nb-notice" role="status">
-              <div>
-                <b>Still being checked.</b> Your thread will appear in the feed in a moment. You can find it
-                under You.
-              </div>
-            </div>
+            <p className="notice" role="status">
+              Still being checked. It shows up in the feed in a minute, and it’s under You.
+            </p>
           )}
           <div className="row">
-            <Link className="nb-btn nb-btn--primary" to="/">
-              Back to the front page
+            <Link className="btn btn--primary" to="/">
+              Back to the feed
             </Link>
-            <Link className="nb-btn" to="/me">
-              See your posts
+            <Link className="btn" to="/me">
+              Your posts
             </Link>
           </div>
         </div>
@@ -141,10 +135,10 @@ export default function NewPost() {
 
   return (
     <Page>
-      <form className="nb-composer" onSubmit={(event) => void submit(event)} noValidate>
+      <form className="composer" onSubmit={(event) => void submit(event)} noValidate>
         <div className="row row--between">
-          <h1 className="page-h">Start a thread</h1>
-          <Link className="nb-btn nb-btn--quiet nb-btn--sm" to="/">
+          <h1 className="page-h">New post</h1>
+          <Link className="btn btn--quiet btn--sm" to="/">
             Cancel
           </Link>
         </div>
@@ -157,21 +151,20 @@ export default function NewPost() {
           }}
           firstName={member.profile.firstName}
           displayName={member.profile.displayName}
-          staff={isStaffRole(member.role)}
           invalid={needMode}
         />
 
         <div className="field" style={{ maxWidth: 360 }}>
-          <label className="nb-label" htmlFor={`${id}-space`}>
+          <label className="label" htmlFor={`${id}-space`}>
             Space
           </label>
           <select
-            className="nb-select"
+            className="select"
             id={`${id}-space`}
             value={spaceId}
             onChange={(e) => setSpaceId(e.target.value)}
           >
-            <option value="">Choose a space</option>
+            <option value="">Pick a space</option>
             {allowed.map((space) => (
               <option key={space.id} value={space.id}>
                 {space.name}
@@ -180,7 +173,7 @@ export default function NewPost() {
           </select>
         </div>
 
-        <div className="tabs" role="tablist" aria-label="Kind of thread">
+        <div className="tabs" role="tablist" aria-label="Post type">
           {(Object.keys(KIND_LABELS) as Kind[]).map((k) => (
             <button key={k} type="button" role="tab" aria-selected={kind === k} onClick={() => setKind(k)}>
               {KIND_LABELS[k]}
@@ -190,13 +183,13 @@ export default function NewPost() {
 
         <div className="field">
           <div className="row row--between">
-            <label className="nb-label" htmlFor={`${id}-title`}>
-              {kind === 'poll' ? 'Your question' : 'Title'}
+            <label className="label" htmlFor={`${id}-title`}>
+              {kind === 'poll' ? 'Question' : 'Title'}
             </label>
             <Count value={title.trim().length} max={LIMITS.titleMax} />
           </div>
           <input
-            className="nb-input"
+            className="input"
             id={`${id}-title`}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -205,11 +198,11 @@ export default function NewPost() {
 
         {kind === 'link' && (
           <div className="field">
-            <label className="nb-label" htmlFor={`${id}-url`}>
+            <label className="label" htmlFor={`${id}-url`}>
               Link
             </label>
             <input
-              className="nb-input"
+              className="input"
               id={`${id}-url`}
               type="url"
               inputMode="url"
@@ -217,19 +210,19 @@ export default function NewPost() {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
             />
-            <p className="nb-help">
+            <p className="help">
               Links must start with https://. We show the link; we never open it for you.
             </p>
           </div>
         )}
 
         {kind === 'poll' && (
-          <fieldset className="opts" style={{ border: 0, padding: 0, margin: 0 }}>
-            <legend className="nb-label">Options (2 to {LIMITS.pollMaxOptions})</legend>
+          <fieldset className="opts">
+            <legend className="label">Options (2 to {LIMITS.pollMaxOptions})</legend>
             {options.map((option, i) => (
               <div className="opts__row" key={i}>
                 <input
-                  className="nb-input"
+                  className="input"
                   aria-label={`Option ${i + 1}`}
                   value={option}
                   maxLength={LIMITS.pollOptionMax}
@@ -239,7 +232,7 @@ export default function NewPost() {
                 />
                 {options.length > LIMITS.pollMinOptions && (
                   <button
-                    className="nb-btn nb-btn--quiet nb-btn--sm"
+                    className="btn btn--quiet btn--sm"
                     type="button"
                     aria-label={`Remove option ${i + 1}`}
                     onClick={() => setOptions((current) => current.filter((_, j) => j !== i))}
@@ -252,11 +245,12 @@ export default function NewPost() {
             {options.length < LIMITS.pollMaxOptions && (
               <div>
                 <button
-                  className="nb-btn nb-btn--sm"
+                  className="btn btn--sm"
                   type="button"
                   onClick={() => setOptions((current) => [...current, ''])}
                 >
-                  <Icon name="plus" /> Add an option
+                  <Icon name="plus" />
+                  Add option
                 </button>
               </div>
             )}
@@ -265,28 +259,21 @@ export default function NewPost() {
 
         <div className="field">
           <div className="row row--between">
-            <label className="nb-label" htmlFor={`${id}-body`}>
-              {kind === 'text' ? 'Your thoughts' : 'Anything to add (optional)'}
+            <label className="label" htmlFor={`${id}-body`}>
+              {kind === 'text' ? 'Text' : 'Text (optional)'}
             </label>
             <Count value={body.trim().length} max={LIMITS.bodyMax} />
           </div>
           <textarea
-            className="nb-textarea"
+            className="textarea"
             id={`${id}-body`}
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={6}
           />
-          <p className="nb-help">
-            Plain text. *italic*, **bold** and https links work. Your draft is saved on this device only.
+          <p className="help">
+            *italic* and **bold** work, and https links turn into links. Your draft stays on this device.
           </p>
-        </div>
-
-        <div className="nb-notice nb-notice--kind">
-          <Icon name="check" />
-          <div>
-            <b>Be kind. Be honest.</b> Talk about ideas, not people.
-          </div>
         </div>
 
         {error && (
@@ -294,11 +281,11 @@ export default function NewPost() {
             {error}
           </p>
         )}
-        <div className="nb-composer__foot">
-          <span className="nb-meta" role="status">
-            {busy === 'checking' ? 'Checking your post. This takes a few seconds.' : ''}
+        <div className="composer__foot">
+          <span className="muted" role="status">
+            {busy === 'checking' ? 'Checking it. A few seconds.' : ''}
           </span>
-          <button className="nb-btn nb-btn--primary" type="submit" disabled={busy !== 'idle'}>
+          <button className="btn btn--primary" type="submit" disabled={busy !== 'idle'}>
             {busy === 'sending' ? 'Posting' : busy === 'checking' ? 'Checking' : 'Post'}
           </button>
         </div>

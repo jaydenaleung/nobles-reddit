@@ -37,7 +37,7 @@ Decide the numbers before looking at them.
 | Measure | A good sign after two weeks | Where to see it |
 | --- | --- | --- |
 | People who came back | At least half the group signed in on three or more days | Ask; the app keeps no analytics |
-| Conversation, not broadcast | Most threads have replies, and replies have replies | The feed, "No replies yet" tab |
+| Conversation, not broadcast | Most threads have replies, and replies have replies | The feed, "No replies" tab |
 | Named and anonymous both used | Neither is under about 15% of comments | The "% of comments are anonymous" line on polls |
 | Kindness | Few holds and removals, and moderators agree with most automatic flags | Moderation queue, audit log |
 | The check's mistakes | Moderators restore fewer than about one in three automatic flags | Audit log: `restore` after an automatic flag |
@@ -73,7 +73,7 @@ Generate the QR code for the live address with any QR tool, or screenshot the on
 
 ## The Gleason Hall slide
 
-The live screen is `/board`: today's question, the poll, the replies a moderator chose, the QR code and Nobleman headlines. Open it in a browser on the display computer, press F11 for full screen and leave it. It reconnects by itself after a network drop.
+The live screen is `/board`: today's question, the poll, the replies a moderator chose and the QR code. Open it in a browser on the display computer, press F11 for full screen and leave it. It reconnects by itself after a network drop.
 
 For a static slide in the morning rotation:
 

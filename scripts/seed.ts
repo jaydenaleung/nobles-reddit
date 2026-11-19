@@ -1,13 +1,9 @@
 /**
- * Fills the database with sample data.
+ * npm run seed                   The emulators: the spaces, plus test threads the e2e tests rely on.
+ * npm run seed -- --allow-prod   The real project in .env.local: the spaces only, after you type its id.
  *
- *   npm run seed                      -> the Firebase emulators (the default, and safe)
- *   npm run seed -- --allow-prod      -> the real project in .env.local, after you type its id
- *
- * Everything written here is marked `sample: true` and uses obviously made-up
- * names. No real person is ever seeded, and no sign-in accounts are created:
- * the three sample users are profile records only, there to own the sample
- * posts.
+ * Production never gets test threads. The emulator test threads use placeholder
+ * names ("Sample S.") and are marked sample: true.
  */
 import { createInterface } from 'node:readline/promises';
 import {
@@ -61,7 +57,6 @@ const db = await connect();
 const now = Date.now();
 const hoursAgo = (hours: number) => Timestamp.fromMillis(now - hours * 3_600_000);
 
-/* ---------- Spaces ---------- */
 const spaceIds: Record<string, string> = {};
 const existingSpaces = await db.collection('spaces').get();
 for (const doc of existingSpaces.docs) spaceIds[doc.data().slug] = doc.id;
@@ -73,15 +68,18 @@ for (const space of DEFAULT_SPACES) {
 }
 const spaceName = (slug: string) => DEFAULT_SPACES.find((s) => s.slug === slug)!.name;
 
-/* ---------- Roles for the sample sign-ins (emulator only) and the three sample users ---------- */
-if (!allowProd) {
-  await db
-    .doc('config/roles')
-    .set(
-      { emailToRole: { 'sample.teacher@nobles.edu': 'faculty', 'sample.moderator@nobles.edu': 'moderator' } },
-      { merge: true },
-    );
+if (allowProd) {
+  console.log(`Spaces are ready: ${Object.keys(spaceIds).join(', ')}.`);
+  process.exit(0);
 }
+
+// Roles for emulator sign-ins. sample.admin@nobles.edu is an admin through .env.emulator.
+await db
+  .doc('config/roles')
+  .set(
+    { emailToRole: { 'sample.teacher@nobles.edu': 'faculty', 'sample.moderator@nobles.edu': 'moderator' } },
+    { merge: true },
+  );
 const users = {
   student: { uid: 'sample-student', firstName: 'Sample', lastInitial: 'S', classYear: 2028, role: 'student' },
   faculty: { uid: 'sample-teacher', firstName: 'Sample', lastInitial: 'T', classYear: null, role: 'faculty' },
@@ -113,7 +111,6 @@ const anonymous = (letter: string): AuthorDisplay => ({
   anonLabel: `Anonymous ${letter}`,
 });
 
-/* ---------- Threads ---------- */
 interface SeedComment {
   body: string;
   author: AuthorDisplay;
@@ -421,7 +418,7 @@ if (!already.empty) {
   console.log(`Wrote ${posts.length} sample threads.`);
 }
 
-/* ---------- Thread counts per space, and the hall screen ---------- */
+// Thread counts per space, and the hall screen
 for (const [slug, id] of Object.entries(spaceIds)) {
   const count = await db
     .collection('posts')
@@ -463,14 +460,10 @@ if (questionPostId) {
         ...(c.author.mode === 'named' && c.author.role ? { role: c.author.role } : {}),
         text: c.body,
       })),
-    nobleman: [
-      { title: 'Lacrosse opens the season with a one-goal win', url: '', minutes: 4, sample: true },
-      { title: 'Inside the new student-run film festival', url: '', minutes: 6, sample: true },
-      { title: 'Club fair moves to the Gleason lobby', url: '', minutes: 3, sample: true },
-    ],
+    nobleman: [],
     updatedAt: FieldValue.serverTimestamp(),
   });
 }
 
-console.log('Seeding finished. All sample content is marked sample: true.');
+console.log('Seeded the emulator.');
 process.exit(0);

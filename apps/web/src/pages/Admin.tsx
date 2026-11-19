@@ -63,18 +63,18 @@ function RolesTab() {
   return (
     <div className="stack">
       <p className="muted">
-        Everyone with an allowed school email is a student unless listed here. Moderators are faculty
-        nominated by the administration. Admins can look up authors.
+        Anyone with a nobles.edu email is a student unless they’re listed here. Mods are teachers the
+        administration picks. Only admins can look up who wrote a post.
       </p>
       <form className="panel" onSubmit={(event) => void submit(event)}>
-        <h2>Give someone a role</h2>
+        <h2>Set a role</h2>
         <div className="field-row">
           <div className="field">
-            <label className="nb-label" htmlFor="role-email">
+            <label className="label" htmlFor="role-email">
               School email
             </label>
             <input
-              className="nb-input"
+              className="input"
               id="role-email"
               type="email"
               value={email}
@@ -83,11 +83,11 @@ function RolesTab() {
             />
           </div>
           <div className="field" style={{ flex: '0 1 200px' }}>
-            <label className="nb-label" htmlFor="role-role">
+            <label className="label" htmlFor="role-role">
               Role
             </label>
             <select
-              className="nb-select"
+              className="select"
               id="role-role"
               value={role}
               onChange={(e) => setRole(e.target.value as Role)}
@@ -101,11 +101,11 @@ function RolesTab() {
           </div>
         </div>
         <div className="field">
-          <label className="nb-label" htmlFor="role-reason">
+          <label className="label" htmlFor="role-reason">
             Reason (goes in the audit log)
           </label>
           <input
-            className="nb-input"
+            className="input"
             id="role-reason"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
@@ -114,25 +114,25 @@ function RolesTab() {
           />
         </div>
         <div className="row">
-          <button className="nb-btn nb-btn--primary" type="submit" disabled={busy}>
-            {busy ? 'Saving' : 'Save role'}
+          <button className="btn btn--primary" type="submit" disabled={busy}>
+            {busy ? 'Saving' : 'Save'}
           </button>
         </div>
       </form>
       {load === 'loading' ? (
-        <Loading label="Loading roles" />
+        <Loading label="Loading" />
       ) : load === 'error' ? (
-        <ErrorState title="Roles did not load" />
+        <ErrorState title="Roles didn’t load" />
       ) : entries.length === 0 ? (
-        <Empty title="Nobody has a special role yet">
-          <p>Bootstrap admins are set in the deployment settings and are not listed here.</p>
+        <Empty title="Nobody has a role yet">
+          <p>The first admins come from the deploy settings, so they aren’t listed here.</p>
         </Empty>
       ) : (
         <div
           className="tbl-wrap"
           tabIndex={0}
           role="group"
-          aria-label="Table. Scroll sideways to see every column."
+          aria-label="Table. Scroll sideways for more columns."
         >
           <table className="tbl">
             <thead>
@@ -188,7 +188,7 @@ function SpacesTab() {
         order: Number(order) || 0,
         postingRoles,
       });
-      toast(editing ? 'Space updated.' : 'Space created.');
+      toast(editing ? 'Saved.' : 'Space added.');
       start(null);
     } catch (error) {
       toast(errorMessage(error));
@@ -203,14 +203,14 @@ function SpacesTab() {
         className="tbl-wrap"
         tabIndex={0}
         role="group"
-        aria-label="Table. Scroll sideways to see every column."
+        aria-label="Table. Scroll sideways for more columns."
       >
         <table className="tbl">
           <thead>
             <tr>
               <th scope="col">Space</th>
               <th scope="col">Address</th>
-              <th scope="col">Threads</th>
+              <th scope="col">Posts</th>
               <th scope="col">Who can post</th>
               <th scope="col">Edit</th>
             </tr>
@@ -223,7 +223,7 @@ function SpacesTab() {
                 <td className="num">{space.postCount ?? 0}</td>
                 <td>{space.postingRoles.join(', ')}</td>
                 <td>
-                  <button className="nb-btn nb-btn--sm" type="button" onClick={() => start(space.slug)}>
+                  <button className="btn btn--sm" type="button" onClick={() => start(space.slug)}>
                     Edit {space.name}
                   </button>
                 </td>
@@ -236,11 +236,11 @@ function SpacesTab() {
         <h2>{editing ? `Edit ${name}` : 'Add a space'}</h2>
         <div className="field-row">
           <div className="field">
-            <label className="nb-label" htmlFor="space-name">
+            <label className="label" htmlFor="space-name">
               Name
             </label>
             <input
-              className="nb-input"
+              className="input"
               id="space-name"
               value={name}
               maxLength={40}
@@ -249,11 +249,11 @@ function SpacesTab() {
             />
           </div>
           <div className="field">
-            <label className="nb-label" htmlFor="space-slug">
+            <label className="label" htmlFor="space-slug">
               Address (lowercase, dashes)
             </label>
             <input
-              className="nb-input"
+              className="input"
               id="space-slug"
               value={slug}
               maxLength={40}
@@ -263,11 +263,11 @@ function SpacesTab() {
             />
           </div>
           <div className="field" style={{ flex: '0 1 120px' }}>
-            <label className="nb-label" htmlFor="space-order">
+            <label className="label" htmlFor="space-order">
               Order
             </label>
             <input
-              className="nb-input"
+              className="input"
               id="space-order"
               type="number"
               min={0}
@@ -278,11 +278,11 @@ function SpacesTab() {
           </div>
         </div>
         <div className="field">
-          <label className="nb-label" htmlFor="space-description">
+          <label className="label" htmlFor="space-description">
             Description
           </label>
           <input
-            className="nb-input"
+            className="input"
             id="space-description"
             value={description}
             maxLength={200}
@@ -290,7 +290,7 @@ function SpacesTab() {
           />
         </div>
         <fieldset className="radio-list">
-          <legend>Who can start threads here</legend>
+          <legend>Who can post here</legend>
           {ROLES.map((r) => (
             <label key={r}>
               <input
@@ -307,15 +307,11 @@ function SpacesTab() {
           ))}
         </fieldset>
         <div className="row">
-          <button
-            className="nb-btn nb-btn--primary"
-            type="submit"
-            disabled={busy || postingRoles.length === 0}
-          >
-            {busy ? 'Saving' : editing ? 'Save changes' : 'Create space'}
+          <button className="btn btn--primary" type="submit" disabled={busy || postingRoles.length === 0}>
+            {busy ? 'Saving' : editing ? 'Save' : 'Add space'}
           </button>
           {editing && (
-            <button className="nb-btn nb-btn--quiet" type="button" onClick={() => start(null)}>
+            <button className="btn btn--quiet" type="button" onClick={() => start(null)}>
               Cancel
             </button>
           )}
@@ -337,7 +333,7 @@ function RevealTab() {
     const candidate = fromLink ? postKey(fromLink[1]!) : text;
     if (!contentKeySchema.safeParse(candidate).success) {
       setKey(null);
-      setError('Paste a thread link, or a key that starts with post: or comment:.');
+      setError('Paste a post link, or a key that starts with post: or comment:.');
       return;
     }
     setKey(candidate);
@@ -345,20 +341,15 @@ function RevealTab() {
   return (
     <div className="stack">
       <p className="muted">
-        To find the author of a thread, paste its link here. For a single comment, open the thread and choose
-        “Who wrote this?” under that comment. Either way you must give a reason, and the lookup is logged.
+        Paste a post link here. For a reply, open the post and use “Who wrote this?” under the reply. You have
+        to give a reason, and the lookup goes in the log.
       </p>
       <form className="panel" onSubmit={find}>
         <div className="field">
-          <label className="nb-label" htmlFor="reveal-key">
-            Thread link or content key
+          <label className="label" htmlFor="reveal-key">
+            Post link or content key
           </label>
-          <input
-            className="nb-input"
-            id="reveal-key"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
+          <input className="input" id="reveal-key" value={input} onChange={(e) => setInput(e.target.value)} />
         </div>
         {error && (
           <p className="err" role="alert">
@@ -366,13 +357,13 @@ function RevealTab() {
           </p>
         )}
         <div className="row">
-          <button className="nb-btn" type="submit">
+          <button className="btn" type="submit">
             Continue
           </button>
         </div>
       </form>
       {key && (
-        <section className="panel" aria-label="Author lookup">
+        <section className="panel" aria-label="Lookup">
           <h2>Who wrote {key}?</h2>
           <RevealForm key={key} contentKey={key} />
         </section>
@@ -395,8 +386,8 @@ function UsageTab() {
     );
   };
   useEffect(fetchUsage, []);
-  if (load === 'loading') return <Loading label="Loading usage" />;
-  if (load === 'error' || !usage) return <ErrorState title="Usage did not load" onRetry={fetchUsage} />;
+  if (load === 'loading') return <Loading label="Loading" />;
+  if (load === 'error' || !usage) return <ErrorState title="Usage didn’t load" onRetry={fetchUsage} />;
   const percent = Math.min(100, Math.round((usage.used / Math.max(1, usage.budget)) * 100));
   return (
     <div className="stack">
@@ -423,9 +414,8 @@ function UsageTab() {
           <dd>{usage.provider}</dd>
         </dl>
         <p className="muted">
-          When the day’s budget is used up, summaries and question suggestions say “unavailable today” and
-          posting carries on without the automatic check. Reports and moderators still work. The budget is set
-          by AI_DAILY_TOKEN_BUDGET.
+          Once the day’s budget runs out, summaries and suggestions switch off until tomorrow. Posting keeps
+          working with a simpler safety check. Change the budget with AI_DAILY_TOKEN_BUDGET.
         </p>
       </section>
       {usage.days.length > 0 && (
@@ -433,7 +423,7 @@ function UsageTab() {
           className="tbl-wrap"
           tabIndex={0}
           role="group"
-          aria-label="Table. Scroll sideways to see every column."
+          aria-label="Table. Scroll sideways for more columns."
         >
           <table className="tbl">
             <thead>
@@ -521,78 +511,76 @@ function SettingsTab() {
     }
   };
 
-  if (load === 'loading') return <Loading label="Loading settings" />;
-  if (load === 'error') return <ErrorState title="Settings did not load" />;
+  if (load === 'loading') return <Loading label="Loading" />;
+  if (load === 'error') return <ErrorState title="Settings didn’t load" />;
   return (
     <div className="stack">
       <section className="panel">
-        <h2>Topics the question of the day should avoid</h2>
+        <h2>Topics to keep out of the question of the day</h2>
         <div className="field">
-          <label className="nb-label" htmlFor="set-banned">
+          <label className="label" htmlFor="set-banned">
             One topic per line
           </label>
           <textarea
-            className="nb-textarea"
+            className="textarea"
             id="set-banned"
             value={banned}
             onChange={(e) => setBanned(e.target.value)}
           />
         </div>
         <div className="row">
-          <button className="nb-btn" type="button" onClick={() => void save('ai')}>
+          <button className="btn" type="button" onClick={() => void save('ai')}>
             Save topics
           </button>
         </div>
       </section>
       <section className="panel">
-        <h2>School calendar notes</h2>
-        <p className="muted">
-          Short notes the model may use for timely questions, such as “Spirit week starts Monday”.
-        </p>
+        <h2>Calendar notes</h2>
+        <p className="muted">Short notes the model can use, like “Long weekend starts Friday”.</p>
         <div className="field">
-          <label className="nb-label" htmlFor="set-calendar">
+          <label className="label" htmlFor="set-calendar">
             One note per line
           </label>
           <textarea
-            className="nb-textarea"
+            className="textarea"
             id="set-calendar"
             value={calendar}
             onChange={(e) => setCalendar(e.target.value)}
           />
         </div>
         <div className="row">
-          <button className="nb-btn" type="button" onClick={() => void save('calendar')}>
+          <button className="btn" type="button" onClick={() => void save('calendar')}>
             Save notes
           </button>
         </div>
       </section>
       <section className="panel">
         <h2>What a student sees after a wellbeing flag</h2>
-        <p className="muted">Please have the counseling office review this wording before launch.</p>
+        <p className="muted">Have the counseling office read this before launch.</p>
         <div className="field">
-          <label className="nb-label" htmlFor="set-message">
+          <label className="label" htmlFor="set-message">
             Message
           </label>
           <textarea
-            className="nb-textarea"
+            className="textarea"
             id="set-message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
           />
         </div>
         <div className="field">
-          <label className="nb-label" htmlFor="set-items">
+          <label className="label" htmlFor="set-items">
             Resources, one per line, as “Name | detail”
           </label>
           <textarea
-            className="nb-textarea"
+            className="textarea"
             id="set-items"
             value={items}
             onChange={(e) => setItems(e.target.value)}
           />
         </div>
         <div className="row">
-          <button className="nb-btn" type="button" onClick={() => void save('resources')}>
+          <button className="btn" type="button" onClick={() => void save('resources')}>
             Save resources
           </button>
         </div>
@@ -606,26 +594,26 @@ const TABS: [Tab, string][] = [
   ['roles', 'Roles'],
   ['spaces', 'Spaces'],
   ['question', 'Question of the day'],
-  ['reveal', 'Find an author'],
-  ['usage', 'AI budget and usage'],
+  ['reveal', 'Who wrote it'],
+  ['usage', 'AI budget'],
   ['settings', 'Settings'],
 ];
 
 export default function Admin() {
   const [tab, setTab] = useState<Tab>('roles');
   useEffect(() => {
-    document.title = `Administration · ${APP_NAME}`;
+    document.title = `Administration | ${APP_NAME}`;
   }, []);
   return (
     <Page>
       <div className="page">
         <div className="row row--between">
-          <h1 className="page-h">Administration</h1>
-          <Link className="nb-btn" to="/admin/audit">
-            Open the audit log
+          <h1 className="page-h">Admin</h1>
+          <Link className="btn" to="/admin/audit">
+            Audit log
           </Link>
         </div>
-        <div className="tabs" role="tablist" aria-label="Administration sections">
+        <div className="tabs" role="tablist" aria-label="Admin sections">
           {TABS.map(([value, label]) => (
             <button
               key={value}
@@ -649,7 +637,7 @@ export default function Admin() {
   );
 }
 
-/** /admin/audit: every moderation action, role change and author lookup. Append-only. */
+/** /admin/audit, the append-only log. */
 export function AuditLog() {
   const toast = useToast();
   const [entries, setEntries] = useState<(AuditLogEntry & { id: string })[]>([]);
@@ -665,13 +653,13 @@ export function AuditLog() {
     );
   };
   useEffect(() => {
-    document.title = `Audit log · ${APP_NAME}`;
+    document.title = `Audit log | ${APP_NAME}`;
     fetchLog();
   }, []);
   const exportLog = async () => {
     try {
       downloadJson('nobles-commons-audit-log.json', await api.exportAuditLog({ limit: 1000 }));
-      toast('Exported. The export itself was logged.');
+      toast('Exported. The export is in the log too.');
       fetchLog();
     } catch (error) {
       toast(errorMessage(error));
@@ -683,30 +671,29 @@ export function AuditLog() {
         <div className="row row--between">
           <h1 className="page-h">Audit log</h1>
           <div className="row">
-            <Link className="nb-btn nb-btn--quiet" to="/admin">
-              Back to administration
+            <Link className="btn btn--quiet" to="/admin">
+              Back to admin
             </Link>
-            <button className="nb-btn" type="button" onClick={() => void exportLog()}>
+            <button className="btn" type="button" onClick={() => void exportLog()}>
               Export
             </button>
           </div>
         </div>
         <p className="page-lede">
-          Every author lookup, moderation action and role change, newest first. Nobody can edit or delete an
-          entry.
+          Every lookup and mod action, newest first. Nobody can edit or delete an entry.
         </p>
         {load === 'loading' ? (
-          <Loading label="Loading the log" />
+          <Loading label="Loading" />
         ) : load === 'error' ? (
-          <ErrorState title="The log did not load" onRetry={fetchLog} />
+          <ErrorState title="The log didn’t load" onRetry={fetchLog} />
         ) : entries.length === 0 ? (
-          <Empty title="Nothing has been logged yet" />
+          <Empty title="Nothing in the log yet" />
         ) : (
           <div
             className="tbl-wrap"
             tabIndex={0}
             role="group"
-            aria-label="Table. Scroll sideways to see every column."
+            aria-label="Table. Scroll sideways for more columns."
           >
             <table className="tbl">
               <thead>

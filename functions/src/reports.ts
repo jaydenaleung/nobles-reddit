@@ -30,7 +30,7 @@ export const reportContent = callable(
   { name: 'reportContent', schema: reportContentSchema, rate: 'reports' },
   async (data, caller): Promise<{ received: true }> => {
     const parsed = parseContentKey(data.contentKey);
-    if (!parsed) throw errors.invalid('That does not look right.');
+    if (!parsed) throw errors.invalid('That doesn’t look right.');
     const contentRef = db.doc(contentPath(parsed));
     // One report per person per item: reporting twice updates the first report.
     const reportRef = db.doc(`reports/${shortHash(`${caller.uid}:${data.contentKey}`)}`);

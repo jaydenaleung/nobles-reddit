@@ -2,9 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import './styles/fonts';
-import './styles/tokens.css';
-import './styles/components.css';
-import './styles/app.css';
+import './styles/site.css';
 import { App } from './App';
 
 createRoot(document.getElementById('root')!).render(

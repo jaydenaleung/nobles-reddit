@@ -1,15 +1,14 @@
-import { APP_NAME, SORTS, SORT_LABELS, initials, postKey, type Sort } from '@commons/shared';
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { APP_NAME, SORTS, SORT_LABELS, postKey, type Sort } from '@commons/shared';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { api, errorMessage } from '../api';
 import { useMember } from '../auth/AuthContext';
 import { Page, Sidebar } from '../components/Layout';
-import { FeedSkeleton, PostRow, type PostView } from '../components/Post';
-import { Empty, ErrorState, useToast } from '../components/Ui';
-import { useFeed, useMyVotes, useSearch, useSpaces, type MyVotes } from '../data/hooks';
-import { openedThreads, savedThreads, toggleSaved } from '../lib/storage';
+import { PostRow, type PostView } from '../components/Post';
+import { Empty, ErrorState, Loading, useToast } from '../components/Ui';
+import { MAX_START_PAGES, useFeed, useMyVotes, useSearch, useSpaces, type MyVotes } from '../data/hooks';
+import { openedThreads, readScroll, savedThreads, toggleSaved, writeScroll } from '../lib/storage';
 
-/** The list of threads with voting, saving and sharing. Shared by the feed and search. */
 export function ThreadList({
   posts,
   votes,
@@ -34,13 +33,23 @@ export function ThreadList({
         toast('Link copied.');
       }
     } catch {
-      /* the person closed the share sheet */
+      /* share sheet closed */
     }
   };
 
+  const save = (post: PostView) => {
+    const isSaved = toggleSaved({ id: post.id, title: post.title });
+    setSaved((current) => {
+      const next = new Set(current);
+      if (isSaved) next.add(post.id);
+      else next.delete(post.id);
+      return next;
+    });
+    toast(isSaved ? 'Saved on this device. It’s under You.' : 'Unsaved.');
+  };
+
   return (
-    <section className="nb-feed" aria-label="Threads">
-      <h2 className="nb-sr">Threads</h2>
+    <section className="feed" aria-label="Posts">
       {posts.map((post) => (
         <PostRow
           key={post.id}
@@ -51,16 +60,7 @@ export function ThreadList({
           onVote={() => onVote(post)}
           read={opened.has(post.id)}
           saved={saved.has(post.id)}
-          onSave={() => {
-            const isSaved = toggleSaved({ id: post.id, title: post.title });
-            setSaved((current) => {
-              const next = new Set(current);
-              if (isSaved) next.add(post.id);
-              else next.delete(post.id);
-              return next;
-            });
-            toast(isSaved ? 'Saved on this device. Find it under You.' : 'Removed from your saved threads.');
-          }}
+          onSave={() => save(post)}
           onShare={() => void share(post)}
         />
       ))}
@@ -68,7 +68,7 @@ export function ThreadList({
   );
 }
 
-/** Optimistic "Thoughtful" on a feed row: the count moves at once and rolls back if the server says no. */
+/** The count moves right away and goes back if the server says no. */
 export function useFeedVoting(
   uid: string,
   posts: PostView[],
@@ -96,9 +96,71 @@ export function useFeedVoting(
   return { votes, onVote };
 }
 
+/** Asks for the next page when this comes within about a screen of the viewport. */
+function LoadNext({
+  count,
+  hasMore,
+  loading,
+  failed,
+  onLoad,
+  newHref,
+}: {
+  count: number;
+  hasMore: boolean;
+  loading: boolean;
+  failed: boolean;
+  onLoad: () => void;
+  newHref: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !hasMore || failed) return;
+    const watcher = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) onLoad();
+      },
+      { rootMargin: '900px 0px' },
+    );
+    watcher.observe(el);
+    return () => watcher.disconnect();
+  }, [count, hasMore, failed, onLoad]);
+
+  if (failed) {
+    return (
+      <div className="feed-foot" role="alert">
+        Couldn’t load more posts.{' '}
+        <button className="btn btn--sm" type="button" onClick={onLoad}>
+          Try again
+        </button>
+      </div>
+    );
+  }
+  if (!hasMore) {
+    return (
+      <p className="feed-foot">
+        That’s every post. <Link to={newHref}>Post something</Link>
+      </p>
+    );
+  }
+  return (
+    <div className="feed-foot" ref={ref}>
+      <button className="btn btn--sm" type="button" onClick={onLoad} disabled={loading}>
+        {loading ? 'Loading' : 'More posts'}
+      </button>
+    </div>
+  );
+}
+
+function startPage(raw: string | null): number {
+  const n = Number(raw);
+  return Number.isInteger(n) && n > 1 ? Math.min(n, MAX_START_PAGES) : 1;
+}
+
 export default function Feed() {
   const { slug } = useParams();
   const member = useMember();
+  const location = useLocation();
   const { spaces, bySlug, load: spacesLoad } = useSpaces();
   const [params, setParams] = useSearchParams();
   const sortParam = params.get('sort') as Sort | null;
@@ -106,24 +168,63 @@ export default function Feed() {
   const space = slug ? bySlug(slug) : undefined;
   const unknownSpace = !!slug && spacesLoad === 'ready' && !space;
   const waitingForSpace = !!slug && !space && !unknownSpace;
+  const newHref = space ? `/new?space=${space.slug}` : '/new';
 
-  const feed = useFeed(waitingForSpace || unknownSpace ? '__none__' : space?.id, sort);
+  const feed = useFeed(
+    waitingForSpace || unknownSpace ? '__none__' : space?.id,
+    sort,
+    startPage(params.get('page')),
+  );
   const { votes, onVote } = useFeedVoting(member.user.uid, feed.posts, feed.patch);
 
   useEffect(() => {
-    document.title = space ? `${space.name} · ${APP_NAME}` : APP_NAME;
+    document.title = space ? `${space.name} | ${APP_NAME}` : APP_NAME;
   }, [space]);
 
-  const sidebar = <Sidebar spaceName={space?.name} spaceDescription={space?.description} />;
+  // Keep ?page= in step with how far down you've loaded, without adding history entries.
+  useEffect(() => {
+    if (feed.load !== 'ready') return;
+    const current = params.get('page');
+    const wanted = feed.pages > 1 ? String(feed.pages) : null;
+    if (current === wanted) return;
+    const next = new URLSearchParams(params);
+    if (wanted) next.set('page', wanted);
+    else next.delete('page');
+    setParams(next, { replace: true });
+  }, [feed.load, feed.pages, params, setParams]);
+
+  const scrollKey = `${location.pathname}?sort=${sort}`;
+  useEffect(() => {
+    let frame = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => writeScroll(scrollKey, window.scrollY));
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, [scrollKey]);
+
+  // After a refresh or coming back from a thread, go back to where you were. Only on the first load.
+  const restored = useRef(false);
+  useEffect(() => {
+    if (feed.load !== 'ready' || restored.current) return;
+    restored.current = true;
+    const y = readScroll(scrollKey);
+    if (y > 0) requestAnimationFrame(() => window.scrollTo(0, y));
+  }, [feed.load, scrollKey]);
+
+  const sidebar = <Sidebar spaceDescription={space?.description} />;
 
   if (unknownSpace) {
     return (
       <Page sidebar={sidebar}>
-        <Empty title="We could not find that space">
-          <p>It may have been renamed. The list of spaces is on the left.</p>
-          <Link className="nb-btn" to="/">
-            Go to the front page
-          </Link>
+        <Empty title="No space with that name">
+          <p>
+            It might have been renamed. <Link to="/">Go to all posts</Link>
+          </p>
         </Empty>
       </Page>
     );
@@ -132,43 +233,25 @@ export default function Feed() {
   return (
     <Page sidebar={sidebar}>
       {space ? (
-        <header className="sp-head">
+        <header className="space-head">
           <h1>{space.name}</h1>
-          <p>{space.description}</p>
         </header>
       ) : (
-        <h1 className="nb-sr">Front page</h1>
+        <h1 className="nb-sr">All posts</h1>
       )}
 
-      <nav className="nb-chips ph-only" aria-label="Spaces">
-        <Link className="nb-chip" to="/" aria-current={!slug ? 'page' : undefined}>
+      <nav className="chips" aria-label="Spaces">
+        <Link to="/" aria-current={!slug ? 'page' : undefined}>
           All
         </Link>
         {spaces.map((s) => (
-          <Link
-            className="nb-chip"
-            key={s.id}
-            to={`/s/${s.slug}`}
-            aria-current={slug === s.slug ? 'page' : undefined}
-          >
+          <Link key={s.id} to={`/s/${s.slug}`} aria-current={slug === s.slug ? 'page' : undefined}>
             {s.name}
           </Link>
         ))}
       </nav>
 
-      <div className="fp-start">
-        <span className="nb-avatar" aria-hidden="true">
-          {initials(member.profile.displayName)}
-        </span>
-        <Link className="in" to={space ? `/new?space=${space.slug}` : '/new'}>
-          What’s on your mind, {member.profile.firstName}?
-        </Link>
-        <Link className="nb-btn nb-btn--sm" to={space ? `/new?space=${space.slug}` : '/new'}>
-          Post
-        </Link>
-      </div>
-
-      <nav className="nb-sort" aria-label="Sort">
+      <nav className="sortbar" aria-label="Sort">
         {SORTS.map((s) => (
           <a
             key={s}
@@ -177,44 +260,42 @@ export default function Feed() {
             onClick={(event) => {
               event.preventDefault();
               setParams(s === 'hot' ? {} : { sort: s });
+              window.scrollTo(0, 0);
             }}
           >
             {SORT_LABELS[s]}
           </a>
         ))}
-        <span className="end">{space ? space.name : 'All spaces'}</span>
+        <Link className="btn btn--primary btn--sm" to={newHref}>
+          Post
+        </Link>
       </nav>
 
       {feed.load === 'loading' || waitingForSpace ? (
-        <FeedSkeleton />
+        <Loading label="Loading posts" />
       ) : feed.load === 'error' ? (
-        <ErrorState title="The feed did not load" onRetry={feed.reload} />
+        <ErrorState title="The feed didn’t load" onRetry={feed.reload} />
       ) : feed.posts.length === 0 ? (
-        <Empty title={sort === 'unanswered' ? 'Every thread has a reply' : 'Nothing here yet'}>
+        <Empty title={sort === 'unanswered' ? 'Everything here has a reply' : 'No posts here yet'}>
           <p>
-            {sort === 'unanswered'
-              ? 'Nice. Try Hot or New to see what people are talking about.'
-              : 'Be the first to start a thread in this space.'}
+            {sort === 'unanswered' ? (
+              <Link to="?sort=new">See the newest posts</Link>
+            ) : (
+              <Link to={newHref}>Write the first one</Link>
+            )}
           </p>
-          <Link className="nb-btn nb-btn--primary" to={space ? `/new?space=${space.slug}` : '/new'}>
-            Start a thread
-          </Link>
         </Empty>
       ) : (
         <>
           <ThreadList posts={feed.posts} votes={votes} onVote={(post) => void onVote(post)} />
-          {feed.hasMore && (
-            <div className="more">
-              <button
-                className="nb-btn"
-                type="button"
-                onClick={() => void feed.loadMore()}
-                disabled={feed.loadingMore}
-              >
-                {feed.loadingMore ? 'Loading more' : 'Show more threads'}
-              </button>
-            </div>
-          )}
+          <LoadNext
+            count={feed.posts.length}
+            hasMore={feed.hasMore}
+            loading={feed.loadingMore}
+            failed={feed.moreFailed}
+            onLoad={() => void feed.loadMore()}
+            newHref={newHref}
+          />
         </>
       )}
     </Page>
@@ -233,37 +314,34 @@ export function Search() {
   );
 
   useEffect(() => {
-    document.title = `Search · ${APP_NAME}`;
+    document.title = `Search | ${APP_NAME}`;
   }, []);
 
   return (
     <Page sidebar={<Sidebar />}>
-      <header className="sp-head">
-        <h1>Search</h1>
-        <p>{text ? `Threads and spaces that mention “${text}”.` : 'Type a word or two in the search box.'}</p>
+      <header className="space-head">
+        <h1>{text ? `“${text}”` : 'Search'}</h1>
       </header>
       {matchingSpaces.length > 0 && (
-        <nav className="nb-chips" aria-label="Matching spaces" style={{ flexWrap: 'wrap' }}>
+        <nav className="chips" aria-label="Matching spaces" style={{ display: 'flex' }}>
           {matchingSpaces.map((s) => (
-            <Link className="nb-chip" key={s.id} to={`/s/${s.slug}`}>
+            <Link key={s.id} to={`/s/${s.slug}`}>
               {s.name}
             </Link>
           ))}
         </nav>
       )}
       {search.load === 'loading' ? (
-        <FeedSkeleton rows={3} />
+        <Loading label="Searching" />
       ) : search.load === 'error' ? (
-        <ErrorState title="Search did not work" />
+        <ErrorState title="Search didn’t work" />
       ) : search.tokens.length === 0 ? (
-        text ? (
-          <Empty title="Try a more specific word">
-            <p>Very common words like “the” and “what” are left out of search.</p>
-          </Empty>
-        ) : null
+        <Empty title={text ? 'Try a more specific word' : 'Type something in the search box'}>
+          {text && <p>Words like “the” and “what” get skipped.</p>}
+        </Empty>
       ) : search.posts.length === 0 ? (
-        <Empty title="No threads match that">
-          <p>Search looks at titles, the start of each post and space names. It never searches by author.</p>
+        <Empty title="Nothing matches that">
+          <p>Search checks titles and the start of each post. It never searches by who wrote it.</p>
         </Empty>
       ) : (
         <ThreadList posts={search.posts} votes={votes} onVote={(post) => void onVote(post)} />

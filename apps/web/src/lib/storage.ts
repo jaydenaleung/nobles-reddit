@@ -1,8 +1,5 @@
-/**
- * Small things remembered on this device only: which threads you opened,
- * which you saved, your draft and your theme. Nothing here leaves the browser.
- * Storage can be blocked, so every call is guarded.
- */
+// Remembered on this device only: opened and saved threads, the draft, the theme, scroll spots.
+// Storage can be blocked, so every call is wrapped.
 function read<T>(key: string, fallback: T): T {
   try {
     const raw = window.localStorage.getItem(key);
@@ -88,4 +85,20 @@ export function applyTheme(choice: ThemeChoice): void {
   const dark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
   const theme = choice === 'system' ? (dark ? 'night' : 'paper') : choice;
   document.documentElement.setAttribute('data-theme', theme);
+}
+
+/** Where you were in a feed, for this tab only, so a refresh or the back button lands you there again. */
+export function readScroll(key: string): number {
+  try {
+    return Number(window.sessionStorage.getItem(`commons.scroll:${key}`)) || 0;
+  } catch {
+    return 0;
+  }
+}
+export function writeScroll(key: string, y: number): void {
+  try {
+    window.sessionStorage.setItem(`commons.scroll:${key}`, String(Math.round(y)));
+  } catch {
+    /* blocked storage just means no restore */
+  }
 }

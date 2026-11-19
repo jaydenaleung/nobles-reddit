@@ -38,7 +38,7 @@ interface AuthValue {
 const AuthContext = createContext<AuthValue | null>(null);
 
 const NOT_NOBLES =
-  'That account is not a Nobles account, so we signed you back out. Nobles Commons is only for students and faculty: try again with your school Google account.';
+  'That isn’t a nobles.edu account, so you got signed back out. Try again with your school Google account.';
 
 async function resolve(user: User): Promise<AuthState> {
   const token = await user.getIdTokenResult();

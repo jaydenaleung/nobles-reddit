@@ -12,16 +12,15 @@ import {
 import { Link } from 'react-router-dom';
 import { Icon } from './Icon';
 
-/** The wordmark is plain type. There is no logo. */
-export function Wordmark({ to = '/', asText = false }: { to?: string; asText?: boolean }) {
+export function Wordmark({ asText = false }: { asText?: boolean }) {
   const inner = (
     <>
       {APP_NAME_PARTS.first} <em>{APP_NAME_PARTS.second}</em>
     </>
   );
-  if (asText) return <span className="nb-wordmark">{inner}</span>;
+  if (asText) return <span className="wordmark">{inner}</span>;
   return (
-    <Link className="nb-wordmark" to={to}>
+    <Link className="wordmark" to="/">
       {inner}
     </Link>
   );
@@ -36,28 +35,32 @@ export function Avatar({ author, small = false }: { author: AuthorDisplay; small
       </span>
     );
   }
-  const staff = isStaffRole(author.role) ? ' nb-avatar--staff' : '';
   return (
-    <span className={`nb-avatar${staff}${size}`} aria-hidden="true">
+    <span className={`nb-avatar${size}`} aria-hidden="true">
       {initials(author.name)}
     </span>
   );
 }
 
-export function StaffBadge({ role }: { role: Role | undefined }) {
-  if (!isStaffRole(role)) return null;
-  const word = role === 'admin' ? 'Administration' : role === 'moderator' ? 'Moderator' : 'Faculty';
+const ROLE_WORDS: Partial<Record<Role, string>> = {
+  faculty: 'faculty',
+  moderator: 'faculty',
+  admin: 'admin',
+};
+
+export function RoleTag({ role }: { role: Role | undefined }) {
+  if (!isStaffRole(role) || !role) return null;
   return (
-    <span className="nb-badge nb-badge--staff">
-      <Icon name="shield" /> {word}
+    <span className="role">
+      <Icon name="shield" />
+      {ROLE_WORDS[role]}
     </span>
   );
 }
 
 /**
- * Who wrote something, as other people see it. Colour is never the only cue:
- * anonymous authors get a dashed ring and the word "Anonymous"; staff get the
- * word "Faculty".
+ * Anonymous authors get a dashed ring and the word, so color is never the only sign.
+ * In a thread they also get their letter for that thread ("Anonymous B").
  */
 export function Byline({
   author,
@@ -67,41 +70,36 @@ export function Byline({
 }: {
   author: AuthorDisplay;
   when?: string;
-  /** In a thread the per-thread letter is shown ("Anonymous B"). In the feed it is just "Anonymous". */
   showLetter?: boolean;
   avatar?: boolean;
 }) {
   if (author.mode === 'anonymous') {
     return (
-      <div className="nb-byline nb-byline--anon">
+      <div className="byline byline--anon">
         {avatar && <Avatar author={author} small />}
         <b>{showLetter ? author.anonLabel : 'Anonymous'}</b>
-        {when && <span className="nb-meta">· {when}</span>}
+        {when && <span>{when}</span>}
       </div>
     );
   }
   return (
-    <div className="nb-byline">
+    <div className="byline">
       {avatar && <Avatar author={author} small />}
       <b>{author.name}</b>
       {author.classYear !== undefined && <span>{shortClassYear(author.classYear)}</span>}
-      <StaffBadge role={author.role} />
-      {when && <span className="nb-meta">· {when}</span>}
+      <RoleTag role={author.role} />
+      {when && <span>{when}</span>}
     </div>
   );
 }
 
-/**
- * "Post as": your name or Anonymous. Nothing is preselected, and the notice
- * about what the administration can see is shown every time.
- */
+/** Nothing is preselected, and the notice shows every time. */
 export function IdentityToggle({
   value,
   onChange,
   firstName,
   displayName,
   label = 'Post as',
-  staff = false,
   invalid = false,
 }: {
   value: IdentityMode | null;
@@ -109,7 +107,6 @@ export function IdentityToggle({
   firstName: string;
   displayName: string;
   label?: string;
-  staff?: boolean;
   invalid?: boolean;
 }) {
   const name = useId();
@@ -117,16 +114,16 @@ export function IdentityToggle({
   return (
     <div className="stack">
       <div>
-        <span className="nb-label" id={`${name}-label`}>
+        <span className="label" id={`${name}-label`}>
           {label}
         </span>
         <div
-          className="nb-identity"
+          className="identity"
           role="radiogroup"
           aria-labelledby={`${name}-label`}
           aria-describedby={noticeId}
         >
-          <label className="nb-identity__opt">
+          <label className="identity__opt">
             <input
               type="radio"
               name={name}
@@ -136,13 +133,13 @@ export function IdentityToggle({
               aria-invalid={invalid || undefined}
             />
             <span>
-              <b className={`nb-avatar${staff ? ' nb-avatar--staff' : ''}`} aria-hidden="true">
+              <b className="nb-avatar" aria-hidden="true">
                 {initials(displayName)}
-              </b>{' '}
+              </b>
               {firstName}
             </span>
           </label>
-          <label className="nb-identity__opt nb-identity__opt--anon">
+          <label className="identity__opt identity__opt--anon">
             <input
               type="radio"
               name={name}
@@ -154,14 +151,14 @@ export function IdentityToggle({
             <span>
               <b className="nb-avatar nb-avatar--anon" aria-hidden="true">
                 <Icon name="mask" />
-              </b>{' '}
+              </b>
               Anonymous
             </span>
           </label>
         </div>
         {invalid && (
           <p className="err" role="alert">
-            Choose your name or Anonymous first.
+            Pick your name or Anonymous.
           </p>
         )}
       </div>
@@ -170,14 +167,11 @@ export function IdentityToggle({
   );
 }
 
-/** Shown on the composer every time, in plain words. */
 export function AdminNotice({ id }: { id?: string }) {
   return (
-    <div className="nb-notice nb-notice--staff" id={id}>
+    <div className="notice" id={id}>
       <Icon name="shield" />
-      <div>
-        <b>Visible to administration.</b> {ANONYMITY_NOTICE}
-      </div>
+      <div>{ANONYMITY_NOTICE}</div>
     </div>
   );
 }

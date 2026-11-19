@@ -1,4 +1,4 @@
-import { schoolDate } from '@commons/shared';
+import { ADMIN_DISPLAY_NAME, schoolDate } from '@commons/shared';
 import { doc, getDoc } from 'firebase/firestore';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
@@ -227,7 +227,7 @@ describe('question of the day', () => {
     await expect(getDoc(doc(reader.db, `dailyQuestions/${proposed.docs[0]!.id}`))).rejects.toBeTruthy();
   });
 
-  it('approving one makes a pinned thread in Current events by "Administration" and puts it on the hall screen', async () => {
+  it('approving one makes a pinned thread in Current events by the administration and puts it on the Gleason TV', async () => {
     const proposed = await adminDb.collection('dailyQuestions').where('status', '==', 'proposed').get();
     const chosen = proposed.docs[0]!;
     await expectError(
@@ -249,7 +249,7 @@ describe('question of the day', () => {
       pinnedBy: 'administration',
       questionOfTheDay: true,
       kind: 'poll',
-      authorDisplay: { mode: 'named', name: 'Administration', role: 'admin' },
+      authorDisplay: { mode: 'named', name: ADMIN_DISPLAY_NAME, role: 'admin' },
     });
     // The approving moderator is recorded as the author, in the private collection only.
     expect((await adminDb.doc(`authorship/post:${result.postId}`).get()).data()!.authorUid).toBe(

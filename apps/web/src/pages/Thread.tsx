@@ -67,11 +67,9 @@ function PollVote({
   const total = pollTotal(options);
   return (
     <fieldset className="poll">
-      <legend>
-        {total} {total === 1 ? 'vote' : 'votes'} so far. Choose one; you can change your mind.
-      </legend>
+      <legend>{total === 1 ? '1 vote' : `${total} votes`}. You can change yours.</legend>
       {options.map((option, i) => (
-        <label className={`poll__opt${i % 2 === 1 ? ' alt' : ''}`} key={option.id}>
+        <label className="poll__opt" key={option.id}>
           <input
             type="radio"
             name={`poll-${post.id}`}
@@ -80,12 +78,12 @@ function PollVote({
           />
           <span>{option.label}</span>
           <span>{percents[i]}%</span>
-          <span className="t" aria-hidden="true">
-            <i style={{ width: `${percents[i]}%` }} />
+          <span className="poll__track" aria-hidden="true">
+            <span className="poll__fill" style={{ width: `${percents[i]}%` }} />
           </span>
         </label>
       ))}
-      {mine && <span className="poll__mine">Your vote is counted. Nobody can see how you voted.</span>}
+      {mine && <span className="muted">Voted. Nobody can see what you picked.</span>}
     </fieldset>
   );
 }
@@ -118,7 +116,7 @@ export default function Thread() {
 
   useEffect(() => {
     if (post) {
-      document.title = `${post.title} · ${APP_NAME}`;
+      document.title = `${post.title} | ${APP_NAME}`;
       markOpened(post.id);
     }
   }, [post]);
@@ -133,7 +131,7 @@ export default function Thread() {
     setCountDelta({});
   }, [post?.thoughtfulCount, comments]);
 
-  // A live region tells screen-reader users when new comments arrive.
+  // Screen readers hear when new replies come in.
   useEffect(() => {
     if (!commentsReady) return;
     const visible = comments.filter((c) => c.status === 'visible');
@@ -144,7 +142,7 @@ export default function Thread() {
     const fresh = visible.filter((c) => !seen.current!.has(c.id));
     if (fresh.length > 0) {
       for (const c of fresh) seen.current.add(c.id);
-      setAnnouncement(fresh.length === 1 ? 'One new comment.' : `${fresh.length} new comments.`);
+      setAnnouncement(fresh.length === 1 ? '1 new reply.' : `${fresh.length} new replies.`);
     }
   }, [comments, commentsReady]);
 
@@ -154,18 +152,17 @@ export default function Thread() {
   if (load === 'loading') {
     return (
       <Page sidebar={<Sidebar />}>
-        <Loading label="Opening the thread" />
+        <Loading label="Loading" />
       </Page>
     );
   }
   if (!post) {
     return (
       <Page sidebar={<Sidebar />}>
-        <Empty title="This thread is not available">
-          <p>It may have been removed, or a moderator may be taking a look at it.</p>
-          <Link className="nb-btn" to="/">
-            Back to the front page
-          </Link>
+        <Empty title="This post isn’t available">
+          <p>
+            It was removed, or a mod is looking at it. <Link to="/">Back to all posts</Link>
+          </p>
         </Empty>
       </Page>
     );
@@ -221,7 +218,7 @@ export default function Thread() {
   const remove = async (contentKey: string) => {
     if (
       !window.confirm(
-        'Delete this? It will disappear for everyone. The school keeps its record of who wrote it.',
+        'Delete this? It disappears for everyone. The school still keeps its record of who wrote it.',
       )
     )
       return;
@@ -238,7 +235,7 @@ export default function Thread() {
     try {
       await api.editOwnContent({ contentKey, body: editText });
       setEditing(null);
-      toast('Saved. It is being checked and will reappear in a moment.');
+      toast('Saved. It’ll show again once it’s been checked.');
     } catch (error) {
       toast(errorMessage(error));
     }
@@ -249,7 +246,7 @@ export default function Thread() {
 
   const thoughtfulLabel = (contentKey: string, count: number) => {
     const shown = Math.max(0, count + (countDelta[contentKey] ?? 0));
-    return `Thoughtful · ${shown}`;
+    return `Thoughtful ${shown}`;
   };
 
   const pendingDisplay = (mode: PendingComment['mode']): AuthorDisplay =>
@@ -264,7 +261,7 @@ export default function Thread() {
         <div className="nb-comment nb-comment--pending" key={p.key} aria-busy="true">
           <Avatar author={pendingDisplay(p.mode)} />
           <div>
-            <Byline author={pendingDisplay(p.mode)} when="posting…" avatar={false} showLetter={false} />
+            <Byline author={pendingDisplay(p.mode)} when="posting" avatar={false} showLetter={false} />
             <SafeText className="nb-comment__body" text={p.body} />
           </div>
         </div>
@@ -277,7 +274,7 @@ export default function Thread() {
         <div className="nb-comment nb-comment--gone" key={node.id}>
           <span className="nb-avatar nb-avatar--sm" aria-hidden="true" />
           <div>
-            <p className="nb-comment__body">This comment is no longer here.</p>
+            <p className="nb-comment__body">Deleted.</p>
             <div className="nb-comment__replies">{node.children.map(renderNode)}</div>
           </div>
         </div>
@@ -292,37 +289,25 @@ export default function Thread() {
         <div>
           <Byline author={c.authorDisplay} when={relativeTime(created, now)} avatar={false} />
           {hidden && (
-            <span className="nb-badge nb-badge--live">
-              {c.status === 'held'
-                ? 'Held: only moderators can see this'
-                : 'Removed: only moderators can see this'}
-            </span>
+            <span className="flag">{c.status === 'held' ? 'Hidden, mods only' : 'Removed, mods only'}</span>
           )}
           {editing === key ? (
             <div className="stack nb-comment__form">
-              <label className="nb-label" htmlFor={`edit-${c.id}`}>
-                Edit your comment
+              <label className="label" htmlFor={`edit-${c.id}`}>
+                Edit
               </label>
               <textarea
-                className="nb-textarea"
+                className="textarea"
                 id={`edit-${c.id}`}
                 value={editText}
                 maxLength={LIMITS.commentMax}
                 onChange={(event) => setEditText(event.target.value)}
               />
               <div className="row">
-                <button
-                  className="nb-btn nb-btn--primary nb-btn--sm"
-                  type="button"
-                  onClick={() => void saveEdit(key)}
-                >
+                <button className="btn btn--primary btn--sm" type="button" onClick={() => void saveEdit(key)}>
                   Save
                 </button>
-                <button
-                  className="nb-btn nb-btn--quiet nb-btn--sm"
-                  type="button"
-                  onClick={() => setEditing(null)}
-                >
+                <button className="btn btn--quiet btn--sm" type="button" onClick={() => setEditing(null)}>
                   Cancel
                 </button>
               </div>
@@ -333,7 +318,8 @@ export default function Thread() {
           <div className="nb-comment__actions">
             {!hidden && (
               <button type="button" aria-pressed={votes.thoughtful.has(key)} onClick={() => void toggle(key)}>
-                <Icon name="up" /> {thoughtfulLabel(key, c.thoughtfulCount)}
+                <Icon name="up" />
+                {thoughtfulLabel(key, c.thoughtfulCount)}
               </button>
             )}
             {!hidden && c.depth < LIMITS.maxDepth && (
@@ -342,12 +328,14 @@ export default function Thread() {
                 onClick={() => setReplyTo(replyTo === c.id ? null : c.id)}
                 aria-expanded={replyTo === c.id}
               >
-                <Icon name="comment" /> Reply
+                <Icon name="comment" />
+                Reply
               </button>
             )}
             {!hidden && (
               <button type="button" onClick={() => setReport(key)}>
-                <Icon name="flag" /> Report
+                <Icon name="flag" />
+                Report
               </button>
             )}
             {canEdit(key, created) && (
@@ -378,7 +366,8 @@ export default function Thread() {
                   })
                 }
               >
-                <Icon name="shield" /> Moderate
+                <Icon name="shield" />
+                Moderate
               </button>
             )}
             {isAdmin && (
@@ -426,43 +415,39 @@ export default function Thread() {
   const visibleCount = comments.filter((c) => c.status === 'visible').length;
 
   return (
-    <Page sidebar={<Sidebar spaceName={space?.name} spaceDescription={space?.description} />}>
+    <Page sidebar={<Sidebar spaceDescription={space?.description} />}>
       <article className="th">
         <div className="th-card">
-          <div className="ph-bar" style={{ display: 'flex' }}>
-            <Link className="nb-btn nb-btn--quiet nb-btn--sm th-back" to={space ? `/s/${space.slug}` : '/'}>
-              ← {post.spaceName}
-            </Link>
-            <span className="nb-meta">
-              {post.commentCount} {post.commentCount === 1 ? 'reply' : 'replies'}
-            </span>
-          </div>
+          <Link className="th-back" to={space ? `/s/${space.slug}` : '/'}>
+            <Icon name="left" />
+            {post.spaceName}
+          </Link>
           {post.pinned && (
-            <div className="nb-post__pin">
-              <Icon name="pin" />{' '}
-              {post.pinnedBy === 'administration' ? 'Pinned by the administration' : 'Pinned'}
-            </div>
+            <span className="pin">
+              <Icon name="pin" />
+              Pinned
+            </span>
           )}
           {post.status !== 'visible' && (
-            <div className="nb-notice" role="status">
-              <div>
-                <b>{post.status === 'held' ? 'Held.' : 'Removed.'}</b> Only moderators can see this thread.
-              </div>
-            </div>
+            <p className="flag" role="status">
+              {post.status === 'held'
+                ? 'Hidden. Only mods can see this.'
+                : 'Removed. Only mods can see this.'}
+            </p>
           )}
           <h1 className="th-title">
-            {post.questionOfTheDay ? <span className="nb-hl">{post.title}</span> : post.title}
+            {post.questionOfTheDay ? <span className="hl">{post.title}</span> : post.title}
           </h1>
           <Byline author={post.authorDisplay} when={relativeTime(createdMs, now)} />
-          {post.questionOfTheDay && <span className="nb-meta">Question of the day</span>}
+          {post.questionOfTheDay && <span className="muted">Question of the day</span>}
 
           {editing === pKey ? (
             <div className="stack">
-              <label className="nb-label" htmlFor="edit-post">
-                Edit your post
+              <label className="label" htmlFor="edit-post">
+                Edit
               </label>
               <textarea
-                className="nb-textarea"
+                className="textarea"
                 id="edit-post"
                 value={editText}
                 maxLength={LIMITS.bodyMax}
@@ -470,17 +455,13 @@ export default function Thread() {
               />
               <div className="row">
                 <button
-                  className="nb-btn nb-btn--primary nb-btn--sm"
+                  className="btn btn--primary btn--sm"
                   type="button"
                   onClick={() => void saveEdit(pKey)}
                 >
                   Save
                 </button>
-                <button
-                  className="nb-btn nb-btn--quiet nb-btn--sm"
-                  type="button"
-                  onClick={() => setEditing(null)}
-                >
+                <button className="btn btn--quiet btn--sm" type="button" onClick={() => setEditing(null)}>
                   Cancel
                 </button>
               </div>
@@ -490,13 +471,9 @@ export default function Thread() {
           )}
 
           {post.kind === 'link' && post.link && (
-            <a className="nb-source" href={post.link.url} target="_blank" rel="noopener noreferrer nofollow">
-              <div className="nb-source__from">
-                <Icon name="ext" /> {post.link.source === 'nobleman' ? 'From the Nobleman' : post.link.domain}
-                {post.sample ? ' · sample link' : ''}
-              </div>
-              <div className="nb-source__title">{post.link.title ?? post.link.url}</div>
-              <div className="nb-source__meta">Opens in a new tab. This is an outside site.</div>
+            <a className="post__link" href={post.link.url} target="_blank" rel="noopener noreferrer nofollow">
+              <Icon name="ext" />
+              <span>{post.link.url}</span>
             </a>
           )}
 
@@ -511,26 +488,24 @@ export default function Thread() {
           <div className="th-actions">
             {post.status === 'visible' && (
               <button
-                className="nb-btn nb-btn--sm th-vote"
+                className="btn btn--sm th-vote"
                 type="button"
                 aria-pressed={votes.thoughtful.has(pKey)}
                 onClick={() => void toggle(pKey)}
               >
-                <Icon name="up" /> {thoughtfulLabel(pKey, post.thoughtfulCount)}
+                <Icon name="up" />
+                {thoughtfulLabel(pKey, post.thoughtfulCount)}
               </button>
             )}
             {post.status === 'visible' && (
-              <button
-                className="nb-btn nb-btn--quiet nb-btn--sm"
-                type="button"
-                onClick={() => setReport(pKey)}
-              >
-                <Icon name="flag" /> Report
+              <button className="btn btn--quiet btn--sm" type="button" onClick={() => setReport(pKey)}>
+                <Icon name="flag" />
+                Report
               </button>
             )}
             {canEdit(pKey, createdMs) && (
               <button
-                className="nb-btn nb-btn--quiet nb-btn--sm"
+                className="btn btn--quiet btn--sm"
                 type="button"
                 onClick={() => {
                   setEditing(pKey);
@@ -541,31 +516,24 @@ export default function Thread() {
               </button>
             )}
             {mine.keys.has(pKey) && (
-              <button
-                className="nb-btn nb-btn--quiet nb-btn--sm"
-                type="button"
-                onClick={() => void remove(pKey)}
-              >
+              <button className="btn btn--quiet btn--sm" type="button" onClick={() => void remove(pKey)}>
                 Delete
               </button>
             )}
             {isMod && (
               <button
-                className="nb-btn nb-btn--quiet nb-btn--sm"
+                className="btn btn--quiet btn--sm"
                 type="button"
                 onClick={() =>
                   setModTarget({ contentKey: pKey, kind: 'post', status: post.status, pinned: post.pinned })
                 }
               >
-                <Icon name="shield" /> Moderate
+                <Icon name="shield" />
+                Moderate
               </button>
             )}
             {isAdmin && (
-              <button
-                className="nb-btn nb-btn--quiet nb-btn--sm"
-                type="button"
-                onClick={() => setReveal(pKey)}
-              >
+              <button className="btn btn--quiet btn--sm" type="button" onClick={() => setReveal(pKey)}>
                 Who wrote this?
               </button>
             )}
@@ -580,38 +548,34 @@ export default function Thread() {
           >
             {summaryStale && !summary && (
               <button
-                className="nb-btn nb-btn--sm"
+                className="btn btn--sm"
                 type="button"
                 onClick={() => void askSummary()}
                 disabled={summaryBusy}
               >
-                {summaryBusy ? 'Updating' : 'Update the summary'}
+                {summaryBusy ? 'Updating' : 'Update summary'}
               </button>
             )}
           </SummaryBox>
         ) : (
           canSummarise && (
-            <section className="nb-ai" aria-label="Auto-summary">
-              <div className="nb-ai__head">
-                <span className="nb-badge nb-badge--ai">Auto-summary</span>
-                <span className="nb-ai__how">Written by our model, not by a person.</span>
-              </div>
+            <section className="summary" aria-label="Summary">
               {summary && !summary.available ? (
-                <p className="nb-ai__how" role="status">
+                <p className="summary__head" role="status" style={{ margin: 0 }}>
                   {summary.reason === 'unavailable-today'
-                    ? 'Summaries are unavailable for the rest of today. Everything else works as usual.'
-                    : 'A summary is not available right now. Everything else works as usual.'}
+                    ? 'Summaries are off for the rest of today.'
+                    : 'Couldn’t get a summary right now.'}
                 </p>
               ) : (
-                <div className="nb-ai__foot" style={{ marginTop: 0 }}>
-                  <span>This thread is long enough for a short summary.</span>
+                <div className="summary__foot" style={{ marginTop: 0 }}>
+                  <span>Long thread. A computer model can sum it up.</span>
                   <button
-                    className="nb-btn nb-btn--sm"
+                    className="btn btn--sm"
                     type="button"
                     onClick={() => void askSummary()}
                     disabled={summaryBusy}
                   >
-                    {summaryBusy ? 'Writing it' : 'Summarise this thread'}
+                    {summaryBusy ? 'Working' : 'Summarize'}
                   </button>
                 </div>
               )}
@@ -621,17 +585,15 @@ export default function Thread() {
 
         <section className="th-card" aria-labelledby="comments-h">
           <h2 className="th-h" id="comments-h">
-            {visibleCount === 0
-              ? 'Comments'
-              : `${visibleCount} ${visibleCount === 1 ? 'comment' : 'comments'}`}
+            {visibleCount === 0 ? 'Replies' : `${visibleCount} ${visibleCount === 1 ? 'reply' : 'replies'}`}
           </h2>
           <div className="nb-sr" aria-live="polite" role="status">
             {announcement}
           </div>
           {!commentsReady ? (
-            <p className="muted">Loading comments…</p>
+            <p className="muted">Loading replies</p>
           ) : tree.length === 0 && pending.length === 0 ? (
-            <p className="muted">No comments yet. Be the first?</p>
+            <p className="muted">No replies yet.</p>
           ) : (
             <div className="th-comments">
               {tree.map(renderNode)}
@@ -641,7 +603,7 @@ export default function Thread() {
         </section>
 
         {post.status === 'visible' && (
-          <section className="nb-composer" aria-label="Add a comment">
+          <section className="composer composer--reply" aria-label="Reply">
             <ReplyComposer
               postId={post.id}
               parentId={null}

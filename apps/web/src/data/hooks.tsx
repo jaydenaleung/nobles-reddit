@@ -43,8 +43,6 @@ export type Load = 'loading' | 'ready' | 'error';
 export type SpaceView = Space & { id: string };
 export type CommentView = Comment & { id: string };
 
-/* ---------- Spaces: loaded once for the signed-in shell, kept live ---------- */
-
 interface SpacesValue {
   spaces: SpaceView[];
   load: Load;
@@ -84,33 +82,48 @@ export function SpacesProvider({ children }: { children: ReactNode }) {
 }
 export const useSpaces = () => useContext(SpacesContext);
 
-/* ---------- The feed ---------- */
-
 const toPost = (d: DocumentSnapshot): PostView => ({ id: d.id, ...(d.data() as Omit<PostView, 'id'>) });
 
+/** The most pages a URL can ask for on load, so a hand-edited ?page=500 can't pull the whole collection. */
+export const MAX_START_PAGES = 10;
+
+/** Pinned first, then most thoughtful marks, then hot score. */
+function rankTop(posts: PostView[]): PostView[] {
+  return [...posts].sort((a, b) =>
+    a.pinned !== b.pinned ? (a.pinned ? -1 : 1) : b.thoughtfulCount - a.thoughtfulCount || compareHot(a, b),
+  );
+}
+
 /**
- * One page of the feed at a time, 20 threads a page, with a cursor.
- * Pinned threads come first in every sort. Only visible threads are asked
- * for: the rules reject any query that does not say so.
+ * Real pagination over the posts collection, PAGE_SIZE at a time, with a
+ * Firestore cursor. `startPages` comes from ?page= in the URL, so a refresh
+ * loads as many pages as you had. Posts are de-duplicated by id because hot
+ * scores can change between fetches.
+ *
+ * "Top this week" can't be ordered by score in one Firestore query, so it
+ * fetches the week's posts (up to 200) once and pages through that list.
  */
-export function useFeed(spaceId: string | undefined, sort: Sort) {
+export function useFeed(spaceId: string | undefined, sort: Sort, startPages: number) {
   const [posts, setPosts] = useState<PostView[]>([]);
   const [load, setLoad] = useState<Load>('loading');
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const cursor = useRef<DocumentSnapshot | null>(null);
-  const shown = useRef(PAGE_SIZE);
-  const weekPool = useRef<PostView[]>([]);
+  const [moreFailed, setMoreFailed] = useState(false);
+  const [pages, setPages] = useState(1);
   const [version, setVersion] = useState(0);
+  const cursor = useRef<DocumentSnapshot | null>(null);
+  const weekPool = useRef<PostView[]>([]);
+  const busy = useRef(false);
+  const start = useRef(startPages);
+  start.current = startPages;
 
-  const fetchPage = useCallback(
-    async (after: DocumentSnapshot | null) => {
+  const fetchPosts = useCallback(
+    (count: number, after: DocumentSnapshot | null) => {
       const constraints: QueryConstraint[] = [];
       if (sort === 'unanswered') constraints.push(where('commentCount', '==', 0));
       if (spaceId) constraints.push(where('spaceId', '==', spaceId));
       constraints.push(where('status', '==', 'visible'));
       if (sort === 'top') {
-        // "Top this week": the week's threads, ranked on this device. Fine at school scale; see docs/DECISIONS.md.
         const weekAgo = Timestamp.fromMillis(Date.now() - 7 * 24 * 60 * 60 * 1000);
         constraints.push(where('createdAt', '>=', weekAgo), orderBy('createdAt', 'desc'), limit(200));
       } else {
@@ -119,7 +132,7 @@ export function useFeed(spaceId: string | undefined, sort: Sort) {
           orderBy(sort === 'hot' ? 'hotScore' : 'createdAt', 'desc'),
         );
         if (after) constraints.push(startAfter(after));
-        constraints.push(limit(PAGE_SIZE + 1));
+        constraints.push(limit(count + 1));
       }
       return getDocs(query(collection(db, 'posts'), ...constraints));
     },
@@ -128,31 +141,27 @@ export function useFeed(spaceId: string | undefined, sort: Sort) {
 
   useEffect(() => {
     let cancelled = false;
+    const wanted = Math.min(Math.max(1, start.current), MAX_START_PAGES);
     setLoad('loading');
     setPosts([]);
+    setMoreFailed(false);
     cursor.current = null;
-    shown.current = PAGE_SIZE;
-    fetchPage(null).then(
+    fetchPosts(wanted * PAGE_SIZE, null).then(
       (snap) => {
         if (cancelled) return;
+        let shown: PostView[];
         if (sort === 'top') {
-          weekPool.current = snap.docs
-            .map(toPost)
-            .sort((a, b) =>
-              a.pinned !== b.pinned
-                ? a.pinned
-                  ? -1
-                  : 1
-                : b.thoughtfulCount - a.thoughtfulCount || compareHot(a, b),
-            );
-          setPosts(weekPool.current.slice(0, PAGE_SIZE));
-          setHasMore(weekPool.current.length > PAGE_SIZE);
+          weekPool.current = rankTop(snap.docs.map(toPost));
+          shown = weekPool.current.slice(0, wanted * PAGE_SIZE);
+          setHasMore(weekPool.current.length > shown.length);
         } else {
-          const page = snap.docs.slice(0, PAGE_SIZE);
-          cursor.current = page[page.length - 1] ?? null;
-          setPosts(page.map(toPost));
-          setHasMore(snap.docs.length > PAGE_SIZE);
+          const docs = snap.docs.slice(0, wanted * PAGE_SIZE);
+          cursor.current = docs[docs.length - 1] ?? null;
+          shown = docs.map(toPost);
+          setHasMore(snap.docs.length > docs.length);
         }
+        setPosts(shown);
+        setPages(Math.max(1, Math.ceil(shown.length / PAGE_SIZE)));
         setLoad('ready');
       },
       () => !cancelled && setLoad('error'),
@@ -160,36 +169,47 @@ export function useFeed(spaceId: string | undefined, sort: Sort) {
     return () => {
       cancelled = true;
     };
-  }, [fetchPage, sort, version]);
+  }, [fetchPosts, sort, version]);
 
   const loadMore = useCallback(async () => {
-    if (sort === 'top') {
-      shown.current += PAGE_SIZE;
-      setPosts(weekPool.current.slice(0, shown.current));
-      setHasMore(weekPool.current.length > shown.current);
-      return;
-    }
-    if (!cursor.current) return;
+    if (busy.current || !hasMore) return;
+    busy.current = true;
     setLoadingMore(true);
+    setMoreFailed(false);
     try {
-      const snap = await fetchPage(cursor.current);
-      const page = snap.docs.slice(0, PAGE_SIZE);
-      cursor.current = page[page.length - 1] ?? cursor.current;
-      setPosts((current) => [...current, ...page.map(toPost)]);
-      setHasMore(snap.docs.length > PAGE_SIZE);
+      let fresh: PostView[];
+      let more: boolean;
+      if (sort === 'top') {
+        const next = (pages + 1) * PAGE_SIZE;
+        fresh = weekPool.current.slice(pages * PAGE_SIZE, next);
+        more = weekPool.current.length > next;
+      } else {
+        const snap = await fetchPosts(PAGE_SIZE, cursor.current);
+        const docs = snap.docs.slice(0, PAGE_SIZE);
+        if (docs.length > 0) cursor.current = docs[docs.length - 1]!;
+        fresh = docs.map(toPost);
+        more = snap.docs.length > docs.length;
+      }
+      setPosts((current) => {
+        const seen = new Set(current.map((p) => p.id));
+        return [...current, ...fresh.filter((p) => !seen.has(p.id))];
+      });
+      setHasMore(more);
+      setPages((n) => n + 1);
     } catch {
-      setLoad('error');
+      setMoreFailed(true);
     } finally {
+      busy.current = false;
       setLoadingMore(false);
     }
-  }, [fetchPage, sort]);
+  }, [fetchPosts, hasMore, pages, sort]);
 
   const patch = useCallback((id: string, change: (post: PostView) => PostView) => {
     setPosts((current) => current.map((p) => (p.id === id ? change(p) : p)));
   }, []);
   const reload = useCallback(() => setVersion((v) => v + 1), []);
 
-  return { posts, load, hasMore, loadMore, loadingMore, reload, patch };
+  return { posts, load, hasMore, loadMore, loadingMore, moreFailed, pages, reload, patch };
 }
 
 /** Server-side search on the `searchTokens` index. Finds threads by their words, never by author. */
@@ -232,8 +252,6 @@ export function useSearch(text: string) {
   }, []);
   return { posts, load, tokens, patch };
 }
-
-/* ---------- My own marks ("Thoughtful") and poll votes ---------- */
 
 export interface MyVotes {
   thoughtful: Set<string>;
@@ -301,8 +319,6 @@ export function useMyVotes(uid: string, postIds: string[]) {
   return { votes, setThoughtful, setPoll };
 }
 
-/* ---------- One thread, live ---------- */
-
 export function useThread(postId: string, seeAll: boolean) {
   const [post, setPost] = useState<PostView | null>(null);
   const [comments, setComments] = useState<CommentView[]>([]);
@@ -349,8 +365,6 @@ export function useThread(postId: string, seeAll: boolean) {
   return { post, comments, load, commentsReady };
 }
 
-/* ---------- Which content is mine (so I can edit or delete it) ---------- */
-
 interface MineValue {
   items: MyContentItem[];
   keys: Set<string>;
@@ -395,8 +409,6 @@ export function MineProvider({ children }: { children: ReactNode }) {
   return <MineContext.Provider value={value}>{children}</MineContext.Provider>;
 }
 export const useMine = () => useContext(MineContext);
-
-/* ---------- The hall screen feed (the one public document) ---------- */
 
 export function useBoardFeed() {
   const [feed, setFeed] = useState<BoardFeed | null>(null);

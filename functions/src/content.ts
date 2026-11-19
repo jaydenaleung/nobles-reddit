@@ -62,7 +62,7 @@ export const createPost = callable(
       if (!spaceSnap.exists) throw errors.notFound('That space');
       const space = spaceSnap.data() as Space;
       if (!space.postingRoles.includes(caller.role)) {
-        throw new AppError('permission-denied', 'You cannot post in that space.');
+        throw new AppError('permission-denied', 'You can’t post in that space.');
       }
 
       // The author gets letter A in their own thread if they post anonymously.
@@ -128,7 +128,7 @@ export const createComment = callable(
         if (!parent.exists || parent.data()!.status !== 'visible') throw errors.notFound('That comment');
         depth = (parent.data()!.depth as number) + 1;
         if (depth > LIMITS.maxDepth) {
-          throw errors.invalid('This conversation is as deep as it goes. Reply one level up.');
+          throw errors.invalid('Replies can’t nest any deeper. Reply one level up.');
         }
       }
 
@@ -162,11 +162,11 @@ async function ownContent(
   uid: string,
 ): Promise<{ parsed: ParsedContentKey; ref: DocumentReference; data: FirebaseFirestore.DocumentData }> {
   const parsed = parseContentKey(contentKey);
-  if (!parsed) throw errors.invalid('That does not look right.');
+  if (!parsed) throw errors.invalid('That doesn’t look right.');
   const ref = db.doc(contentPath(parsed));
   const [authorship, content] = await Promise.all([tx.get(db.doc(`authorship/${contentKey}`)), tx.get(ref)]);
   if (!authorship.exists || !content.exists || authorship.data()!.authorUid !== uid) {
-    throw new AppError('permission-denied', 'You can only change your own posts and comments.');
+    throw new AppError('permission-denied', 'You can only change your own posts.');
   }
   return { parsed, ref, data: content.data()! };
 }
@@ -179,10 +179,7 @@ export const editOwnContent = callable(
       if (current.status === 'removed') throw errors.notFound('That');
       const createdMs = current.createdAt?.toMillis?.() ?? 0;
       if (Date.now() - createdMs > EDIT_WINDOW_MS) {
-        throw new AppError(
-          'failed-precondition',
-          'You can edit for 10 minutes after posting. That time has passed.',
-        );
+        throw new AppError('failed-precondition', 'You can only edit in the first 10 minutes.');
       }
       const update: Record<string, unknown> = {
         body: data.body,
@@ -244,13 +241,13 @@ export const getMyContentStatus = callable(
   { name: 'getMyContentStatus', schema: contentKeyOnlySchema, rate: 'reads' },
   async (data, caller): Promise<ContentStatusResult> => {
     const parsed = parseContentKey(data.contentKey);
-    if (!parsed) throw errors.invalid('That does not look right.');
+    if (!parsed) throw errors.invalid('That doesn’t look right.');
     const [authorship, content] = await db.getAll(
       db.doc(`authorship/${data.contentKey}`),
       db.doc(contentPath(parsed)),
     );
     if (!authorship?.exists || !content?.exists || authorship.data()!.authorUid !== caller.uid) {
-      throw new AppError('permission-denied', 'You can only check your own posts and comments.');
+      throw new AppError('permission-denied', 'You can only check your own posts.');
     }
     const c = content.data()!;
     if (c.screening === 'pending') return { outcome: 'pending' };

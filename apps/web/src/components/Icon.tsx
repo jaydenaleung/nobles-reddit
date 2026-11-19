@@ -1,10 +1,7 @@
-/**
- * The icon set, taken unchanged from the reference pages. The sprite is
- * rendered once; <Icon name="up" /> points at a symbol in it.
- * Icons are decorative: the words next to them carry the meaning.
- */
+// One inline sprite; <Icon name="up" /> points at a symbol in it. Icons sit next to words, so screen readers skip them.
 export type IconName =
   | 'mask'
+  | 'left'
   | 'up'
   | 'comment'
   | 'pin'
@@ -35,6 +32,9 @@ export function IconSprite() {
           <path d="M3 8.5c3-1.8 6-1.8 9 0 3-1.8 6-1.8 9 0v2.5c0 3.2-2.2 5.5-4.8 5.5-1.7 0-2.8-1.1-3.6-2.5h-1.2c-.8 1.4-1.9 2.5-3.6 2.5C5.200 16.500 3 14.200 3 11z" />
           <circle cx="8" cy="11.200" r="1.200" />
           <circle cx="16" cy="11.200" r="1.200" />
+        </symbol>
+        <symbol id="i-left" viewBox="0 0 24 24">
+          <path d="M19 12H6M11 6.500l-6 5.500 6 5.500" />
         </symbol>
         <symbol id="i-up" viewBox="0 0 24 24">
           <path d="M12 19V6M6 11.500l6-6 6 6" />

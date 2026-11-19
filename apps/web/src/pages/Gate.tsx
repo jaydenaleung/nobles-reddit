@@ -4,7 +4,6 @@ import {
   DIVISIONS,
   DIVISION_LABELS,
   GROUND_RULES,
-  SCHOOL_NAME,
   type Division,
 } from '@commons/shared';
 import { useEffect, useId, useState, type FormEvent } from 'react';
@@ -12,90 +11,44 @@ import { Link, Navigate } from 'react-router-dom';
 import { errorMessage } from '../api';
 import { useAuth } from '../auth/AuthContext';
 import { USE_EMULATORS, config } from '../config';
-import { Icon } from '../components/Icon';
 import { PublicFrame } from '../components/Layout';
 import { Loading } from '../components/Ui';
 
-/**
- * Emulator builds only: made-up people for local development and tests.
- * It is rendered behind a build-time constant, so production builds leave it out entirely.
- */
-function DevelopmentSignIn() {
+/** Emulator builds only, compiled out of production. Signs in as any address through the Auth emulator. */
+function EmulatorSignIn() {
   const { signInForDevelopment } = useAuth();
-  const [email, setEmail] = useState('sample.student@nobles.edu');
+  const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   if (!signInForDevelopment) return null;
-  const go = async (address: string, name: string) => {
+  const go = async (event: FormEvent) => {
+    event.preventDefault();
     setError(null);
     try {
-      await signInForDevelopment(address, name);
+      await signInForDevelopment(email.trim(), 'Emulator User');
     } catch (err) {
       setError(errorMessage(err));
     }
   };
   return (
-    <section className="panel" aria-label="Local development sign-in">
-      <h2>Local development</h2>
-      <p className="muted">
-        This box only exists when the app runs against the Firebase emulators. These are made-up people.
-      </p>
-      <div className="row">
-        <button
-          className="nb-btn nb-btn--sm"
-          type="button"
-          onClick={() => void go('sample.student@nobles.edu', 'Sample Student')}
-        >
-          Sample student
-        </button>
-        <button
-          className="nb-btn nb-btn--sm"
-          type="button"
-          onClick={() => void go('sample.teacher@nobles.edu', 'Sample Teacher')}
-        >
-          Sample teacher
-        </button>
-        <button
-          className="nb-btn nb-btn--sm"
-          type="button"
-          onClick={() => void go('sample.moderator@nobles.edu', 'Sample Moderator')}
-        >
-          Sample moderator
-        </button>
-        <button
-          className="nb-btn nb-btn--sm"
-          type="button"
-          onClick={() => void go('sample.admin@nobles.edu', 'Sample Admin')}
-        >
-          Sample admin
-        </button>
-      </div>
-      <form
-        className="row"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void go(email.trim(), 'Sample Person');
-        }}
-      >
-        <label className="nb-sr" htmlFor="dev-email">
+    <form className="panel" onSubmit={(event) => void go(event)}>
+      <h2>Emulator</h2>
+      <div className="field">
+        <label className="label" htmlFor="dev-email">
           Any email address
         </label>
-        <input
-          className="nb-input"
-          id="dev-email"
-          style={{ flex: 1, minWidth: 220 }}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <button className="nb-btn nb-btn--sm" type="submit">
+        <input className="input" id="dev-email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      </div>
+      <div className="row">
+        <button className="btn btn--sm" type="submit">
           Sign in as this address
         </button>
-      </form>
+      </div>
       {error && (
         <p className="err" role="alert">
           {error}
         </p>
       )}
-    </section>
+    </form>
   );
 }
 
@@ -105,7 +58,7 @@ export function SignIn() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = `Sign in · ${APP_NAME}`;
+    document.title = `Sign in | ${APP_NAME}`;
   }, []);
 
   if (state.status === 'member') return <Navigate to="/" replace />;
@@ -121,8 +74,8 @@ export function SignIn() {
       if (code !== 'auth/popup-closed-by-user' && code !== 'auth/cancelled-popup-request') {
         setError(
           code === 'auth/popup-blocked'
-            ? 'Your browser blocked the sign-in window. Allow pop-ups for this site and try again.'
-            : 'Sign-in did not work. Please try again.',
+            ? 'Your browser blocked the sign-in window. Allow pop-ups for this site, then try again.'
+            : 'Sign-in didn’t work. Try again.',
         );
       }
     } finally {
@@ -132,34 +85,21 @@ export function SignIn() {
 
   return (
     <PublicFrame>
-      <div className="gate__card" style={{ justifySelf: 'center' }}>
-        <h1>A place for all of us to talk.</h1>
-        <p className="page-lede">
-          {APP_NAME} is a discussion board for students and faculty at {SCHOOL_NAME}: school news, what’s
-          going on in the world, and whatever else is on our minds. Kind and honest, both.
-        </p>
+      <div className="gate">
         {notice && (
-          <div className="nb-notice" role="alert">
-            <div>{notice}</div>
-          </div>
+          <p className="notice" role="alert">
+            {notice}
+          </p>
         )}
         {state.status === 'loading' ? (
-          <Loading label="Checking whether you are signed in" />
+          <Loading />
         ) : (
           <section className="panel">
-            <h2>Sign in</h2>
-            <p>
-              Anyone with a <b>@{config.allowedDomains.join(' or @')}</b> Google account can join. Other
-              accounts, including personal Gmail, cannot.
-            </p>
+            <h1 className="page-h">Sign in</h1>
+            <p>Use your @{config.allowedDomains.join(' or @')} Google account. Personal Gmail won’t work.</p>
             <div className="row">
-              <button
-                className="nb-btn nb-btn--primary"
-                type="button"
-                onClick={() => void go()}
-                disabled={busy}
-              >
-                {busy ? 'Opening Google' : 'Sign in with your Nobles Google account'}
+              <button className="btn btn--primary" type="button" onClick={() => void go()} disabled={busy}>
+                {busy ? 'Opening Google' : 'Sign in with Google'}
               </button>
             </div>
             {error && (
@@ -168,18 +108,11 @@ export function SignIn() {
               </p>
             )}
             <p className="muted">
-              We ask Google for your name and school email, nothing else. No ads and no trackers.{' '}
-              <Link to="/about">How it works and who can see what</Link>.
+              {ANONYMITY_NOTICE} <Link to="/about">How this works</Link>
             </p>
           </section>
         )}
-        {USE_EMULATORS && <DevelopmentSignIn />}
-        <div className="nb-notice nb-notice--staff">
-          <Icon name="shield" />
-          <div>
-            <b>Who can see what.</b> {ANONYMITY_NOTICE}
-          </div>
-        </div>
+        {USE_EMULATORS && <EmulatorSignIn />}
       </div>
     </PublicFrame>
   );
@@ -202,7 +135,7 @@ export function Onboarding() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = `Welcome · ${APP_NAME}`;
+    document.title = `Set up | ${APP_NAME}`;
   }, []);
 
   if (state.status === 'loading') {
@@ -223,9 +156,9 @@ export function Onboarding() {
     setError(null);
     if (!firstName.trim()) return setError('Add your first name.');
     if (!/^\p{L}$/u.test(lastInitial.trim())) return setError('Add the first letter of your last name.');
-    if (!who) return setError('Tell us whether you are a student or faculty.');
-    if (who === 'student' && !classYear) return setError('Choose your class year.');
-    if (!understood) return setError('Please tick the box to say you understand how it works.');
+    if (!who) return setError('Pick student or faculty.');
+    if (who === 'student' && !classYear) return setError('Pick your class year.');
+    if (!understood) return setError('Check the box at the bottom first.');
     setBusy(true);
     try {
       await completeOnboarding({
@@ -241,26 +174,24 @@ export function Onboarding() {
     }
   };
 
+  const preview = `${firstName.trim() || 'First'} ${lastInitial.trim() || 'L'}.`;
+
   return (
     <PublicFrame>
-      <form
-        className="gate__card"
-        style={{ justifySelf: 'center' }}
-        onSubmit={(event) => void submit(event)}
-        noValidate
-      >
-        <h1>Welcome. Two minutes, then you’re in.</h1>
-        <p className="page-lede">Signed in as {state.user.email}.</p>
+      <form className="gate" onSubmit={(event) => void submit(event)} noValidate>
+        <h1 className="page-h">Set up your account</h1>
+        <p className="muted" style={{ margin: 0 }}>
+          Signed in as {state.user.email}
+        </p>
 
         <section className="panel">
-          <h2>How your name will show</h2>
           <div className="field-row">
             <div className="field">
-              <label className="nb-label" htmlFor={`${id}-first`}>
+              <label className="label" htmlFor={`${id}-first`}>
                 First name
               </label>
               <input
-                className="nb-input"
+                className="input"
                 id={`${id}-first`}
                 value={firstName}
                 maxLength={40}
@@ -268,12 +199,12 @@ export function Onboarding() {
                 onChange={(e) => setFirstName(e.target.value)}
               />
             </div>
-            <div className="field" style={{ flex: '0 1 160px' }}>
-              <label className="nb-label" htmlFor={`${id}-last`}>
+            <div className="field" style={{ flex: '0 1 120px' }}>
+              <label className="label" htmlFor={`${id}-last`}>
                 Last initial
               </label>
               <input
-                className="nb-input"
+                className="input"
                 id={`${id}-last`}
                 value={lastInitial}
                 maxLength={1}
@@ -281,13 +212,10 @@ export function Onboarding() {
               />
             </div>
           </div>
-          <p className="nb-help">
-            When you post under your name, people see “{firstName.trim() || 'First'}{' '}
-            {lastInitial.trim() || 'L'}.” We do not show your full last name or your photo.
-          </p>
+          <p className="help">Posts with your name show “{preview}” and nothing else.</p>
 
           <fieldset className="radio-list">
-            <legend>I am</legend>
+            <legend>You are</legend>
             <label>
               <input
                 type="radio"
@@ -308,17 +236,17 @@ export function Onboarding() {
             </label>
           </fieldset>
           {who === 'student' && (
-            <div className="field" style={{ maxWidth: 220 }}>
-              <label className="nb-label" htmlFor={`${id}-year`}>
+            <div className="field" style={{ maxWidth: 200 }}>
+              <label className="label" htmlFor={`${id}-year`}>
                 Class year
               </label>
               <select
-                className="nb-select"
+                className="select"
                 id={`${id}-year`}
                 value={classYear}
                 onChange={(e) => setClassYear(e.target.value)}
               >
-                <option value="">Choose a year</option>
+                <option value="">Pick one</option>
                 {years.map((year) => (
                   <option key={year} value={year}>
                     {year}
@@ -328,13 +256,12 @@ export function Onboarding() {
             </div>
           )}
           {who === 'faculty' && (
-            <p className="nb-help">
-              The “Faculty” badge is added by the administration, not by this form. Until then you can read
-              and post like everyone else.
+            <p className="help">
+              An admin adds the faculty label to your account. Until then you post like anyone else.
             </p>
           )}
           <fieldset className="radio-list">
-            <legend>Which part of the school? (optional)</legend>
+            <legend>Upper or middle school (optional)</legend>
             {DIVISIONS.map((division) => (
               <label key={division}>
                 <input
@@ -352,32 +279,20 @@ export function Onboarding() {
           </fieldset>
         </section>
 
-        <section className="nb-box">
-          <h2 className="nb-box__head" style={{ margin: 0 }}>
-            Ground rules
-          </h2>
-          <div className="nb-box__body">
-            <ol className="fp-rules">
-              {GROUND_RULES.map((rule) => (
-                <li key={rule}>{rule}</li>
-              ))}
-            </ol>
-          </div>
+        <section className="panel">
+          <h2>Rules</h2>
+          <ol className="rules">
+            {GROUND_RULES.map((rule) => (
+              <li key={rule}>{rule}</li>
+            ))}
+          </ol>
+          <p className="muted">{ANONYMITY_NOTICE} Mods can take posts down but can’t see who wrote them.</p>
         </section>
-
-        <div className="nb-notice nb-notice--staff">
-          <Icon name="shield" />
-          <div>
-            <b>Who can see what.</b> {ANONYMITY_NOTICE} Moderators can remove posts but cannot see who wrote
-            them. Each time the administration looks up an author, it is logged.
-          </div>
-        </div>
 
         <label className="check">
           <input type="checkbox" checked={understood} onChange={(e) => setUnderstood(e.target.checked)} />
           <span>
-            I understand: I will follow the ground rules, and anonymous posts are hidden from students but not
-            from the school.
+            I read the rules. I get that anonymous posts are hidden from students, not from the school.
           </span>
         </label>
 
@@ -387,11 +302,11 @@ export function Onboarding() {
           </p>
         )}
         <div className="row row--between">
-          <button className="nb-btn nb-btn--quiet" type="button" onClick={() => void signOut()}>
+          <button className="btn btn--quiet" type="button" onClick={() => void signOut()}>
             Sign out
           </button>
-          <button className="nb-btn nb-btn--primary" type="submit" disabled={busy}>
-            {busy ? 'Setting up' : 'Join the conversation'}
+          <button className="btn btn--primary" type="submit" disabled={busy}>
+            {busy ? 'Setting up' : 'Done'}
           </button>
         </div>
       </form>
@@ -401,21 +316,15 @@ export function Onboarding() {
 
 export function NotFound() {
   useEffect(() => {
-    document.title = `Not found · ${APP_NAME}`;
+    document.title = `Not found | ${APP_NAME}`;
   }, []);
   return (
     <PublicFrame>
       <div className="state">
-        <h1 className="page-h">That page is not here</h1>
-        <p>The link may be old, or the thread may have been removed. Nothing is broken on your end.</p>
-        <div className="row" style={{ justifyContent: 'center' }}>
-          <Link className="nb-btn nb-btn--primary" to="/">
-            Go to the front page
-          </Link>
-          <Link className="nb-btn" to="/about">
-            How it works
-          </Link>
-        </div>
+        <h1 className="page-h">Page not found</h1>
+        <p>
+          The link might be old, or the post got removed. <Link to="/">Go to the feed</Link>
+        </p>
       </div>
     </PublicFrame>
   );

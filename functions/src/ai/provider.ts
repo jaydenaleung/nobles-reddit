@@ -1,7 +1,7 @@
 import { LIMITS, SCREEN_LABELS, type ScreenFinding } from '@commons/shared';
 import { z } from 'zod';
 
-/* ---------- What goes in. Note what is NOT here: no author, no uid, no name. ---------- */
+// What goes in. Note what is NOT here: no author, no uid, no name.
 
 export interface ThreadForSummary {
   title: string;
@@ -16,7 +16,7 @@ export interface QuestionContext {
   bannedTopics: string[];
 }
 
-/* ---------- What comes out ---------- */
+// What comes out.
 
 export interface SummaryOutput {
   text: string;
@@ -65,7 +65,7 @@ export class AiUnavailable extends Error {
   }
 }
 
-/* ---------- JSON schemas sent to the model (structured output) ---------- */
+// JSON schemas sent to the model (structured output).
 
 export const summaryJsonSchema = {
   type: 'object',
@@ -106,7 +106,7 @@ export const classifyJsonSchema = {
   additionalProperties: false,
 } as const;
 
-/* ---------- Validation of what the model returned. Never trust it. ---------- */
+// Validation of what the model returned. Never trust it.
 
 function clampWords(text: string, maxWords: number): string {
   const words = text.trim().split(/\s+/).filter(Boolean);

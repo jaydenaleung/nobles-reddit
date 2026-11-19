@@ -1,11 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 
-/* ---------- Loading, empty and error states. Every list has all three. ---------- */
-
 export function Loading({ label = 'Loading' }: { label?: string }) {
   return (
     <div className="state" role="status" aria-live="polite">
-      <p>{label}…</p>
+      <p>{label}</p>
     </div>
   );
 }
@@ -20,7 +18,7 @@ export function Empty({ title, children }: { title: string; children?: ReactNode
 }
 
 export function ErrorState({
-  title = 'That did not load',
+  title = 'That didn’t load',
   onRetry,
   children,
 }: {
@@ -31,17 +29,15 @@ export function ErrorState({
   return (
     <div className="state state--error" role="alert">
       <h2>{title}</h2>
-      <p>{children ?? 'Check your connection and try again.'}</p>
+      <p>{children ?? 'Check your wifi and try again.'}</p>
       {onRetry && (
-        <button className="nb-btn" type="button" onClick={onRetry}>
+        <button className="btn" type="button" onClick={onRetry}>
           Try again
         </button>
       )}
     </div>
   );
 }
-
-/* ---------- A small message at the bottom of the screen ---------- */
 
 const ToastContext = createContext<(message: string) => void>(() => undefined);
 
@@ -63,10 +59,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     </ToastContext.Provider>
   );
 }
+
 export const useToast = () => useContext(ToastContext);
 
-/* ---------- A modal dialog built on <dialog>: focus is trapped and Escape closes it ---------- */
-
+/** Built on <dialog>, so focus stays inside and Escape closes it. */
 export function Dialog({
   open,
   onClose,
@@ -88,7 +84,7 @@ export function Dialog({
   return (
     <dialog
       ref={ref}
-      className="dlg nb"
+      className="dlg"
       aria-label={title}
       onClose={onClose}
       onClick={(event) => {
@@ -105,12 +101,11 @@ export function Dialog({
   );
 }
 
-/** A character counter that turns into a warning when over the limit. */
 export function Count({ value, max }: { value: number; max: number }) {
   const over = value > max;
   return (
     <span className={`count${over ? ' count--over' : ''}`} aria-live={over ? 'polite' : undefined}>
-      {over ? `${value - max} over the limit` : `${value} / ${max}`}
+      {over ? `${value - max} too many` : `${value}/${max}`}
     </span>
   );
 }

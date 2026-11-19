@@ -11,7 +11,7 @@ import { applyTheme, savedThreads, themeChoice, type ThemeChoice } from '../lib/
 
 const STATUS_WORDS = {
   visible: 'Visible',
-  held: 'With a moderator',
+  held: 'With a mod',
   removed: 'Removed',
 } as const;
 
@@ -32,7 +32,7 @@ export default function Me() {
   const p = member.profile;
 
   useEffect(() => {
-    document.title = `You · ${APP_NAME}`;
+    document.title = `You | ${APP_NAME}`;
     mine.refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -46,7 +46,7 @@ export default function Me() {
     setExporting(true);
     try {
       downloadJson('nobles-commons-my-data.json', await api.exportMyData({}));
-      toast('Your data was downloaded.');
+      toast('Downloaded.');
     } catch (error) {
       toast(errorMessage(error));
     } finally {
@@ -57,7 +57,7 @@ export default function Me() {
   const deleteAccount = async (event: FormEvent) => {
     event.preventDefault();
     if (typed.trim().toLowerCase() !== 'delete') {
-      setDeleteError('Type the word delete to confirm.');
+      setDeleteError('Type delete to confirm.');
       return;
     }
     setDeleting(true);
@@ -78,7 +78,7 @@ export default function Me() {
         <h1 className="page-h">You</h1>
 
         <section className="panel" aria-labelledby="me-profile">
-          <h2 id="me-profile">Your account</h2>
+          <h2 id="me-profile">Account</h2>
           <dl className="kv">
             <dt>Shown as</dt>
             <dd>
@@ -91,28 +91,28 @@ export default function Me() {
             <dd>{member.role}</dd>
             {p.divisions?.length > 0 && (
               <>
-                <dt>Part of school</dt>
+                <dt>School</dt>
                 <dd>{p.divisions.map((d) => DIVISION_LABELS[d]).join(', ')}</dd>
               </>
             )}
           </dl>
-          <p className="muted">Only you and the administration can see this page’s details.</p>
+          <p className="muted">Only you and the admins can see these details.</p>
           <div className="row">
-            <button className="nb-btn" type="button" onClick={() => void signOut()}>
+            <button className="btn" type="button" onClick={() => void signOut()}>
               Sign out
             </button>
           </div>
         </section>
 
         <section className="panel" aria-labelledby="me-theme">
-          <h2 id="me-theme">How it looks</h2>
+          <h2 id="me-theme">Theme</h2>
           <fieldset className="radio-list">
-            <legend>Theme</legend>
+            <legend className="nb-sr">Theme</legend>
             {(
               [
-                ['system', 'Match my device'],
-                ['paper', 'Paper (light)'],
-                ['night', 'Night (dark)'],
+                ['system', 'Same as my device'],
+                ['paper', 'Light'],
+                ['night', 'Dark'],
               ] as [ThemeChoice, string][]
             ).map(([value, label]) => (
               <label key={value}>
@@ -129,33 +129,31 @@ export default function Me() {
         </section>
 
         <section className="panel" aria-labelledby="me-posts">
-          <h2 id="me-posts">Your posts and comments</h2>
+          <h2 id="me-posts">Your posts</h2>
           <p className="muted">
-            This list includes what you posted as Anonymous. Only you see it here; other students still see
-            “Anonymous”.
+            Your anonymous posts are in this list too. Only you can see that they’re yours.
           </p>
           {mine.load === 'loading' ? (
-            <Loading label="Loading your posts" />
+            <Loading label="Loading" />
           ) : mine.load === 'error' ? (
-            <ErrorState title="Your posts did not load" onRetry={mine.refresh} />
+            <ErrorState title="Your posts didn’t load" onRetry={mine.refresh} />
           ) : mine.items.length === 0 ? (
             <Empty title="Nothing yet">
-              <p>When you post or comment, it shows up here.</p>
-              <Link className="nb-btn nb-btn--primary" to="/new">
-                Start a thread
-              </Link>
+              <p>
+                Your posts and replies show up here. <Link to="/new">Write a post</Link>
+              </p>
             </Empty>
           ) : (
             <div
               className="tbl-wrap"
               tabIndex={0}
               role="group"
-              aria-label="Table. Scroll sideways to see every column."
+              aria-label="Your posts. Scroll sideways for more columns."
             >
               <table className="tbl">
                 <thead>
                   <tr>
-                    <th scope="col">What you wrote</th>
+                    <th scope="col">Post</th>
                     <th scope="col">Posted as</th>
                     <th scope="col">Status</th>
                     <th scope="col">When</th>
@@ -170,12 +168,13 @@ export default function Me() {
                         ) : (
                           (item.title ?? excerpt(item.body, 90))
                         )}
-                        <div className="nb-meta">{item.kind === 'post' ? 'Thread' : 'Comment'}</div>
+                        <div className="muted">{item.kind === 'post' ? 'Post' : 'Reply'}</div>
                       </td>
                       <td>
                         {item.identityMode === 'anonymous' ? (
-                          <span className="nb-badge nb-badge--anon">
-                            <Icon name="mask" /> Anonymous
+                          <span className="role">
+                            <Icon name="mask" />
+                            Anonymous
                           </span>
                         ) : (
                           'Your name'
@@ -192,13 +191,11 @@ export default function Me() {
         </section>
 
         <section className="panel" aria-labelledby="me-saved">
-          <h2 id="me-saved">Saved on this device</h2>
+          <h2 id="me-saved">Saved</h2>
           {saved.length === 0 ? (
-            <p className="muted">
-              Press Save on a thread to keep it here. Saved threads stay on this device only.
-            </p>
+            <p className="muted">Hit Save on a post and it shows up here. Saves stay on this device.</p>
           ) : (
-            <ul className="stack" style={{ margin: 0, paddingLeft: 'var(--space-5)' }}>
+            <ul className="plain-list">
               {saved.map((thread) => (
                 <li key={thread.id}>
                   <Link to={`/t/${thread.id}`}>{thread.title}</Link>
@@ -210,15 +207,12 @@ export default function Me() {
 
         <section className="panel" aria-labelledby="me-data">
           <h2 id="me-data">Your data</h2>
-          <p>
-            You can download everything the app holds about you: your profile, what you wrote, what you marked
-            thoughtful and what you reported.
-          </p>
+          <p>Download a file with everything this site has stored about you.</p>
           <div className="row">
-            <button className="nb-btn" type="button" onClick={() => void download()} disabled={exporting}>
-              {exporting ? 'Preparing' : 'Download my data'}
+            <button className="btn" type="button" onClick={() => void download()} disabled={exporting}>
+              {exporting ? 'Getting it ready' : 'Download my data'}
             </button>
-            <button className="nb-btn nb-btn--danger" type="button" onClick={() => setConfirming(true)}>
+            <button className="btn" type="button" onClick={() => setConfirming(true)}>
               Delete my account
             </button>
           </div>
@@ -229,22 +223,20 @@ export default function Me() {
 
       <Dialog open={confirming} onClose={() => setConfirming(false)} title="Delete your account?">
         <form className="stack" onSubmit={(event) => void deleteAccount(event)}>
-          <p>Here is exactly what happens:</p>
-          <ul className="stack" style={{ margin: 0, paddingLeft: 'var(--space-5)' }}>
-            <li>Your profile and sign-in are removed.</li>
-            <li>Posts and comments under your name stay, but show “Former member” instead of your name.</li>
-            <li>
-              <b>The school keeps its record of who wrote each post</b>, including yours, as school policy
-              requires. The administration can still look that up, and each lookup is logged.
-            </li>
-            <li>This cannot be undone.</li>
-          </ul>
+          <p style={{ margin: 0 }}>
+            Your account goes away. Posts you made under your name stay up, but they say “Former member”
+            instead of your name.
+          </p>
+          <p style={{ margin: 0 }}>
+            <b>The school still keeps its record of who wrote every post, yours too.</b> Admins can look that
+            up, and each lookup is logged. You can’t undo this.
+          </p>
           <div className="field">
-            <label className="nb-label" htmlFor="delete-confirm">
-              Type the word delete to confirm
+            <label className="label" htmlFor="delete-confirm">
+              Type delete to confirm
             </label>
             <input
-              className="nb-input"
+              className="input"
               id="delete-confirm"
               value={typed}
               onChange={(e) => setTyped(e.target.value)}
@@ -257,10 +249,10 @@ export default function Me() {
             </p>
           )}
           <div className="row row--between">
-            <button className="nb-btn nb-btn--quiet" type="button" onClick={() => setConfirming(false)}>
+            <button className="btn btn--quiet" type="button" onClick={() => setConfirming(false)}>
               Keep my account
             </button>
-            <button className="nb-btn nb-btn--danger" type="submit" disabled={deleting}>
+            <button className="btn" type="submit" disabled={deleting}>
               {deleting ? 'Deleting' : 'Delete my account'}
             </button>
           </div>
@@ -270,20 +262,20 @@ export default function Me() {
   );
 }
 
-/** Links for moderators and admins on phones, where the left column is hidden. */
+/** On phones the left column is hidden, so mods get their links here. */
 function SpacesTiles() {
   const member = useMember();
   if (member.role !== 'moderator' && member.role !== 'admin') return null;
   return (
     <section className="panel ph-only" aria-label="Moderation">
-      <h2>For moderators</h2>
+      <h2>Mods</h2>
       <div className="row">
-        <Link className="nb-btn" to="/mod">
-          Moderation queue
+        <Link className="btn" to="/mod">
+          Mod queue
         </Link>
         {member.role === 'admin' && (
-          <Link className="nb-btn" to="/admin">
-            Administration
+          <Link className="btn" to="/admin">
+            Admin
           </Link>
         )}
       </div>
@@ -291,13 +283,13 @@ function SpacesTiles() {
   );
 }
 
-/** The Spaces tab on phones: search, then a door for each space. */
+/** The Spaces tab on phones. */
 export function Spaces() {
   const { spaces, load } = useSpaces();
   const navigate = useNavigate();
   const [text, setText] = useState('');
   useEffect(() => {
-    document.title = `Spaces · ${APP_NAME}`;
+    document.title = `Spaces | ${APP_NAME}`;
   }, []);
   return (
     <Page>
@@ -312,29 +304,29 @@ export function Spaces() {
           }}
         >
           <label className="nb-sr" htmlFor="spaces-search">
-            Search threads and spaces
+            Search posts
           </label>
           <input
-            className="nb-input"
+            className="input"
             id="spaces-search"
             type="search"
             style={{ flex: 1 }}
-            placeholder="Search threads and spaces"
+            placeholder="Search posts"
             value={text}
             maxLength={120}
             onChange={(e) => setText(e.target.value)}
           />
-          <button className="nb-btn" type="submit">
+          <button className="btn" type="submit">
             Search
           </button>
         </form>
         {load === 'loading' ? (
-          <Loading label="Loading spaces" />
+          <Loading label="Loading" />
         ) : load === 'error' ? (
-          <ErrorState title="The spaces did not load" />
+          <ErrorState title="Spaces didn’t load" />
         ) : spaces.length === 0 ? (
           <Empty title="No spaces yet">
-            <p>An administrator can add the first one.</p>
+            <p>An admin has to add them first.</p>
           </Empty>
         ) : (
           <nav className="doors" aria-label="All spaces">

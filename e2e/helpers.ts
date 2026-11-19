@@ -15,9 +15,9 @@ export interface Who {
 }
 
 /**
- * Signs in through the Auth emulator's Google provider (the "Local
- * development" box on the sign-in page, which only exists in emulator builds)
- * and completes onboarding if this person is new.
+ * Signs in through the Auth emulator (the "Emulator" box on the sign-in page,
+ * which only exists in emulator builds) and completes onboarding if this
+ * person is new.
  */
 export async function signIn(page: Page, email: string, who: Who): Promise<void> {
   await page.goto('/sign-in');
@@ -33,8 +33,8 @@ export async function signIn(page: Page, email: string, who: Who): Promise<void>
       await page.getByLabel('A student').check();
       await page.getByLabel('Class year').selectOption(String(who.classYear));
     }
-    await page.getByLabel(/I understand/).check();
-    await page.getByRole('button', { name: 'Join the conversation' }).click();
+    await page.getByLabel(/I read the rules/).check();
+    await page.getByRole('button', { name: 'Done' }).click();
     await page.waitForURL((url) => url.pathname === '/');
   }
   await expect(page.getByRole('navigation', { name: 'Sort' })).toBeVisible();
@@ -74,7 +74,7 @@ export async function startThread(page: Page, thread: NewThread): Promise<string
     .filter({ hasText: thread.as === 'anonymous' ? 'Anonymous' : thread.firstName })
     .click();
   await page.getByLabel('Title', { exact: true }).fill(thread.title);
-  if (thread.body) await page.getByLabel('Your thoughts', { exact: true }).fill(thread.body);
+  if (thread.body) await page.getByLabel('Text', { exact: true }).fill(thread.body);
   await page.getByRole('button', { name: 'Post', exact: true }).click();
   await page.waitForURL(/\/t\/[A-Za-z0-9]+$/, { timeout: 30_000 });
   await expect(page.getByRole('heading', { level: 1, name: thread.title })).toBeVisible();
@@ -88,14 +88,14 @@ export async function addComment(
   as: 'name' | 'anonymous',
   firstName: string,
 ): Promise<void> {
-  const composer = page.getByRole('region', { name: 'Add a comment' });
+  const composer = page.getByRole('region', { name: 'Reply', exact: true });
   await composer
     .getByRole('radiogroup', { name: 'Reply as' })
     .locator('label')
     .filter({ hasText: as === 'anonymous' ? 'Anonymous' : firstName })
     .click();
-  await composer.getByLabel('Add a comment').fill(body);
-  await composer.getByRole('button', { name: 'Post comment' }).click();
+  await composer.getByLabel('Reply', { exact: true }).fill(body);
+  await composer.getByRole('button', { name: 'Post', exact: true }).click();
   await expect(page.locator('.th-comments').getByText(body)).toBeVisible({ timeout: 30_000 });
   await expect(page.locator('.nb-comment--pending')).toHaveCount(0, { timeout: 30_000 });
 }
@@ -112,7 +112,7 @@ export async function openQuestionThread(page: Page): Promise<string> {
   await page.goto('/s/current-events');
   // Scoped to the feed: the sidebar's hall-screen box shows the same question and links to /board.
   await page
-    .getByRole('region', { name: 'Threads' })
+    .getByRole('region', { name: 'Posts' })
     .getByRole('link', { name: /Should the school day start at 8:30/ })
     .click();
   await page.waitForURL(/\/t\//);

@@ -7,10 +7,8 @@ import {
 } from '@commons/shared';
 import { useId, useState, type FormEvent } from 'react';
 import { api, errorMessage } from '../api';
-import { Icon } from './Icon';
 import { Dialog, useToast } from './Ui';
 
-/** "Report": anyone can ask a moderator to look at something. */
 export function ReportDialog({ contentKey, onClose }: { contentKey: string | null; onClose: () => void }) {
   const toast = useToast();
   const id = useId();
@@ -29,14 +27,14 @@ export function ReportDialog({ contentKey, onClose }: { contentKey: string | nul
     event.preventDefault();
     if (!contentKey) return;
     if (!reason) {
-      setError('Choose what is wrong first.');
+      setError('Pick a reason.');
       return;
     }
     setBusy(true);
     setError(null);
     try {
       await api.reportContent({ contentKey, reason, note: note.trim() || undefined });
-      toast('Thank you. A moderator will take a look.');
+      toast('Sent. A mod will look at it.');
       close();
     } catch (err) {
       setError(errorMessage(err));
@@ -46,10 +44,10 @@ export function ReportDialog({ contentKey, onClose }: { contentKey: string | nul
   };
 
   return (
-    <Dialog open={!!contentKey} onClose={close} title="Report this to a moderator">
+    <Dialog open={!!contentKey} onClose={close} title="Report">
       <form className="stack" onSubmit={(event) => void submit(event)}>
         <fieldset className="radio-list">
-          <legend>What is wrong with it?</legend>
+          <legend>What’s wrong with it?</legend>
           {REPORT_REASONS.map((option) => (
             <label key={option.id}>
               <input
@@ -63,11 +61,11 @@ export function ReportDialog({ contentKey, onClose }: { contentKey: string | nul
           ))}
         </fieldset>
         <div className="field">
-          <label className="nb-label" htmlFor={`${id}-note`}>
-            Anything a moderator should know (optional)
+          <label className="label" htmlFor={`${id}-note`}>
+            Anything else a mod should know (optional)
           </label>
           <textarea
-            className="nb-textarea"
+            className="textarea"
             id={`${id}-note`}
             value={note}
             maxLength={LIMITS.reportNoteMax}
@@ -75,9 +73,8 @@ export function ReportDialog({ contentKey, onClose }: { contentKey: string | nul
             rows={2}
           />
         </div>
-        <p className="nb-help">
-          Moderators see your report, not your name. If someone is in danger right now, tell an adult at
-          school or call 911.
+        <p className="help">
+          Mods see the report but not your name. If someone is in danger right now, find an adult or call 911.
         </p>
         {error && (
           <p className="err" role="alert">
@@ -85,11 +82,11 @@ export function ReportDialog({ contentKey, onClose }: { contentKey: string | nul
           </p>
         )}
         <div className="row row--between">
-          <button className="nb-btn nb-btn--quiet" type="button" onClick={close}>
+          <button className="btn btn--quiet" type="button" onClick={close}>
             Cancel
           </button>
-          <button className="nb-btn nb-btn--primary" type="submit" disabled={busy}>
-            {busy ? 'Sending' : 'Send report'}
+          <button className="btn btn--primary" type="submit" disabled={busy}>
+            {busy ? 'Sending' : 'Send'}
           </button>
         </div>
       </form>
@@ -98,13 +95,13 @@ export function ReportDialog({ contentKey, onClose }: { contentKey: string | nul
 }
 
 const MOD_LABELS: Record<ModAction, string> = {
-  hold: 'Hold for review (hide it for now)',
+  hold: 'Hide it for now',
   remove: 'Remove',
-  restore: 'Restore (make it visible)',
-  pin: 'Pin to the top of its space',
+  restore: 'Put it back',
+  pin: 'Pin to the top',
   unpin: 'Unpin',
-  approveForBoard: 'Show on the hall screen',
-  removeFromBoard: 'Take off the hall screen',
+  approveForBoard: 'Put it on the Gleason TV',
+  removeFromBoard: 'Take it off the Gleason TV',
 };
 
 export interface ModTarget {
@@ -115,7 +112,7 @@ export interface ModTarget {
   onBoard?: boolean;
 }
 
-/** What a moderator can do with a post or comment. It never shows who wrote it. */
+/** Mods never see who wrote what, and nothing here shows it. */
 export function ModDialog({
   target,
   onClose,
@@ -132,18 +129,14 @@ export function ModDialog({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const options: ModAction[] = !target
-    ? []
-    : [
-        ...(target.status === 'visible' ? (['hold', 'remove'] as ModAction[]) : (['restore'] as ModAction[])),
-        ...(target.status === 'held' ? (['remove'] as ModAction[]) : []),
-        ...(target.kind === 'post' && target.status === 'visible'
-          ? ([target.pinned ? 'unpin' : 'pin'] as ModAction[])
-          : []),
-        ...(target.status === 'visible'
-          ? ([target.onBoard ? 'removeFromBoard' : 'approveForBoard'] as ModAction[])
-          : []),
-      ];
+  const options: ModAction[] = [];
+  if (target) {
+    if (target.status === 'visible') options.push('hold', 'remove');
+    else options.push('restore');
+    if (target.status === 'held') options.push('remove');
+    if (target.kind === 'post' && target.status === 'visible') options.push(target.pinned ? 'unpin' : 'pin');
+    if (target.status === 'visible') options.push(target.onBoard ? 'removeFromBoard' : 'approveForBoard');
+  }
 
   const close = () => {
     setAction(null);
@@ -155,14 +148,14 @@ export function ModDialog({
     event.preventDefault();
     if (!target) return;
     if (!action) {
-      setError('Choose what to do first.');
+      setError('Pick what to do.');
       return;
     }
     setBusy(true);
     setError(null);
     try {
       await api.modAction({ contentKey: target.contentKey, action, note: note.trim() });
-      toast('Done. It has been written to the audit log.');
+      toast('Done. It’s in the log.');
       onDone?.();
       close();
     } catch (err) {
@@ -176,7 +169,7 @@ export function ModDialog({
     <Dialog
       open={!!target}
       onClose={close}
-      title={target?.kind === 'post' ? 'Moderate this thread' : 'Moderate this comment'}
+      title={target?.kind === 'post' ? 'Moderate post' : 'Moderate reply'}
     >
       <form className="stack" onSubmit={(event) => void submit(event)}>
         <fieldset className="radio-list">
@@ -194,32 +187,29 @@ export function ModDialog({
           ))}
         </fieldset>
         <div className="field">
-          <label className="nb-label" htmlFor={`${id}-note`}>
-            Note for the audit log
+          <label className="label" htmlFor={`${id}-note`}>
+            Note for the log
           </label>
           <input
-            className="nb-input"
+            className="input"
             id={`${id}-note`}
             value={note}
             maxLength={LIMITS.reasonMax}
             onChange={(event) => setNote(event.target.value)}
           />
         </div>
-        <p className="nb-help">
-          Moderators cannot see who wrote something. If you need to know, ask an administrator; their lookup
-          is logged.
-        </p>
+        <p className="help">You can’t see who wrote this. If you need to know, ask an admin.</p>
         {error && (
           <p className="err" role="alert">
             {error}
           </p>
         )}
         <div className="row row--between">
-          <button className="nb-btn nb-btn--quiet" type="button" onClick={close}>
+          <button className="btn btn--quiet" type="button" onClick={close}>
             Cancel
           </button>
-          <button className="nb-btn nb-btn--primary" type="submit" disabled={busy}>
-            {busy ? 'Working' : 'Confirm'}
+          <button className="btn btn--primary" type="submit" disabled={busy}>
+            {busy ? 'Saving' : 'Save'}
           </button>
         </div>
       </form>
@@ -227,10 +217,7 @@ export function ModDialog({
   );
 }
 
-/**
- * "Who wrote this?" For administrators only. A reason is required, and the
- * page says plainly that the lookup was logged.
- */
+/** Admins only. A reason is required and every lookup goes in the log. */
 export function RevealForm({ contentKey, onClose }: { contentKey: string; onClose?: () => void }) {
   const id = useId();
   const [reason, setReason] = useState('');
@@ -241,7 +228,7 @@ export function RevealForm({ contentKey, onClose }: { contentKey: string; onClos
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (reason.trim().length < LIMITS.revealReasonMin) {
-      setError(`Give a reason of at least ${LIMITS.revealReasonMin} characters.`);
+      setError(`Write at least ${LIMITS.revealReasonMin} characters.`);
       return;
     }
     setBusy(true);
@@ -263,7 +250,7 @@ export function RevealForm({ contentKey, onClose }: { contentKey: string; onClos
           <dd>{result.author.displayName}</dd>
           <dt>Email</dt>
           <dd>{result.author.email}</dd>
-          <dt>Class year</dt>
+          <dt>Class of</dt>
           <dd>{result.author.classYear ?? 'None'}</dd>
           <dt>Role</dt>
           <dd>{result.author.role}</dd>
@@ -274,15 +261,12 @@ export function RevealForm({ contentKey, onClose }: { contentKey: string; onClos
             </>
           )}
         </dl>
-        <div className="nb-notice nb-notice--staff" role="status">
-          <Icon name="shield" />
-          <div>
-            <b>This view was logged.</b> Your name, the time and your reason are in the audit log.
-          </div>
-        </div>
+        <p className="notice" role="status">
+          This lookup is in the log, along with your reason.
+        </p>
         {onClose && (
           <div className="row">
-            <button className="nb-btn" type="button" onClick={onClose}>
+            <button className="btn" type="button" onClick={onClose}>
               Close
             </button>
           </div>
@@ -293,16 +277,15 @@ export function RevealForm({ contentKey, onClose }: { contentKey: string; onClos
 
   return (
     <form className="stack" onSubmit={(event) => void submit(event)}>
-      <p className="muted">
-        Looking up an author is for safety and serious rule-breaking. Every lookup is recorded with your name
-        and your reason.
+      <p className="muted" style={{ margin: 0 }}>
+        Only for safety or serious rule breaking. Your name and reason go in the log.
       </p>
       <div className="field">
-        <label className="nb-label" htmlFor={`${id}-reason`}>
-          Why do you need to know? (required)
+        <label className="label" htmlFor={`${id}-reason`}>
+          Why do you need to know?
         </label>
         <textarea
-          className="nb-textarea"
+          className="textarea"
           id={`${id}-reason`}
           value={reason}
           maxLength={LIMITS.reasonMax}
@@ -318,12 +301,12 @@ export function RevealForm({ contentKey, onClose }: { contentKey: string; onClos
       )}
       <div className="row row--between">
         {onClose && (
-          <button className="nb-btn nb-btn--quiet" type="button" onClick={onClose}>
+          <button className="btn btn--quiet" type="button" onClick={onClose}>
             Cancel
           </button>
         )}
-        <button className="nb-btn nb-btn--primary" type="submit" disabled={busy}>
-          {busy ? 'Looking up' : 'Show the author and log it'}
+        <button className="btn btn--primary" type="submit" disabled={busy}>
+          {busy ? 'Looking up' : 'Show who wrote it'}
         </button>
       </div>
     </form>

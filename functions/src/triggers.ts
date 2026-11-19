@@ -105,13 +105,13 @@ export const screenComment = onDocumentWritten(
   },
 );
 
-/* ---------- Feed counters. Recounted from the source each time, so they heal themselves. ---------- */
+// Feed counters. Recounted from the source each time, so they heal themselves.
 
 async function refreshBoardIfQuestion(postId: string): Promise<void> {
   if ((await boardQuestionId()) === postId) await rebuildBoardFeed();
 }
 
-/** Keeps commentCount, anonCommentCount and hotScore right when a comment appears, disappears or changes status. */
+/** Keeps commentCount, anonCommentCount and hotScore right whenever a comment is added or its status changes. */
 export const onCommentWritten = onDocumentWritten(
   { ...triggerOptions, document: 'posts/{postId}/comments/{commentId}' },
   async (event) => {

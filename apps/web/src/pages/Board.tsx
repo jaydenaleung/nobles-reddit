@@ -1,9 +1,9 @@
-import { APP_NAME, initials, isStaffRole } from '@commons/shared';
+import { APP_NAME } from '@commons/shared';
 import { useEffect, useState } from 'react';
 import { joinUrl, qrPath, qrSize } from 'virtual:join-qr';
 import { Icon, IconSprite } from '../components/Icon';
-import { Wordmark } from '../components/Identity';
-import { pollPercents } from '../components/Post';
+import { Byline, Wordmark } from '../components/Identity';
+import { pollDescription, pollPercents } from '../components/Post';
 import { useBoardFeed } from '../data/hooks';
 
 function useClock(): string {
@@ -21,7 +21,7 @@ function useClock(): string {
     .replace(/\s?(AM|PM)$/i, '');
 }
 
-/** The design is 1280x720. On a TV it is scaled up to fill the screen; on a phone it reads like a page. */
+/** Laid out at 1280x720 and scaled to the TV. On a phone it reads like a normal page instead. */
 function useBoardScale(): number {
   const compute = () => Math.min(window.innerWidth / 1280, window.innerHeight / 720);
   const [scale, setScale] = useState(compute);
@@ -46,10 +46,7 @@ function JoinQr() {
   );
 }
 
-/**
- * The Gleason Hall screen. Public, no login, and it reads exactly one
- * document: boardFeed/current, which holds no uid and no authorship.
- */
+/** The Gleason TV. No login. It reads one document, boardFeed/current, which has no author info in it. */
 export default function Board() {
   const { feed, load } = useBoardFeed();
   const clock = useClock();
@@ -57,7 +54,7 @@ export default function Board() {
   const [online, setOnline] = useState(() => navigator.onLine);
 
   useEffect(() => {
-    document.title = `Hall screen · ${APP_NAME}`;
+    document.title = `Gleason TV | ${APP_NAME}`;
     const up = () => setOnline(true);
     const down = () => setOnline(false);
     window.addEventListener('online', up);
@@ -69,47 +66,43 @@ export default function Board() {
   }, []);
 
   const hasQuestion = !!feed?.questionPostId && !!feed.questionText;
-  const options = feed?.pollOptions ?? [];
+  const options = (feed?.pollOptions ?? []).slice(0, 4);
   const percents = pollPercents(options);
   const length = feed?.questionText.length ?? 0;
-  const qClass = length > 95 ? 'q q--xlong' : length > 60 ? 'q q--long' : 'q';
+  const qClass = length > 95 ? 'bd-q bd-q--xlong' : length > 60 ? 'bd-q bd-q--long' : 'bd-q';
   const headlines = feed?.nobleman ?? [];
-  const anySample = headlines.some((item) => item.sample);
 
   return (
-    <div className="nb bd-root" data-theme="board">
+    <div className="bd-root" data-theme="board">
       <IconSprite />
       <div className="bd" style={{ ['--bd-scale' as string]: scale }}>
         <header className="bd-head">
           <Wordmark asText />
-          <div className="clock">
-            <span className="nb-badge nb-badge--live">
-              <Icon name="tv" /> Live on Gleason Hall
-            </span>
-            <span>{clock}</span>
+          <div className="bd-clock">
+            <Icon name="tv" />
+            <span>Gleason Hall</span>
+            <b>{clock}</b>
           </div>
         </header>
 
         <main className="bd-main">
           <section aria-live="polite">
             {load === 'loading' ? (
-              <p className="quiet">Getting today’s question…</p>
+              <p className="bd-quiet">Loading</p>
             ) : !hasQuestion ? (
               <>
-                <span className="nb-eyebrow">Today’s question</span>
-                <h1 className="q">A new question is on its way.</h1>
-                <p className="quiet">Scan the code to see what people are talking about right now.</p>
+                <span className="bd-label">Question of the day</span>
+                <h1 className="bd-q">No question up yet.</h1>
+                <p className="bd-quiet">Scan the code to see what people are posting.</p>
               </>
             ) : (
               <>
-                <span className="nb-eyebrow">Today’s question · {feed!.spaceName}</span>
+                <span className="bd-label">Question of the day, in {feed!.spaceName}</span>
                 <h1 className={qClass}>{feed!.questionText}</h1>
-                <div className="counts">
+                <div className="bd-counts">
                   <div>
                     <b>{feed!.counts.weighedIn}</b>
-                    <span>
-                      {feed!.counts.weighedIn === 1 ? 'person has weighed in' : 'people have weighed in'}
-                    </span>
+                    <span>{options.length > 0 ? 'votes' : 'people weighed in'}</span>
                   </div>
                   <div>
                     <b>{feed!.counts.replies}</b>
@@ -117,25 +110,18 @@ export default function Board() {
                   </div>
                   <div>
                     <b>{feed!.counts.anonymousPercent}%</b>
-                    <span>chose to stay anonymous</span>
+                    <span>of replies anonymous</span>
                   </div>
                 </div>
                 {options.length > 0 && (
-                  <div
-                    className="bars"
-                    role="img"
-                    aria-label={`Poll: ${options.map((o, i) => `${o.label} ${percents[i]} percent`).join(', ')}`}
-                  >
-                    {options.slice(0, 4).map((option, i) => (
-                      <div className="bar" key={option.id}>
+                  <div className="bd-bars" role="img" aria-label={pollDescription(options)}>
+                    {options.map((option, i) => (
+                      <div className="bd-bar" key={option.id}>
                         <span>{option.label}</span>
-                        <div className="t">
-                          <i
-                            className={i % 2 === 1 ? 'hatch' : undefined}
-                            style={{ width: `${percents[i]}%` }}
-                          />
-                        </div>
-                        <span className="p">{percents[i]}%</span>
+                        <span className="bd-bar__track">
+                          <span className="bd-bar__fill" style={{ width: `${percents[i]}%` }} />
+                        </span>
+                        <span>{percents[i]}%</span>
                       </div>
                     ))}
                   </div>
@@ -143,63 +129,41 @@ export default function Board() {
               </>
             )}
             {(!online || load === 'error') && (
-              <p className="offline">Reconnecting. The numbers will catch up.</p>
+              <p className="bd-offline">Reconnecting. Numbers will catch up.</p>
             )}
           </section>
 
-          <aside className="side" aria-label="Join in">
-            <div className="join">
+          <aside className="bd-side" aria-label="Reply">
+            <div className="bd-join">
               <JoinQr />
               <div>
-                <b>Join in</b>
-                <span>Scan with your phone camera to reply.</span>
+                <b>Reply from your phone</b>
+                <span>Point your camera at the code.</span>
               </div>
             </div>
-            {(feed?.approvedReplies ?? []).slice(0, 2).map((reply, i) => {
-              return (
-                <div className="reply" key={i}>
-                  <div className={`nb-byline${reply.anonymous ? ' nb-byline--anon' : ''}`}>
-                    {reply.anonymous ? (
-                      <span className="nb-avatar nb-avatar--anon" aria-hidden="true">
-                        <Icon name="mask" />
-                      </span>
-                    ) : (
-                      <span
-                        className={`nb-avatar${isStaffRole(reply.role) ? ' nb-avatar--staff' : ''}`}
-                        aria-hidden="true"
-                      >
-                        {initials(reply.displayName)}
-                      </span>
-                    )}
-                    <b>{reply.anonymous ? 'Anonymous' : reply.displayName}</b>
-                    {!reply.anonymous && isStaffRole(reply.role) && (
-                      <span className="nb-badge nb-badge--staff">
-                        <Icon name="shield" /> Faculty
-                      </span>
-                    )}
-                  </div>
-                  <p>{reply.text}</p>
-                </div>
-              );
-            })}
+            {(feed?.approvedReplies ?? []).slice(0, 2).map((reply, i) => (
+              <div className="reply" key={i}>
+                <Byline
+                  author={
+                    reply.anonymous
+                      ? { mode: 'anonymous', anonLabel: 'Anonymous' }
+                      : { mode: 'named', name: reply.displayName, role: reply.role }
+                  }
+                />
+                <p>{reply.text}</p>
+              </div>
+            ))}
           </aside>
         </main>
 
-        <footer className="tick">
-          <b>From the Nobleman</b>
-          {headlines.map((item) => (
-            <span key={item.title} style={{ display: 'contents' }}>
-              <span className="dot" aria-hidden="true" />
-              <span>{item.title}</span>
-            </span>
-          ))}
-          {anySample && (
-            <>
-              <span className="dot" aria-hidden="true" />
-              <span>Sample headlines</span>
-            </>
-          )}
-        </footer>
+        {headlines.length > 0 && (
+          <footer className="tick">
+            <b>In the Nobleman</b>
+            {headlines.map((item) => (
+              <span key={item.url}>{item.title}</span>
+            ))}
+          </footer>
+        )}
       </div>
     </div>
   );
