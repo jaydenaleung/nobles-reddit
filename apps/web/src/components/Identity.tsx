@@ -76,7 +76,7 @@ export function Byline({
       <div className="nb-byline nb-byline--anon">
         {avatar && <Avatar author={author} small />}
         <b>{showLetter ? author.anonLabel : 'Anonymous'}</b>
-        {when && <span className="nb-meta">· {when}</span>}
+        {when && <span className="nb-meta">{when}</span>}
       </div>
     );
   }
@@ -86,7 +86,7 @@ export function Byline({
       <b>{author.name}</b>
       {author.classYear !== undefined && <span>{shortClassYear(author.classYear)}</span>}
       <StaffBadge role={author.role} />
-      {when && <span className="nb-meta">· {when}</span>}
+      {when && <span className="nb-meta">{when}</span>}
     </div>
   );
 }
@@ -161,7 +161,7 @@ export function IdentityToggle({
         </div>
         {invalid && (
           <p className="err" role="alert">
-            Choose your name or Anonymous first.
+            Pick your name or Anonymous.
           </p>
         )}
       </div>
@@ -175,9 +175,7 @@ export function AdminNotice({ id }: { id?: string }) {
   return (
     <div className="nb-notice nb-notice--staff" id={id}>
       <Icon name="shield" />
-      <div>
-        <b>Visible to administration.</b> {ANONYMITY_NOTICE}
-      </div>
+      <div>{ANONYMITY_NOTICE}</div>
     </div>
   );
 }

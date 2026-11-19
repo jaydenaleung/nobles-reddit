@@ -63,17 +63,16 @@ function PostTop({ post, nowMs, spaceSlug }: { post: PostView; nowMs: number; sp
     return (
       <div className="nb-post__top">
         {space}
-        <span>·</span>
-        {post.questionOfTheDay && <span>Question of the day ·</span>}
+        {post.questionOfTheDay && <span>Question of the day</span>}
         <span className="nb-badge nb-badge--staff">Administration</span>
-        <span>· {when}</span>
+        <span>{when}</span>
       </div>
     );
   }
   return (
     <div className="nb-post__top">
       {space}
-      <span>· {post.questionOfTheDay ? 'Question of the day · ' : ''}Posted by</span>
+      {post.questionOfTheDay && <span>Question of the day</span>}
       {author.mode === 'anonymous' ? (
         <span className="nb-badge nb-badge--anon">
           <Icon name="mask" /> Anonymous
@@ -84,12 +83,10 @@ function PostTop({ post, nowMs, spaceSlug }: { post: PostView; nowMs: number; sp
           {isStaffRole(author.role) && <StaffBadge role={author.role} />}
         </>
       )}
-      <span>
-        {author.mode === 'named' && author.classYear !== undefined
-          ? `${shortClassYear(author.classYear)} `
-          : ''}
-        · {when}
-      </span>
+      {author.mode === 'named' && author.classYear !== undefined && (
+        <span>{shortClassYear(author.classYear)}</span>
+      )}
+      <span>{when}</span>
     </div>
   );
 }
@@ -120,7 +117,7 @@ export function PostRow({
 }: PostRowProps) {
   const href = `/t/${post.id}`;
   const body = post.body ? excerpt(post.body) : '';
-  const voteLabel = voted ? 'Thoughtful. Select to take it back' : 'Mark thoughtful';
+  const voteLabel = voted ? 'Thoughtful, press again to undo' : 'Mark thoughtful';
   return (
     <article className={`nb-post${read ? ' nb-post--read' : ''}`}>
       <div className="nb-votes">
@@ -166,7 +163,7 @@ export function PostRow({
             <Icon name="ext" />
             <span>
               {post.link.source === 'nobleman' ? 'From the Nobleman' : post.link.domain}
-              {post.sample ? ' · sample link' : ''}
+              {post.sample ? ' (sample link)' : ''}
             </span>
           </a>
         )}
@@ -182,9 +179,7 @@ export function PostRow({
           </button>
           <Link to={href}>
             <Icon name="comment" />{' '}
-            {post.commentCount === 0
-              ? 'No comments yet. Be the first?'
-              : plural(post.commentCount, 'comment', 'comments')}
+            {post.commentCount === 0 ? 'No comments yet' : plural(post.commentCount, 'comment', 'comments')}
           </Link>
           {onSave && (
             <button className="nb-act" type="button" aria-pressed={!!saved} onClick={onSave}>
@@ -200,7 +195,7 @@ export function PostRow({
             <span className="nb-meta">
               {plural(pollTotal(post.poll.options), 'vote', 'votes')}
               {post.commentCount > 0
-                ? ` · ${Math.round((post.anonCommentCount / post.commentCount) * 100)}% of comments are anonymous`
+                ? `, ${Math.round((post.anonCommentCount / post.commentCount) * 100)}% of comments are anonymous`
                 : ''}
             </span>
           )}
@@ -226,7 +221,7 @@ export function SummaryBox({
 }) {
   const [label, how] = AI_SUMMARY_LABEL.split('. ');
   return (
-    <section className="nb-ai" aria-label="Auto-summary">
+    <section className="nb-ai" aria-label="Summary">
       <div className="nb-ai__head">
         <span className="nb-badge nb-badge--ai">{label}</span>
         <span className="nb-ai__how">{how}</span>
@@ -241,9 +236,7 @@ export function SummaryBox({
       )}
       {(basedOn !== undefined || children) && (
         <div className="nb-ai__foot">
-          {basedOn !== undefined && (
-            <span>Based on the first {basedOn} comments. It can miss things or get them wrong.</span>
-          )}
+          {basedOn !== undefined && <span>From the first {basedOn} comments. It can get things wrong.</span>}
           {children}
         </div>
       )}

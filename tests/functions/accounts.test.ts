@@ -66,7 +66,7 @@ describe('onboard', () => {
   it('rejects an account from another domain, on the server', async () => {
     const p = await signIn('someone@example.com');
     const message = await expectError(p.call('onboard', valid), 'permission-denied');
-    expect(message).toMatch(/Nobles community/);
+    expect(message).toMatch(/nobles.edu accounts/);
     expect((await adminDb.doc(`users/${p.uid}`).get()).exists).toBe(false);
   });
 

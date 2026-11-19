@@ -32,7 +32,7 @@ export default function Me() {
   const p = member.profile;
 
   useEffect(() => {
-    document.title = `You · ${APP_NAME}`;
+    document.title = `You  | ${APP_NAME}`;
     mine.refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -105,12 +105,12 @@ export default function Me() {
         </section>
 
         <section className="panel" aria-labelledby="me-theme">
-          <h2 id="me-theme">How it looks</h2>
+          <h2 id="me-theme">Theme</h2>
           <fieldset className="radio-list">
             <legend>Theme</legend>
             {(
               [
-                ['system', 'Match my device'],
+                ['system', 'Same as my device'],
                 ['paper', 'Paper (light)'],
                 ['night', 'Night (dark)'],
               ] as [ThemeChoice, string][]
@@ -131,13 +131,13 @@ export default function Me() {
         <section className="panel" aria-labelledby="me-posts">
           <h2 id="me-posts">Your posts and comments</h2>
           <p className="muted">
-            This list includes what you posted as Anonymous. Only you see it here; other students still see
+            This includes what you posted as Anonymous. Only you can see this list. Everyone else still sees
             “Anonymous”.
           </p>
           {mine.load === 'loading' ? (
             <Loading label="Loading your posts" />
           ) : mine.load === 'error' ? (
-            <ErrorState title="Your posts did not load" onRetry={mine.refresh} />
+            <ErrorState title="Your posts didn’t load" onRetry={mine.refresh} />
           ) : mine.items.length === 0 ? (
             <Empty title="Nothing yet">
               <p>When you post or comment, it shows up here.</p>
@@ -194,11 +194,9 @@ export default function Me() {
         <section className="panel" aria-labelledby="me-saved">
           <h2 id="me-saved">Saved on this device</h2>
           {saved.length === 0 ? (
-            <p className="muted">
-              Press Save on a thread to keep it here. Saved threads stay on this device only.
-            </p>
+            <p className="muted">Hit Save on a thread and it shows up here. Saves stay on this device.</p>
           ) : (
-            <ul className="stack" style={{ margin: 0, paddingLeft: 'var(--space-5)' }}>
+            <ul className="stack plain-list">
               {saved.map((thread) => (
                 <li key={thread.id}>
                   <Link to={`/t/${thread.id}`}>{thread.title}</Link>
@@ -210,10 +208,7 @@ export default function Me() {
 
         <section className="panel" aria-labelledby="me-data">
           <h2 id="me-data">Your data</h2>
-          <p>
-            You can download everything the app holds about you: your profile, what you wrote, what you marked
-            thoughtful and what you reported.
-          </p>
+          <p>Download everything the site has on you as a file. That includes your anonymous posts.</p>
           <div className="row">
             <button className="nb-btn" type="button" onClick={() => void download()} disabled={exporting}>
               {exporting ? 'Preparing' : 'Download my data'}
@@ -229,15 +224,14 @@ export default function Me() {
 
       <Dialog open={confirming} onClose={() => setConfirming(false)} title="Delete your account?">
         <form className="stack" onSubmit={(event) => void deleteAccount(event)}>
-          <p>Here is exactly what happens:</p>
-          <ul className="stack" style={{ margin: 0, paddingLeft: 'var(--space-5)' }}>
+          <ul className="stack plain-list">
             <li>Your profile and sign-in are removed.</li>
             <li>Posts and comments under your name stay, but show “Former member” instead of your name.</li>
             <li>
-              <b>The school keeps its record of who wrote each post</b>, including yours, as school policy
-              requires. The administration can still look that up, and each lookup is logged.
+              <b>The school still keeps its record of who wrote every post, yours too.</b> Admins can look
+              that up, and each lookup is logged.
             </li>
-            <li>This cannot be undone.</li>
+            <li>You can’t undo this.</li>
           </ul>
           <div className="field">
             <label className="nb-label" htmlFor="delete-confirm">
@@ -297,7 +291,7 @@ export function Spaces() {
   const navigate = useNavigate();
   const [text, setText] = useState('');
   useEffect(() => {
-    document.title = `Spaces · ${APP_NAME}`;
+    document.title = `Spaces  | ${APP_NAME}`;
   }, []);
   return (
     <Page>
@@ -334,7 +328,7 @@ export function Spaces() {
           <ErrorState title="The spaces did not load" />
         ) : spaces.length === 0 ? (
           <Empty title="No spaces yet">
-            <p>An administrator can add the first one.</p>
+            <p>An admin has to add one.</p>
           </Empty>
         ) : (
           <nav className="doors" aria-label="All spaces">

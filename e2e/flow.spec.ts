@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { addComment, chooseIdentity, freshEmail, signIn, signOut, startThread } from './helpers';
 
 /**
- * The main journey, on the Firebase emulators, under the same
+ * The main flow, on the Firebase emulators, under the same
  * Content-Security-Policy as production. It runs twice: at 1280x900 and on a
  * 375x812 phone.
  */
@@ -21,7 +21,7 @@ async function uidFor(page: Page, email: string): Promise<string> {
   return uid;
 }
 
-test.describe.serial('the main journey', () => {
+test.describe.serial('the main flow', () => {
   const author = {
     email: freshEmail('author'),
     firstName: 'Zephyrine',
@@ -68,7 +68,9 @@ test.describe.serial('the main journey', () => {
     await page.getByLabel('Space', { exact: true }).selectOption({ label: 'Clubs' });
     await page.getByLabel('Title', { exact: true }).fill('A thread with no identity chosen');
     await page.getByRole('button', { name: 'Post', exact: true }).click();
-    await expect(page.getByRole('alert').filter({ hasText: 'Choose' }).first()).toBeVisible();
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'Pick your name or Anonymous' }).first(),
+    ).toBeVisible();
     await expect(page).toHaveURL(/\/new$/);
   });
 
@@ -117,7 +119,7 @@ test.describe.serial('the main journey', () => {
     await vote.click();
     // Optimistic: the button changes before the server has answered.
     await expect(vote).toHaveAttribute('aria-pressed', 'true');
-    await expect(vote).toContainText('Thoughtful · 1');
+    await expect(vote).toContainText('Thoughtful 1');
     expect((await saved).status()).toBe(200);
     await page.reload();
     await expect(
@@ -131,7 +133,7 @@ test.describe.serial('the main journey', () => {
         .locator('.th-card')
         .first()
         .getByRole('button', { name: /Thoughtful/ }),
-    ).toContainText('Thoughtful · 1');
+    ).toContainText('Thoughtful 1');
     // The author can find their own anonymous post under You.
     await page.goto('/me');
     await expect(page.getByRole('link', { name: anonTitle })).toBeVisible();
@@ -185,10 +187,10 @@ test.describe.serial('the main journey', () => {
     await page.goto(`/t/${anonId}`);
     await addComment(page, 'A named reply from someone else.', 'name', reader.firstName);
     await page.locator('.th-card').first().getByRole('button', { name: 'Report' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Report this to a moderator' });
-    await dialog.getByLabel('It is spam or off topic').check();
+    const dialog = page.getByRole('dialog', { name: 'Report' });
+    await dialog.getByLabel('Spam or off topic').check();
     await dialog.getByRole('button', { name: 'Send report' }).click();
-    await expect(page.getByText('Thank you. A moderator will take a look.')).toBeVisible();
+    await expect(page.getByText('Sent. A mod will look at it.')).toBeVisible();
     await check('the thread after replying and reporting');
   });
 
@@ -210,10 +212,10 @@ test.describe.serial('the main journey', () => {
     await expect(page.getByRole('button', { name: 'Who wrote this?' })).toHaveCount(0);
     await page.locator('.th-card').first().getByRole('button', { name: 'Moderate' }).click();
     const dialog = page.getByRole('dialog', { name: 'Moderate this thread' });
-    await dialog.getByLabel('Hold for review (hide it for now)').check();
+    await dialog.getByLabel('Hide it for now').check();
     await dialog.getByLabel('Note for the audit log').fill('Holding while we check');
     await dialog.getByRole('button', { name: 'Confirm' }).click();
-    await expect(page.getByText('Only moderators can see this thread.')).toBeVisible();
+    await expect(page.getByText('Only mods can see this thread.')).toBeVisible();
     // The administration page is closed to moderators.
     await page.goto('/admin');
     await expect(page).toHaveURL(/\/$/);
@@ -222,7 +224,7 @@ test.describe.serial('the main journey', () => {
   test('a held thread is not available to students', async ({ page }) => {
     await signIn(page, reader.email, reader);
     await page.goto(`/t/${anonId}`);
-    await expect(page.getByRole('heading', { name: 'This thread is not available' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'This thread isn’t available' })).toBeVisible();
     await page.goto('/mod');
     await expect(page).toHaveURL(/\/$/);
   });
@@ -238,24 +240,24 @@ test.describe.serial('the main journey', () => {
     const dialog = page.getByRole('dialog', { name: 'Who wrote this?' });
 
     // A reason is required.
-    await dialog.getByRole('button', { name: 'Show the author and log it' }).click();
+    await dialog.getByRole('button', { name: 'Show who wrote it' }).click();
     await expect(dialog.getByRole('alert')).toContainText('at least 10');
     await expect(dialog).not.toContainText(author.email);
 
     const reason = `Safety follow-up ${stamp}`;
     await dialog.getByLabel('Why do you need to know? (required)').fill(reason);
-    await dialog.getByRole('button', { name: 'Show the author and log it' }).click();
+    await dialog.getByRole('button', { name: 'Show who wrote it' }).click();
     await expect(dialog.getByText(author.email)).toBeVisible();
     await expect(dialog.getByText('Zephyrine Q.')).toBeVisible();
-    await expect(dialog.getByText('This view was logged.')).toBeVisible();
+    await expect(dialog.getByText('This lookup is in the audit log')).toBeVisible();
     await dialog.getByRole('button', { name: 'Close' }).click();
 
     // Restore the thread, then read the audit log.
     await page.locator('.th-card').first().getByRole('button', { name: 'Moderate' }).click();
     const mod = page.getByRole('dialog', { name: 'Moderate this thread' });
-    await mod.getByLabel('Restore (make it visible)').check();
+    await mod.getByLabel('Put it back').check();
     await mod.getByRole('button', { name: 'Confirm' }).click();
-    await expect(page.getByText('Only moderators can see this thread.')).toHaveCount(0);
+    await expect(page.getByText('Only mods can see this thread.')).toHaveCount(0);
 
     await page.goto('/admin/audit');
     const row = page.getByRole('row').filter({ hasText: reason });
@@ -273,13 +275,13 @@ test.describe.serial('the main journey', () => {
     await page.getByLabel('Space', { exact: true }).selectOption({ label: 'Clubs' });
     await chooseIdentity(page, 'Post as', 'Anonymous');
     await page.getByLabel('Title', { exact: true }).fill(`Something I need to say ${stamp}`);
-    await page.getByLabel('Your thoughts', { exact: true }).fill('Some days I want to hurt myself.');
+    await page.getByLabel('Text', { exact: true }).fill('Some days I want to hurt myself.');
     await page.getByRole('button', { name: 'Post', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'Thank you for writing this' })).toBeVisible({
+    await expect(page.getByRole('heading', { name: 'Thanks for writing this' })).toBeVisible({
       timeout: 30_000,
     });
-    await expect(page.getByText('You are not in trouble.')).toBeVisible();
-    await expect(page.getByText('988 Suicide and Crisis Lifeline.')).toBeVisible();
+    await expect(page.getByText('You’re not in trouble.')).toBeVisible();
+    await expect(page.getByText('Call or text 988.')).toBeVisible();
     await page.goto('/s/clubs?sort=new');
     await expect(page.getByRole('link', { name: `Something I need to say ${stamp}` })).toHaveCount(0);
   });
@@ -312,19 +314,19 @@ test.describe('pages that need no sign-in', () => {
     await expect(page.getByRole('button', { name: /Sign in/ })).toHaveCount(0);
   });
 
-  test('about explains anonymity in three steps', async ({ page }) => {
+  test('the about page explains anonymous posts', async ({ page }) => {
     await page.goto('/about');
-    for (const step of ['You choose', 'Students see your choice', 'Administration can always see']) {
+    for (const step of ['You pick', 'Students see “Anonymous”', 'The school can see it’s you']) {
       await expect(page.getByRole('heading', { name: step })).toBeVisible();
     }
-    await expect(page.getByRole('heading', { name: 'Honest limits' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'What anonymous can’t hide' })).toBeVisible();
   });
 
   test('an account from another domain is signed out with a kind message', async ({ page }) => {
     await page.goto('/sign-in');
     await page.getByLabel('Any email address').fill('someone@example.com');
     await page.getByRole('button', { name: 'Sign in as this address' }).click();
-    await expect(page.getByRole('alert').filter({ hasText: 'not a Nobles account' })).toBeVisible();
+    await expect(page.getByRole('alert').filter({ hasText: 'isn’t a nobles.edu account' })).toBeVisible();
     await expect(page).toHaveURL(/\/sign-in$/);
     await page.goto('/');
     await expect(page).toHaveURL(/\/sign-in$/);

@@ -57,7 +57,7 @@ export default function Board() {
   const [online, setOnline] = useState(() => navigator.onLine);
 
   useEffect(() => {
-    document.title = `Hall screen · ${APP_NAME}`;
+    document.title = `Hall screen  | ${APP_NAME}`;
     const up = () => setOnline(true);
     const down = () => setOnline(false);
     window.addEventListener('online', up);
@@ -102,7 +102,7 @@ export default function Board() {
               </>
             ) : (
               <>
-                <span className="nb-eyebrow">Today’s question · {feed!.spaceName}</span>
+                <span className="nb-eyebrow">Today’s question, in {feed!.spaceName}</span>
                 <h1 className={qClass}>{feed!.questionText}</h1>
                 <div className="counts">
                   <div>
@@ -151,8 +151,8 @@ export default function Board() {
             <div className="join">
               <JoinQr />
               <div>
-                <b>Join in</b>
-                <span>Scan with your phone camera to reply.</span>
+                <b>Reply from your phone</b>
+                <span>Point your camera at the code.</span>
               </div>
             </div>
             {(feed?.approvedReplies ?? []).slice(0, 2).map((reply, i) => {

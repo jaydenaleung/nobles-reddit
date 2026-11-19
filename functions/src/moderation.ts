@@ -25,7 +25,7 @@ export const modAction = callable(
   { name: 'modAction', schema: modActionSchema, roles: MOD_ROLES, rate: 'admin' },
   async (data, caller): Promise<{ contentKey: string; action: ModAction }> => {
     const parsed = parseContentKey(data.contentKey);
-    if (!parsed) throw errors.invalid('That does not look right.');
+    if (!parsed) throw errors.invalid('That doesn’t look right.');
     const ref = db.doc(contentPath(parsed));
     const isPost = parsed.kind === 'post';
 
@@ -78,7 +78,7 @@ export const modAction = callable(
           break;
         case 'pin':
         case 'unpin':
-          if (!isPost) throw errors.invalid('Only threads can be pinned.');
+          if (!isPost) throw errors.invalid('Only threads can be pinned, not comments.');
           if (data.action === 'pin' && current.status !== 'visible') {
             throw new AppError('failed-precondition', 'Only a visible thread can be pinned.');
           }
@@ -91,7 +91,7 @@ export const modAction = callable(
           break;
         case 'approveForBoard':
           if (current.status !== 'visible') {
-            throw new AppError('failed-precondition', 'Only visible content can go on the hall screen.');
+            throw new AppError('failed-precondition', 'Only visible posts can go on the hall screen.');
           }
           if (isPost) {
             // A thread becomes the question shown on the hall screen.

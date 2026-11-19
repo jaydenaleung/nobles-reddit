@@ -37,7 +37,7 @@ function DevelopmentSignIn() {
     <section className="panel" aria-label="Local development sign-in">
       <h2>Local development</h2>
       <p className="muted">
-        This box only exists when the app runs against the Firebase emulators. These are made-up people.
+        Only shows up when the site runs on the Firebase emulators. These are test accounts.
       </p>
       <div className="row">
         <button
@@ -105,7 +105,7 @@ export function SignIn() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = `Sign in · ${APP_NAME}`;
+    document.title = `Sign in  | ${APP_NAME}`;
   }, []);
 
   if (state.status === 'member') return <Navigate to="/" replace />;
@@ -122,7 +122,7 @@ export function SignIn() {
         setError(
           code === 'auth/popup-blocked'
             ? 'Your browser blocked the sign-in window. Allow pop-ups for this site and try again.'
-            : 'Sign-in did not work. Please try again.',
+            : 'Sign-in didn’t work. Try again.',
         );
       }
     } finally {
@@ -133,10 +133,10 @@ export function SignIn() {
   return (
     <PublicFrame>
       <div className="gate__card" style={{ justifySelf: 'center' }}>
-        <h1>A place for all of us to talk.</h1>
+        <h1>The Nobles message board</h1>
         <p className="page-lede">
-          {APP_NAME} is a discussion board for students and faculty at {SCHOOL_NAME}: school news, what’s
-          going on in the world, and whatever else is on our minds. Kind and honest, both.
+          For {SCHOOL_NAME} students and teachers. Post about something at school or in the news, and people
+          reply.
         </p>
         {notice && (
           <div className="nb-notice" role="alert">
@@ -144,13 +144,13 @@ export function SignIn() {
           </div>
         )}
         {state.status === 'loading' ? (
-          <Loading label="Checking whether you are signed in" />
+          <Loading label="Checking if you’re signed in" />
         ) : (
           <section className="panel">
             <h2>Sign in</h2>
             <p>
-              Anyone with a <b>@{config.allowedDomains.join(' or @')}</b> Google account can join. Other
-              accounts, including personal Gmail, cannot.
+              Use your <b>@{config.allowedDomains.join(' or @')}</b> Google account. Personal Gmail won’t
+              work.
             </p>
             <div className="row">
               <button
@@ -168,8 +168,8 @@ export function SignIn() {
               </p>
             )}
             <p className="muted">
-              We ask Google for your name and school email, nothing else. No ads and no trackers.{' '}
-              <Link to="/about">How it works and who can see what</Link>.
+              We only get your name and school email from Google. There are no ads or trackers.{' '}
+              <Link to="/about">How anonymous posting works</Link>
             </p>
           </section>
         )}
@@ -202,7 +202,7 @@ export function Onboarding() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = `Welcome · ${APP_NAME}`;
+    document.title = `Welcome  | ${APP_NAME}`;
   }, []);
 
   if (state.status === 'loading') {
@@ -249,11 +249,11 @@ export function Onboarding() {
         onSubmit={(event) => void submit(event)}
         noValidate
       >
-        <h1>Welcome. Two minutes, then you’re in.</h1>
+        <h1>Set up your account</h1>
         <p className="page-lede">Signed in as {state.user.email}.</p>
 
         <section className="panel">
-          <h2>How your name will show</h2>
+          <h2>Your name</h2>
           <div className="field-row">
             <div className="field">
               <label className="nb-label" htmlFor={`${id}-first`}>
@@ -282,8 +282,8 @@ export function Onboarding() {
             </div>
           </div>
           <p className="nb-help">
-            When you post under your name, people see “{firstName.trim() || 'First'}{' '}
-            {lastInitial.trim() || 'L'}.” We do not show your full last name or your photo.
+            Posts with your name show “{firstName.trim() || 'First'} {lastInitial.trim() || 'L'}.” and nothing
+            else.
           </p>
 
           <fieldset className="radio-list">
@@ -329,12 +329,11 @@ export function Onboarding() {
           )}
           {who === 'faculty' && (
             <p className="nb-help">
-              The “Faculty” badge is added by the administration, not by this form. Until then you can read
-              and post like everyone else.
+              An admin adds the Faculty badge. Until then you can still read and post.
             </p>
           )}
           <fieldset className="radio-list">
-            <legend>Which part of the school? (optional)</legend>
+            <legend>Upper or middle school (optional)</legend>
             {DIVISIONS.map((division) => (
               <label key={division}>
                 <input
@@ -368,16 +367,15 @@ export function Onboarding() {
         <div className="nb-notice nb-notice--staff">
           <Icon name="shield" />
           <div>
-            <b>Who can see what.</b> {ANONYMITY_NOTICE} Moderators can remove posts but cannot see who wrote
-            them. Each time the administration looks up an author, it is logged.
+            <b>Who can see what.</b> {ANONYMITY_NOTICE} Mods can take posts down but can’t see who wrote them.
+            Every time an admin looks up an author, it’s logged.
           </div>
         </div>
 
         <label className="check">
           <input type="checkbox" checked={understood} onChange={(e) => setUnderstood(e.target.checked)} />
           <span>
-            I understand: I will follow the ground rules, and anonymous posts are hidden from students but not
-            from the school.
+            I read the rules. I get that anonymous posts are hidden from students, not from the school.
           </span>
         </label>
 
@@ -391,7 +389,7 @@ export function Onboarding() {
             Sign out
           </button>
           <button className="nb-btn nb-btn--primary" type="submit" disabled={busy}>
-            {busy ? 'Setting up' : 'Join the conversation'}
+            {busy ? 'Setting up' : 'Done'}
           </button>
         </div>
       </form>
@@ -401,13 +399,13 @@ export function Onboarding() {
 
 export function NotFound() {
   useEffect(() => {
-    document.title = `Not found · ${APP_NAME}`;
+    document.title = `Not found  | ${APP_NAME}`;
   }, []);
   return (
     <PublicFrame>
       <div className="state">
         <h1 className="page-h">That page is not here</h1>
-        <p>The link may be old, or the thread may have been removed. Nothing is broken on your end.</p>
+        <p>The link might be old, or the thread got removed.</p>
         <div className="row" style={{ justifyContent: 'center' }}>
           <Link className="nb-btn nb-btn--primary" to="/">
             Go to the front page

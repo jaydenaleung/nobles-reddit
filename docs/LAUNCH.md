@@ -37,7 +37,7 @@ Decide the numbers before looking at them.
 | Measure | A good sign after two weeks | Where to see it |
 | --- | --- | --- |
 | People who came back | At least half the group signed in on three or more days | Ask; the app keeps no analytics |
-| Conversation, not broadcast | Most threads have replies, and replies have replies | The feed, "No replies yet" tab |
+| Conversation, not broadcast | Most threads have replies, and replies have replies | The feed, "No replies" tab |
 | Named and anonymous both used | Neither is under about 15% of comments | The "% of comments are anonymous" line on polls |
 | Kindness | Few holds and removals, and moderators agree with most automatic flags | Moderation queue, audit log |
 | The check's mistakes | Moderators restore fewer than about one in three automatic flags | Audit log: `restore` after an automatic flag |

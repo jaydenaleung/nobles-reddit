@@ -112,7 +112,7 @@ score = thoughtfulCount + 0.5 * commentCount
 hot   = log10(max(score, 1)) + (createdAtSeconds - 1767225600) / 45000
 ```
 
-Pinned threads sort first in every sort order. The sorts are Hot, New, Top this week and No replies yet, 20 threads a page with a cursor. Counts are updated in the same transaction as a vote and then recounted from the source by a trigger, so they repair themselves.
+Pinned threads sort first in every sort order. The sorts are Hot, New, Top this week and No replies, 20 threads a page with a cursor. Counts are updated in the same transaction as a vote and then recounted from the source by a trigger, so they repair themselves.
 
 ## The hall screen
 

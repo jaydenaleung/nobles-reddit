@@ -17,7 +17,7 @@ export const toggleThoughtful = callable(
   { name: 'toggleThoughtful', schema: toggleThoughtfulSchema, rate: 'votes' },
   async (data, caller): Promise<{ thoughtful: boolean }> => {
     const parsed = parseContentKey(data.contentKey);
-    if (!parsed) throw errors.invalid('That does not look right.');
+    if (!parsed) throw errors.invalid('That doesn’t look right.');
     const contentRef = db.doc(contentPath(parsed));
     const voteRef =
       parsed.kind === 'post'

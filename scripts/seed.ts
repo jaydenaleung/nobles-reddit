@@ -211,11 +211,11 @@ const questionComments: SeedComment[] = [
 const posts: SeedPost[] = [
   {
     slug: 'school-news',
-    title: 'Read this first: how Commons works and what we’re all agreeing to',
+    title: 'Read this first: how Commons works',
     body:
-      'Welcome. This is a place for all of us to talk.\n\n**Disagree freely. Be specific. Go after ideas, not people.**\n\n' +
-      'Every time you post you choose: your name, or Anonymous. Anonymous means other students can’t see your name. The school can.\n\n' +
-      'If something looks wrong, press Report and a moderator will take a look.',
+      'Post about school stuff or the news, and argue with ideas, not people.\n\n' +
+      'Every time you post you pick your name or Anonymous. Anonymous hides your name from other students. The school can still see it.\n\n' +
+      'If a post looks wrong, hit Report and a mod will look at it.',
     author: { mode: 'named', name: ADMIN_DISPLAY_NAME, role: 'admin' },
     uid: users.admin.uid,
     hours: 48,

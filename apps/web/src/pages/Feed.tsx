@@ -111,7 +111,7 @@ export default function Feed() {
   const { votes, onVote } = useFeedVoting(member.user.uid, feed.posts, feed.patch);
 
   useEffect(() => {
-    document.title = space ? `${space.name} · ${APP_NAME}` : APP_NAME;
+    document.title = space ? `${space.name}  | ${APP_NAME}` : APP_NAME;
   }, [space]);
 
   const sidebar = <Sidebar spaceName={space?.name} spaceDescription={space?.description} />;
@@ -119,8 +119,8 @@ export default function Feed() {
   if (unknownSpace) {
     return (
       <Page sidebar={sidebar}>
-        <Empty title="We could not find that space">
-          <p>It may have been renamed. The list of spaces is on the left.</p>
+        <Empty title="That space doesn’t exist">
+          <p>It might have been renamed. The spaces are listed on the left.</p>
           <Link className="nb-btn" to="/">
             Go to the front page
           </Link>
@@ -161,7 +161,7 @@ export default function Feed() {
           {initials(member.profile.displayName)}
         </span>
         <Link className="in" to={space ? `/new?space=${space.slug}` : '/new'}>
-          What’s on your mind, {member.profile.firstName}?
+          Start a thread
         </Link>
         <Link className="nb-btn nb-btn--sm" to={space ? `/new?space=${space.slug}` : '/new'}>
           Post
@@ -188,14 +188,10 @@ export default function Feed() {
       {feed.load === 'loading' || waitingForSpace ? (
         <FeedSkeleton />
       ) : feed.load === 'error' ? (
-        <ErrorState title="The feed did not load" onRetry={feed.reload} />
+        <ErrorState title="The feed didn’t load" onRetry={feed.reload} />
       ) : feed.posts.length === 0 ? (
-        <Empty title={sort === 'unanswered' ? 'Every thread has a reply' : 'Nothing here yet'}>
-          <p>
-            {sort === 'unanswered'
-              ? 'Nice. Try Hot or New to see what people are talking about.'
-              : 'Be the first to start a thread in this space.'}
-          </p>
+        <Empty title={sort === 'unanswered' ? 'Every thread has a reply' : 'No threads here yet'}>
+          <p>{sort === 'unanswered' ? 'Check Hot or New instead.' : 'Hit Post to start the first one.'}</p>
           <Link className="nb-btn nb-btn--primary" to={space ? `/new?space=${space.slug}` : '/new'}>
             Start a thread
           </Link>
@@ -211,7 +207,7 @@ export default function Feed() {
                 onClick={() => void feed.loadMore()}
                 disabled={feed.loadingMore}
               >
-                {feed.loadingMore ? 'Loading more' : 'Show more threads'}
+                {feed.loadingMore ? 'Loading more' : 'More threads'}
               </button>
             </div>
           )}
@@ -233,7 +229,7 @@ export function Search() {
   );
 
   useEffect(() => {
-    document.title = `Search · ${APP_NAME}`;
+    document.title = `Search  | ${APP_NAME}`;
   }, []);
 
   return (
@@ -254,16 +250,16 @@ export function Search() {
       {search.load === 'loading' ? (
         <FeedSkeleton rows={3} />
       ) : search.load === 'error' ? (
-        <ErrorState title="Search did not work" />
+        <ErrorState title="Search didn’t work" />
       ) : search.tokens.length === 0 ? (
         text ? (
           <Empty title="Try a more specific word">
-            <p>Very common words like “the” and “what” are left out of search.</p>
+            <p>Search skips common words like “the” and “what”.</p>
           </Empty>
         ) : null
       ) : search.posts.length === 0 ? (
         <Empty title="No threads match that">
-          <p>Search looks at titles, the start of each post and space names. It never searches by author.</p>
+          <p>Search checks titles, the start of each post and space names. It never searches by author.</p>
         </Empty>
       ) : (
         <ThreadList posts={search.posts} votes={votes} onVote={(post) => void onVote(post)} />

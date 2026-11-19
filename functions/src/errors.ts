@@ -21,10 +21,10 @@ export const errors = {
   notMember: () =>
     new AppError(
       'permission-denied',
-      'Nobles Commons is for the Nobles community. Sign in with your school Google account.',
+      'Only nobles.edu accounts can use this. Sign in with your school Google account.',
     ),
   notOnboarded: () => new AppError('failed-precondition', 'Finish setting up your account first.'),
-  notAllowed: () => new AppError('permission-denied', 'You do not have permission to do that.'),
+  notAllowed: () => new AppError('permission-denied', 'You can’t do that.'),
   notFound: (what = 'That') => new AppError('not-found', `${what} is not available.`),
   invalid: (message: string) => new AppError('invalid-argument', message),
   tooLarge: () => new AppError('invalid-argument', 'That is too long to send.'),
@@ -49,5 +49,5 @@ export function toHttpsError(error: unknown, functionName: string): HttpsError {
     name: error instanceof Error ? error.name : 'unknown',
     message: error instanceof Error ? error.message : String(error),
   });
-  return new HttpsError('internal', 'Something went wrong on our side. Please try again.');
+  return new HttpsError('internal', 'Something broke on our end. Try again.');
 }

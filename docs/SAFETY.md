@@ -58,7 +58,7 @@ The alert email needs a mail service to be connected before it is delivered. Unt
 - **No downvotes and no negative scores.** The only reaction is "Thoughtful".
 - **Editing** is possible for 10 minutes; edited text is checked again.
 - **The hall screen** shows only replies a moderator chose for it.
-- **Computer-written text is always labelled** ("Auto-summary. Written by our model, not by a person."), and the model is never told who wrote anything.
+- **Computer-written text is always labelled** ("Summary. Written by a computer model, not a person."), and the model is never told who wrote anything.
 
 ## Known gaps
 

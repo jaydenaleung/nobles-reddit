@@ -45,7 +45,7 @@ export default function NewPost() {
   const [outcome, setOutcome] = useState<ContentStatusResult | null>(null);
 
   useEffect(() => {
-    document.title = `Start a thread · ${APP_NAME}`;
+    document.title = `Start a thread  | ${APP_NAME}`;
   }, []);
 
   // Preselect the space from ?space=slug, or the first one the person can post in.
@@ -68,11 +68,11 @@ export default function NewPost() {
     setError(null);
     if (!mode) {
       setNeedMode(true);
-      setError('Choose whether to post under your name or as Anonymous.');
+      setError('Pick your name or Anonymous.');
       return;
     }
     if (!spaceId) {
-      setError('Choose a space for your thread.');
+      setError('Pick a space.');
       return;
     }
     const base = { spaceId, identityMode: mode, title };
@@ -85,7 +85,7 @@ export default function NewPost() {
     // The same checks the server runs, so mistakes are caught before anything is sent.
     const checked = createPostSchema.safeParse(input);
     if (!checked.success) {
-      setError(checked.error.issues[0]?.message ?? 'Something in the form is not right.');
+      setError(checked.error.issues[0]?.message ?? 'Something in the form isn’t right.');
       return;
     }
     setBusy('sending');
@@ -111,9 +111,7 @@ export default function NewPost() {
     return (
       <Page>
         <div className="page">
-          <h1 className="page-h">
-            {outcome.outcome === 'wellbeing' ? 'Thank you for writing this' : 'Your thread is saved'}
-          </h1>
+          <h1 className="page-h">{outcome.outcome === 'wellbeing' ? 'Thanks for writing this' : 'Saved'}</h1>
           {outcome.outcome === 'wellbeing' && outcome.resources ? (
             <WellbeingPanel resources={outcome.resources} />
           ) : outcome.outcome === 'held' ? (
@@ -121,8 +119,7 @@ export default function NewPost() {
           ) : (
             <div className="nb-notice" role="status">
               <div>
-                <b>Still being checked.</b> Your thread will appear in the feed in a moment. You can find it
-                under You.
+                <b>Still being checked.</b> It’ll show up in the feed in a minute. It’s also under You.
               </div>
             </div>
           )}
@@ -171,7 +168,7 @@ export default function NewPost() {
             value={spaceId}
             onChange={(e) => setSpaceId(e.target.value)}
           >
-            <option value="">Choose a space</option>
+            <option value="">Pick a space</option>
             {allowed.map((space) => (
               <option key={space.id} value={space.id}>
                 {space.name}
@@ -217,9 +214,7 @@ export default function NewPost() {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
             />
-            <p className="nb-help">
-              Links must start with https://. We show the link; we never open it for you.
-            </p>
+            <p className="nb-help">Links have to start with https://.</p>
           </div>
         )}
 
@@ -266,7 +261,7 @@ export default function NewPost() {
         <div className="field">
           <div className="row row--between">
             <label className="nb-label" htmlFor={`${id}-body`}>
-              {kind === 'text' ? 'Your thoughts' : 'Anything to add (optional)'}
+              {kind === 'text' ? 'Text' : 'Text (optional)'}
             </label>
             <Count value={body.trim().length} max={LIMITS.bodyMax} />
           </div>
@@ -277,15 +272,13 @@ export default function NewPost() {
             onChange={(e) => setBody(e.target.value)}
             rows={6}
           />
-          <p className="nb-help">
-            Plain text. *italic*, **bold** and https links work. Your draft is saved on this device only.
-          </p>
+          <p className="nb-help">*italic*, **bold** and https links work. Your draft stays on this device.</p>
         </div>
 
         <div className="nb-notice nb-notice--kind">
           <Icon name="check" />
           <div>
-            <b>Be kind. Be honest.</b> Talk about ideas, not people.
+            <b>Be kind and be honest.</b> Argue with the idea, not the person.
           </div>
         </div>
 

@@ -70,7 +70,7 @@ The brief said: when something is not specified, pick the default given or the m
 
 | Decision | Why |
 | --- | --- |
-| A summary is made when someone asks ("Summarise this thread"), not automatically | Saves budget; the box still appears for everyone once it exists |
+| A summary is made when someone asks ("Summarize"), not automatically | Saves budget; the box still appears for everyone once it exists |
 | Comments are shortened to 1,200 characters for the summary, with a marker | Keeps one long thread from using the day's budget |
 | Structured output (a JSON schema) plus our own validation | The model's reply is never trusted |
 | Server-side refusal fallbacks are not enabled | Model ids are configurable, and a declined suggestion is harmless: a moderator writes the question |

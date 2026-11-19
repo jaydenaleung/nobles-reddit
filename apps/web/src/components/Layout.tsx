@@ -124,9 +124,7 @@ export function SpaceNav() {
           </ul>
         </nav>
       )}
-      <p className="fp-foot">
-        Need a space for your team or club? Ask a moderator and it will usually be up by the next day.
-      </p>
+      <p className="fp-foot">Want a space for your team or club? Ask a moderator.</p>
       <p className="fp-foot">
         <Link to="/about">How {APP_NAME} works</Link>
       </p>
@@ -146,7 +144,7 @@ export function Sidebar({ spaceName, spaceDescription }: { spaceName?: string; s
         <div className="nb-box__body">
           <p>
             {spaceDescription ??
-              'A place for all of us, students and faculty, to talk about school news, what’s going on in the world, and whatever else is on our minds.'}
+              'The Nobles message board. Post about something at school or in the news, and people reply.'}
           </p>
           <Link className="nb-btn nb-btn--primary" to="/new" style={{ width: '100%' }}>
             Start a thread
@@ -179,9 +177,9 @@ export function Sidebar({ spaceName, spaceDescription }: { spaceName?: string; s
             <span className="nb-badge nb-badge--live">
               <Icon name="tv" /> Live now
             </span>
-            <p>{feed?.questionText || 'Today’s question will show here.'}</p>
+            <p>{feed?.questionText || 'No question up yet.'}</p>
           </Link>
-          <span className="nb-meta">Comment from your phone and it can show up on the hall screen.</span>
+          <span className="nb-meta">Reply from your phone. A mod can put your reply on the screen.</span>
         </div>
       </section>
       {feed && feed.nobleman.length > 0 && (
@@ -196,7 +194,7 @@ export function Sidebar({ spaceName, spaceDescription }: { spaceName?: string; s
                   <div className="nb-source__title">{item.title}</div>
                   <div className="nb-source__meta">
                     {item.sample ? 'Sample headline' : 'The Nobleman'}
-                    {item.minutes ? ` · ${item.minutes} min read` : ''}
+                    {item.minutes ? `, ${item.minutes} min read` : ''}
                   </div>
                 </>
               );
@@ -282,7 +280,7 @@ export function Shell() {
   return (
     <>
       <a className="skip" href="#main">
-        Skip to the content
+        Skip to content
       </a>
       <IconSprite />
       <TopBar />
@@ -297,7 +295,7 @@ export function PublicFrame({ children }: { children: ReactNode }) {
   return (
     <>
       <a className="skip" href="#main">
-        Skip to the content
+        Skip to content
       </a>
       <IconSprite />
       <TopBar />

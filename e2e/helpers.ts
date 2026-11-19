@@ -33,8 +33,8 @@ export async function signIn(page: Page, email: string, who: Who): Promise<void>
       await page.getByLabel('A student').check();
       await page.getByLabel('Class year').selectOption(String(who.classYear));
     }
-    await page.getByLabel(/I understand/).check();
-    await page.getByRole('button', { name: 'Join the conversation' }).click();
+    await page.getByLabel(/I read the rules/).check();
+    await page.getByRole('button', { name: 'Done' }).click();
     await page.waitForURL((url) => url.pathname === '/');
   }
   await expect(page.getByRole('navigation', { name: 'Sort' })).toBeVisible();
@@ -74,7 +74,7 @@ export async function startThread(page: Page, thread: NewThread): Promise<string
     .filter({ hasText: thread.as === 'anonymous' ? 'Anonymous' : thread.firstName })
     .click();
   await page.getByLabel('Title', { exact: true }).fill(thread.title);
-  if (thread.body) await page.getByLabel('Your thoughts', { exact: true }).fill(thread.body);
+  if (thread.body) await page.getByLabel('Text', { exact: true }).fill(thread.body);
   await page.getByRole('button', { name: 'Post', exact: true }).click();
   await page.waitForURL(/\/t\/[A-Za-z0-9]+$/, { timeout: 30_000 });
   await expect(page.getByRole('heading', { level: 1, name: thread.title })).toBeVisible();

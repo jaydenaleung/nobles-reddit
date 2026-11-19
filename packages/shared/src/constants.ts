@@ -65,7 +65,7 @@ export const SORT_LABELS: Record<Sort, string> = {
   hot: 'Hot',
   new: 'New',
   top: 'Top this week',
-  unanswered: 'No replies yet',
+  unanswered: 'No replies',
 };
 
 export interface SpaceSeed {
@@ -81,42 +81,42 @@ export const DEFAULT_SPACES: SpaceSeed[] = [
   {
     slug: 'school-news',
     name: 'School news',
-    description: 'What is happening at school this week, and what you think about it.',
+    description: 'What’s going on around campus this week.',
     order: 1,
     postingRoles: ['student', 'faculty', 'moderator', 'admin'],
   },
   {
     slug: 'current-events',
     name: 'Current events',
-    description: 'The world outside campus. Disagree freely, and bring your reasons.',
+    description: 'Stuff happening outside Dedham. Bring your reasons.',
     order: 2,
     postingRoles: ['student', 'faculty', 'moderator', 'admin'],
   },
   {
     slug: 'middle-school',
     name: 'Middle school',
-    description: 'A space for middle schoolers and the people who remember being one.',
+    description: 'For seventh and eighth graders.',
     order: 3,
     postingRoles: ['student', 'faculty', 'moderator', 'admin'],
   },
   {
     slug: 'clubs',
     name: 'Clubs',
-    description: 'Meetings, ideas, and looking for people who like what you like.',
+    description: 'Meeting times and sign-ups.',
     order: 4,
     postingRoles: ['student', 'faculty', 'moderator', 'admin'],
   },
   {
     slug: 'athletics',
     name: 'Athletics',
-    description: 'Games, teams and everything around them.',
+    description: 'Scores, and which home games people should actually go to.',
     order: 5,
     postingRoles: ['student', 'faculty', 'moderator', 'admin'],
   },
   {
     slug: 'ask-the-office',
     name: 'Ask the office',
-    description: 'Questions for the administration, answered in the open.',
+    description: 'Ask the school something. The answer goes here so everyone sees it.',
     order: 6,
     postingRoles: ['student', 'faculty', 'moderator', 'admin'],
   },
@@ -124,24 +124,24 @@ export const DEFAULT_SPACES: SpaceSeed[] = [
 export const DAILY_QUESTION_SPACE = 'current-events';
 
 export const GROUND_RULES = [
-  'Be kind. Be honest. You can say hard things plainly.',
-  'Talk about ideas, not people.',
-  'Say what you actually think, and why.',
-  'If something looks wrong, report it.',
+  'Be kind and be honest. You can disagree hard.',
+  'Argue with the idea, not the person.',
+  'Say what you actually think.',
+  'If a post looks wrong, report it.',
 ] as const;
 
-/** Shown on the composer every time. Do not soften this. */
+/** Shown on every composer. Keep it this plain. */
 export const ANONYMITY_NOTICE =
   'Anonymous hides your name from other students. The administration can always see who wrote every post and comment.';
 export const ANONYMITY_SHORT = 'Anonymous means other students can’t see your name. The school can.';
-export const AI_SUMMARY_LABEL = 'Auto-summary. Written by our model, not by a person.';
+export const AI_SUMMARY_LABEL = 'Summary. Written by a computer model, not a person.';
 
 export const REPORT_REASONS = [
-  { id: 'unkind', label: 'It is unkind or goes after a person' },
-  { id: 'hate', label: 'It is hateful' },
-  { id: 'personal', label: 'It shares private or personal information' },
-  { id: 'safety', label: 'I am worried about someone’s safety' },
-  { id: 'spam', label: 'It is spam or off topic' },
+  { id: 'unkind', label: 'It’s mean or goes after someone' },
+  { id: 'hate', label: 'It’s hateful' },
+  { id: 'personal', label: 'It shares someone’s private info' },
+  { id: 'safety', label: 'I’m worried someone isn’t safe' },
+  { id: 'spam', label: 'Spam or off topic' },
   { id: 'other', label: 'Something else' },
 ] as const;
 export type ReportReason = (typeof REPORT_REASONS)[number]['id'];
@@ -177,17 +177,16 @@ export const DEFAULT_RETENTION_MONTHS = 24;
 /** Shown to an author whose post raised a wellbeing flag, until the school sets its own in config/resources. */
 export const DEFAULT_WELLBEING_RESOURCES = {
   message:
-    'Thank you for writing this. It has not been posted, and it has gone to an adult at school who will read it and follow up with care. You are not in trouble.',
+    'Thanks for writing this. It didn’t go up on the site. An adult at school will read it and check in with you. You’re not in trouble.',
   items: [
     {
       label: 'Talk to someone at school',
-      detail: 'Your advisor, the counseling office or the health office.',
+      detail: 'Your advisor, or anyone in the counseling or health office.',
     },
     {
-      label: '988 Suicide and Crisis Lifeline',
-      detail: 'Call or text 988, any time, free and confidential.',
+      label: 'Call or text 988',
+      detail: 'Any time, free. If someone is in danger right now, call 911.',
     },
-    { label: 'If anyone is in immediate danger', detail: 'Call 911.' },
   ],
 };
 

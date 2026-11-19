@@ -174,7 +174,7 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
         <div className="headline">A headline in Lora 600</div>
         <div className="read-l">Libre Baskerville for posts and comments, set for reading.</div>
         <div className="body">Inter for small interface text, counts and buttons.</div>
-        <div className="nb-meta">Meta · 148 votes · 6 hours ago</div>
+        <div className="nb-meta">Meta, 148 votes, 6 hours ago</div>
         <div>
           The question of the day gets a <span className="nb-hl">yellow highlighter swipe</span>.
         </div>
@@ -294,7 +294,7 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
           />
           <div className="nb-comment__actions">
             <button type="button" aria-pressed="false">
-              <Icon name="up" /> Thoughtful · 18
+              <Icon name="up" /> Thoughtful 18
             </button>
             <button type="button">
               <Icon name="comment" /> Reply
@@ -335,7 +335,7 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
           <div className="nb-box__body fp-src">
             <span className="nb-source">
               <div className="nb-source__title">Lacrosse opens the season with a one-goal win</div>
-              <div className="nb-source__meta">Sample headline · 4 min read</div>
+              <div className="nb-source__meta">Sample headline, 4 min read</div>
             </span>
           </div>
         </section>

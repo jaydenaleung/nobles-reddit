@@ -44,7 +44,7 @@ function useLive<T>(
 const QUEUE_WORDS = {
   wellbeing: 'Wellbeing',
   'ai-flag': 'Flagged by the automatic check',
-  reported: 'Reported by a member',
+  reported: 'Reported',
 } as const;
 
 function QueueTab() {
@@ -73,8 +73,8 @@ function QueueTab() {
   if (load === 'error') return <ErrorState title="The queue did not load" />;
   if (items.length === 0) {
     return (
-      <Empty title="Nothing is waiting">
-        <p>New reports and flagged posts will show up here.</p>
+      <Empty title="Queue’s empty">
+        <p>Reports and held posts show up here.</p>
       </Empty>
     );
   }
@@ -91,11 +91,11 @@ function QueueTab() {
                   {wellbeing && <Icon name="shield" />} {QUEUE_WORDS[item.reason]}
                 </span>
                 <span className="nb-meta">
-                  {parsed?.kind === 'comment' ? 'Comment' : 'Thread'} ·{' '}
+                  {parsed?.kind === 'comment' ? 'Comment' : 'Thread'},{' '}
                   {relativeTime(item.createdAt?.toMillis?.() ?? now, now)}
-                  {item.labels?.length ? ` · ${item.labels.join(', ').replace(/_/g, ' ')}` : ''}
+                  {item.labels?.length ? `, ${item.labels.join(', ').replace(/_/g, ' ')}` : ''}
                   {item.reportReasons?.length
-                    ? ` · ${item.reportReasons.map((r) => REPORT_REASONS.find((x) => x.id === r)?.label ?? r).join('; ')}`
+                    ? `, ${item.reportReasons.map((r) => REPORT_REASONS.find((x) => x.id === r)?.label ?? r).join('; ')}`
                     : ''}
                 </span>
               </div>
@@ -103,9 +103,9 @@ function QueueTab() {
                 <div className="nb-notice nb-notice--kind">
                   <Icon name="check" />
                   <div>
-                    <b>Someone may need a caring adult.</b> This has not been published and must not be
-                    deleted. Follow the school’s steps for a student of concern. An administrator can find out
-                    who wrote it; that lookup is logged.
+                    <b>Someone might need an adult to check in.</b> This didn’t go up, and don’t delete it.
+                    Follow the school’s steps for a student of concern. An admin can find out who wrote it,
+                    and that lookup is logged.
                   </div>
                 </div>
               )}
@@ -165,7 +165,7 @@ function ReportsTab() {
   if (items.length === 0) {
     return (
       <Empty title="No open reports">
-        <p>When someone reports a post or comment, it is listed here.</p>
+        <p>Reports show up here.</p>
       </Empty>
     );
   }
@@ -238,8 +238,8 @@ export function QuestionApprovals() {
           : result.reason === 'already-proposed'
             ? 'Today’s suggestions were already made.'
             : result.reason === 'budget'
-              ? 'Suggestions are unavailable for the rest of today. You can write your own.'
-              : 'Suggestions are not available right now. You can write your own.',
+              ? 'No more suggestions today. You can write your own.'
+              : 'Couldn’t get suggestions right now. You can write your own.',
       );
     } catch (error) {
       toast(errorMessage(error));
@@ -272,7 +272,7 @@ export function QuestionApprovals() {
     try {
       await api.proposeHumanQuestion({ text: own });
       setOwn('');
-      toast('Added. Approve it below when you are ready.');
+      toast('Added. Approve it below when you’re ready.');
     } catch (error) {
       toast(errorMessage(error));
     }
@@ -282,9 +282,9 @@ export function QuestionApprovals() {
     <div className="stack">
       <div className="nb-notice">
         <div>
-          <b>You decide.</b> A model suggests three questions each school morning. Nothing is published until
-          you approve one. Approving turns it into a pinned thread in Current events, posted by
-          “Administration”, and puts it on the hall screen.
+          A computer model suggests three questions every school morning. Nothing goes up until a mod approves
+          one. The approved question becomes a pinned thread in Current events, posted by “Administration”,
+          and goes on the hall screen.
         </div>
       </div>
       <div className="row">
@@ -295,7 +295,7 @@ export function QuestionApprovals() {
       <form className="panel" onSubmit={(event) => void addOwn(event)}>
         <div className="field">
           <label className="nb-label" htmlFor="own-question">
-            Or write your own question
+            Write your own
           </label>
           <input
             className="nb-input"
@@ -307,7 +307,7 @@ export function QuestionApprovals() {
         </div>
         <div className="row">
           <button className="nb-btn" type="submit" disabled={own.trim().length < 5}>
-            Add it to the list
+            Add
           </button>
         </div>
       </form>
@@ -325,7 +325,7 @@ export function QuestionApprovals() {
             <article className="q-item" key={question.id}>
               <div className="row">
                 <span className="nb-badge nb-badge--ai">
-                  {question.source === 'ai' ? 'Suggested by our model' : 'Written by a moderator'}
+                  {question.source === 'ai' ? 'Suggested by the model' : 'Written by a moderator'}
                 </span>
                 <span className="nb-meta">{question.date}</span>
               </div>
@@ -350,7 +350,7 @@ export function QuestionApprovals() {
                   type="button"
                   onClick={() => void decide(question.id, 'approve')}
                 >
-                  Approve and publish
+                  Approve
                 </button>
                 <button
                   className="nb-btn nb-btn--quiet nb-btn--sm"
@@ -373,15 +373,15 @@ type Tab = 'queue' | 'reports' | 'question';
 export default function Mod() {
   const [tab, setTab] = useState<Tab>('queue');
   useEffect(() => {
-    document.title = `Moderation · ${APP_NAME}`;
+    document.title = `Moderation  | ${APP_NAME}`;
   }, []);
   return (
     <Page>
       <div className="page">
         <h1 className="page-h">Moderation</h1>
         <p className="page-lede">
-          Wellbeing flags come first. You can hold, remove, restore and pin, and choose replies for the hall
-          screen. You cannot see who wrote something: ask an administrator if you need to know.
+          Wellbeing flags are at the top. You can’t see who wrote anything here. If you need to know, ask an
+          admin.
         </p>
         <div className="tabs" role="tablist" aria-label="Moderation sections">
           {(

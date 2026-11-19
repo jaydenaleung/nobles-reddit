@@ -47,7 +47,7 @@ function RolesTab() {
       const result = await api.setRole({ email, role, reason });
       toast(
         result.applied
-          ? `${result.email} is now ${result.role}. It is in the audit log.`
+          ? `${result.email} is now ${result.role}. That’s in the audit log.`
           : `${result.email} will be ${result.role} when they first sign in.`,
       );
       setEmail('');
@@ -63,11 +63,11 @@ function RolesTab() {
   return (
     <div className="stack">
       <p className="muted">
-        Everyone with an allowed school email is a student unless listed here. Moderators are faculty
-        nominated by the administration. Admins can look up authors.
+        Anyone with a school email is a student unless they’re listed here. Mods are teachers the
+        administration picks. Only admins can look up who wrote a post.
       </p>
       <form className="panel" onSubmit={(event) => void submit(event)}>
-        <h2>Give someone a role</h2>
+        <h2>Set a role</h2>
         <div className="field-row">
           <div className="field">
             <label className="nb-label" htmlFor="role-email">
@@ -115,7 +115,7 @@ function RolesTab() {
         </div>
         <div className="row">
           <button className="nb-btn nb-btn--primary" type="submit" disabled={busy}>
-            {busy ? 'Saving' : 'Save role'}
+            {busy ? 'Saving' : 'Save'}
           </button>
         </div>
       </form>
@@ -124,8 +124,8 @@ function RolesTab() {
       ) : load === 'error' ? (
         <ErrorState title="Roles did not load" />
       ) : entries.length === 0 ? (
-        <Empty title="Nobody has a special role yet">
-          <p>Bootstrap admins are set in the deployment settings and are not listed here.</p>
+        <Empty title="Nobody has a role yet">
+          <p>Admins set in the deploy settings aren’t listed here.</p>
         </Empty>
       ) : (
         <div
@@ -345,8 +345,8 @@ function RevealTab() {
   return (
     <div className="stack">
       <p className="muted">
-        To find the author of a thread, paste its link here. For a single comment, open the thread and choose
-        “Who wrote this?” under that comment. Either way you must give a reason, and the lookup is logged.
+        Paste a thread link to see who wrote it. For a comment, open the thread and press “Who wrote this?”
+        under it. You have to give a reason, and the lookup goes in the log.
       </p>
       <form className="panel" onSubmit={find}>
         <div className="field">
@@ -423,9 +423,9 @@ function UsageTab() {
           <dd>{usage.provider}</dd>
         </dl>
         <p className="muted">
-          When the day’s budget is used up, summaries and question suggestions say “unavailable today” and
-          posting carries on without the automatic check. Reports and moderators still work. The budget is set
-          by AI_DAILY_TOKEN_BUDGET.
+          When the day’s budget runs out, summaries and question suggestions stop until tomorrow, and new
+          posts go up without the automatic check. Reports and mods still work. AI_DAILY_TOKEN_BUDGET sets the
+          budget.
         </p>
       </section>
       {usage.days.length > 0 && (
@@ -606,15 +606,15 @@ const TABS: [Tab, string][] = [
   ['roles', 'Roles'],
   ['spaces', 'Spaces'],
   ['question', 'Question of the day'],
-  ['reveal', 'Find an author'],
-  ['usage', 'AI budget and usage'],
+  ['reveal', 'Who wrote it'],
+  ['usage', 'AI budget'],
   ['settings', 'Settings'],
 ];
 
 export default function Admin() {
   const [tab, setTab] = useState<Tab>('roles');
   useEffect(() => {
-    document.title = `Administration · ${APP_NAME}`;
+    document.title = `Administration  | ${APP_NAME}`;
   }, []);
   return (
     <Page>
@@ -665,13 +665,13 @@ export function AuditLog() {
     );
   };
   useEffect(() => {
-    document.title = `Audit log · ${APP_NAME}`;
+    document.title = `Audit log  | ${APP_NAME}`;
     fetchLog();
   }, []);
   const exportLog = async () => {
     try {
       downloadJson('nobles-commons-audit-log.json', await api.exportAuditLog({ limit: 1000 }));
-      toast('Exported. The export itself was logged.');
+      toast('Exported. The export is logged too.');
       fetchLog();
     } catch (error) {
       toast(errorMessage(error));
@@ -684,7 +684,7 @@ export function AuditLog() {
           <h1 className="page-h">Audit log</h1>
           <div className="row">
             <Link className="nb-btn nb-btn--quiet" to="/admin">
-              Back to administration
+              Back to admin
             </Link>
             <button className="nb-btn" type="button" onClick={() => void exportLog()}>
               Export
@@ -692,15 +692,14 @@ export function AuditLog() {
           </div>
         </div>
         <p className="page-lede">
-          Every author lookup, moderation action and role change, newest first. Nobody can edit or delete an
-          entry.
+          Every author lookup, mod action and role change, newest first. Nobody can edit or delete these.
         </p>
         {load === 'loading' ? (
           <Loading label="Loading the log" />
         ) : load === 'error' ? (
           <ErrorState title="The log did not load" onRetry={fetchLog} />
         ) : entries.length === 0 ? (
-          <Empty title="Nothing has been logged yet" />
+          <Empty title="The log is empty" />
         ) : (
           <div
             className="tbl-wrap"

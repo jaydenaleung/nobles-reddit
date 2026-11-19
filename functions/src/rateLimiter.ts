@@ -24,7 +24,7 @@ export async function consumeRateLimit(
     const minutes = Math.max(1, Math.ceil(result.retryAfterMs / 60_000));
     throw new AppError(
       'resource-exhausted',
-      `You are doing that a lot. Try again in about ${minutes} minute${minutes === 1 ? '' : 's'}.`,
+      `Slow down a little. Try again in about ${minutes} minute${minutes === 1 ? '' : 's'}.`,
     );
   }
 }

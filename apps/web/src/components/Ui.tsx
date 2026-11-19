@@ -20,7 +20,7 @@ export function Empty({ title, children }: { title: string; children?: ReactNode
 }
 
 export function ErrorState({
-  title = 'That did not load',
+  title = 'That didn’t load',
   onRetry,
   children,
 }: {
@@ -31,7 +31,7 @@ export function ErrorState({
   return (
     <div className="state state--error" role="alert">
       <h2>{title}</h2>
-      <p>{children ?? 'Check your connection and try again.'}</p>
+      <p>{children ?? 'Check your wifi and try again.'}</p>
       {onRetry && (
         <button className="nb-btn" type="button" onClick={onRetry}>
           Try again
@@ -110,7 +110,7 @@ export function Count({ value, max }: { value: number; max: number }) {
   const over = value > max;
   return (
     <span className={`count${over ? ' count--over' : ''}`} aria-live={over ? 'polite' : undefined}>
-      {over ? `${value - max} over the limit` : `${value} / ${max}`}
+      {over ? `${value - max} too many` : `${value} / ${max}`}
     </span>
   );
 }

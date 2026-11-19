@@ -17,7 +17,7 @@ interface AiProvider {
 | Job | Model | When it runs | Who sees the result |
 | --- | --- | --- | --- |
 | Screening | Fast: `claude-haiku-5-5` | On every new or edited post and comment, before it is shown | Nobody directly. It decides: publish, hold for a moderator, or wellbeing flag |
-| Summary | Fast: `claude-haiku-5-5` | When someone presses "Summarise this thread" on a thread with 10 or more comments | Everyone, in a tinted box labelled "Auto-summary. Written by our model, not by a person." |
+| Summary | Fast: `claude-haiku-5-5` | When someone presses "Summarize" on a thread with 10 or more comments | Everyone, in a tinted box labelled "Summary. Written by a computer model, not a person." |
 | Question of the day | Smarter: `claude-sonnet-5-5` | 06:00 on school days, or when a moderator asks | Moderators only, until one of them approves a question |
 
 The model names come from `CLAUDE_MODEL_FAST` and `CLAUDE_MODEL_SMART`. The models are called only from Cloud Functions, with the official `@anthropic-ai/sdk`, using a key held in Secret Manager. The browser never talks to a model.
@@ -86,7 +86,7 @@ Rough sizes: screening one post is a few hundred tokens; a summary of a 60-comme
 1. Build your summariser in `ml/` (see `ml/README.md`).
 2. Run its server: `uvicorn serve.app:app --port 8000` from the `ml` folder.
 3. Set `AI_PROVIDER=local` and `LOCAL_AI_URL=http://127.0.0.1:8000` in `.env.emulator`, then `npm run dev`.
-4. Open a thread with ten or more comments and press "Summarise this thread".
+4. Open a thread with ten or more comments and press "Summarize".
 
 The site sends your server exactly the thread shape above (as JSON) and expects `{ text, bullets, agreements, disagreements }` back. It runs the same output checks as for Claude. If your server is down or returns something invalid, people see "A summary is not available right now".
 

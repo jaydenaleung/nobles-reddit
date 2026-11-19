@@ -20,7 +20,7 @@ The look is meant to feel like a well-made student publication rather than a tem
 **On a desktop** (900px and wider) every page has three columns:
 
 - **Left:** the list of spaces with a thread count for each, plus links to the moderation and admin pages for people who have those roles.
-- **Centre:** the page itself. On the front page that is a "What's on your mind?" box, the sort tabs (Hot, New, Top this week, No replies yet), then the feed. Each thread is a row with a vote rail on its left.
+- **Centre:** the page itself. On the front page that is a "Start a thread" box, the sort tabs (Hot, New, Top this week, No replies), then the feed. Each thread is a row with a vote rail on its left.
 - **Right:** boxes for About, the ground rules, a "Who can see what" notice, a live preview of the hall screen, and headlines from the Nobleman.
 
 **On a phone** the side columns go away. Spaces become a row of chips across the top, threads become cards, the vote moves into each card's footer, and a tab bar along the bottom gives Home, Spaces, Post, Board and You. Every button and link is at least 40px tall.
@@ -63,7 +63,7 @@ More screenshots, at phone, tablet and desktop sizes, are in [`docs/screens`](do
 - Choose, every single time, whether to post under their name or as Anonymous. Nothing is preselected, and the composer always says plainly that the administration can see who wrote everything.
 - Mark posts and comments "Thoughtful". It is the only reaction: there are no downvotes and no negative scores.
 - Vote in polls, and change their vote.
-- Sort the feed by Hot, New, Top this week or No replies yet, and search by the words in a thread.
+- Sort the feed by Hot, New, Top this week or No replies, and search by the words in a thread.
 - Use a small amount of formatting: paragraphs, *italic*, **bold** and https links. Anything that looks like HTML is shown as plain text.
 - Edit for 10 minutes after posting, and delete their own posts at any time.
 - Save threads on their device, share links, and see which threads they have already opened.
@@ -90,7 +90,7 @@ More screenshots, at phone, tablet and desktop sizes, are in [`docs/screens`](do
 **Computer-written help** (all labelled in plain words)
 
 - **A safety check on every new post and comment.** Most posts go up after a few seconds. Possible harassment, hate, sexual content or personal information is held for a moderator. Possible self-harm or harm to others is never published and never deleted: it goes to the top of the queue, the school's wellbeing contact is emailed, and the author sees a caring message with places to get help.
-- **Auto-summaries** of threads with 10 or more comments, labelled "Auto-summary. Written by our model, not by a person." The model is never told who wrote anything.
+- **Auto-summaries** of threads with 10 or more comments, labelled "Summary. Written by a computer model, not a person." The model is never told who wrote anything.
 - **Question-of-the-day suggestions** every school morning. Nothing is published until a moderator approves one.
 - A daily budget caps the cost. When it runs out, or the model is unavailable, the AI features say so and everything else keeps working.
 
@@ -158,7 +158,7 @@ Nothing here touches a real Firebase project: the emulators use the made-up proj
 | `npm run test:unit` | Hot score, input checks, safe text formatter, rate limiter, AI prompt building and output checks |
 | `npm run test:rules` | Firestore rules against the emulator |
 | `npm run test:functions` | Every callable against the emulators, including the anti-deanonymisation tests |
-| `npm run test:e2e` | Playwright journey and axe accessibility checks, at desktop and phone sizes |
+| `npm run test:e2e` | Playwright end-to-end flow and axe accessibility checks, at desktop and phone sizes |
 | `npm run lighthouse` | Lighthouse on the front page, a thread and the hall screen |
 | `npm run screens` | Screenshots of every route into `docs/screens` |
 | `npm run check:secrets` | Fails if a key-shaped string is in a tracked file or in the built site |

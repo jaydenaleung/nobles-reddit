@@ -68,7 +68,7 @@ function PollVote({
   return (
     <fieldset className="poll">
       <legend>
-        {total} {total === 1 ? 'vote' : 'votes'} so far. Choose one; you can change your mind.
+        {total} {total === 1 ? 'vote' : 'votes'} so far. You can change your vote.
       </legend>
       {options.map((option, i) => (
         <label className={`poll__opt${i % 2 === 1 ? ' alt' : ''}`} key={option.id}>
@@ -118,7 +118,7 @@ export default function Thread() {
 
   useEffect(() => {
     if (post) {
-      document.title = `${post.title} · ${APP_NAME}`;
+      document.title = `${post.title}  | ${APP_NAME}`;
       markOpened(post.id);
     }
   }, [post]);
@@ -161,8 +161,8 @@ export default function Thread() {
   if (!post) {
     return (
       <Page sidebar={<Sidebar />}>
-        <Empty title="This thread is not available">
-          <p>It may have been removed, or a moderator may be taking a look at it.</p>
+        <Empty title="This thread isn’t available">
+          <p>It was removed, or a mod is looking at it.</p>
           <Link className="nb-btn" to="/">
             Back to the front page
           </Link>
@@ -221,7 +221,7 @@ export default function Thread() {
   const remove = async (contentKey: string) => {
     if (
       !window.confirm(
-        'Delete this? It will disappear for everyone. The school keeps its record of who wrote it.',
+        'Delete this? It disappears for everyone. The school still keeps its record of who wrote it.',
       )
     )
       return;
@@ -238,7 +238,7 @@ export default function Thread() {
     try {
       await api.editOwnContent({ contentKey, body: editText });
       setEditing(null);
-      toast('Saved. It is being checked and will reappear in a moment.');
+      toast('Saved. It’s being checked and will be back in a minute.');
     } catch (error) {
       toast(errorMessage(error));
     }
@@ -249,7 +249,7 @@ export default function Thread() {
 
   const thoughtfulLabel = (contentKey: string, count: number) => {
     const shown = Math.max(0, count + (countDelta[contentKey] ?? 0));
-    return `Thoughtful · ${shown}`;
+    return `Thoughtful ${shown}`;
   };
 
   const pendingDisplay = (mode: PendingComment['mode']): AuthorDisplay =>
@@ -293,9 +293,7 @@ export default function Thread() {
           <Byline author={c.authorDisplay} when={relativeTime(created, now)} avatar={false} />
           {hidden && (
             <span className="nb-badge nb-badge--live">
-              {c.status === 'held'
-                ? 'Held: only moderators can see this'
-                : 'Removed: only moderators can see this'}
+              {c.status === 'held' ? 'Hidden. Only mods can see this.' : 'Removed. Only mods can see this.'}
             </span>
           )}
           {editing === key ? (
@@ -446,7 +444,7 @@ export default function Thread() {
           {post.status !== 'visible' && (
             <div className="nb-notice" role="status">
               <div>
-                <b>{post.status === 'held' ? 'Held.' : 'Removed.'}</b> Only moderators can see this thread.
+                <b>{post.status === 'held' ? 'Hidden.' : 'Removed.'}</b> Only mods can see this thread.
               </div>
             </div>
           )}
@@ -493,7 +491,7 @@ export default function Thread() {
             <a className="nb-source" href={post.link.url} target="_blank" rel="noopener noreferrer nofollow">
               <div className="nb-source__from">
                 <Icon name="ext" /> {post.link.source === 'nobleman' ? 'From the Nobleman' : post.link.domain}
-                {post.sample ? ' · sample link' : ''}
+                {post.sample ? ' (sample link)' : ''}
               </div>
               <div className="nb-source__title">{post.link.title ?? post.link.url}</div>
               <div className="nb-source__meta">Opens in a new tab. This is an outside site.</div>
@@ -599,19 +597,19 @@ export default function Thread() {
               {summary && !summary.available ? (
                 <p className="nb-ai__how" role="status">
                   {summary.reason === 'unavailable-today'
-                    ? 'Summaries are unavailable for the rest of today. Everything else works as usual.'
-                    : 'A summary is not available right now. Everything else works as usual.'}
+                    ? 'No more summaries today. Everything else still works.'
+                    : 'Couldn’t get a summary right now.'}
                 </p>
               ) : (
                 <div className="nb-ai__foot" style={{ marginTop: 0 }}>
-                  <span>This thread is long enough for a short summary.</span>
+                  <span>This thread is long enough to summarize.</span>
                   <button
                     className="nb-btn nb-btn--sm"
                     type="button"
                     onClick={() => void askSummary()}
                     disabled={summaryBusy}
                   >
-                    {summaryBusy ? 'Writing it' : 'Summarise this thread'}
+                    {summaryBusy ? 'Writing it' : 'Summarize'}
                   </button>
                 </div>
               )}

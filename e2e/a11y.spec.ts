@@ -112,7 +112,7 @@ test('dialogs and forms in use', async ({ page }) => {
 
   // Each administration tab.
   await page.goto('/admin');
-  for (const tab of ['Spaces', 'Question of the day', 'Find an author', 'AI budget and usage', 'Settings']) {
+  for (const tab of ['Spaces', 'Question of the day', 'Who wrote it', 'AI budget', 'Settings']) {
     await page.getByRole('tab', { name: tab }).click();
     await ready(page);
     await expectNoSeriousViolations(page, `admin tab: ${tab}`);
@@ -136,7 +136,7 @@ test('everything can be reached with the keyboard', async ({ page, isMobile }) =
   await ready(page);
   // The first Tab stop is the skip link, and it becomes visible.
   await page.keyboard.press('Tab');
-  const skip = page.getByRole('link', { name: 'Skip to the content' });
+  const skip = page.getByRole('link', { name: 'Skip to content' });
   await expect(skip).toBeFocused();
   await expect(skip).toBeInViewport();
   // A focused control shows a 2px outline.

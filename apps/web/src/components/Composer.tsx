@@ -18,8 +18,8 @@ export function WellbeingPanel({ resources }: { resources: WellbeingResources })
     <div className="nb-notice nb-notice--kind" role="status">
       <Icon name="check" />
       <div>
-        <b>We are glad you wrote this.</b> {resources.message}
-        <ul>
+        {resources.message}
+        <ul className="plain-list">
           {resources.items.map((item) => (
             <li key={item.label}>
               <b>{item.label}.</b> {item.detail}
@@ -35,8 +35,7 @@ export function HeldNotice() {
   return (
     <div className="nb-notice" role="status">
       <div>
-        <b>A moderator will take a look first.</b> Your words are saved and nobody else can see them yet. This
-        usually takes less than a school day.
+        <b>A mod has to check this first.</b> It’s saved, and nobody else can see it until then.
       </div>
     </div>
   );
