@@ -74,9 +74,7 @@ function PostTop({ post, nowMs, spaceSlug }: { post: PostView; nowMs: number; sp
       {space}
       {post.questionOfTheDay && <span>Question of the day</span>}
       {author.mode === 'anonymous' ? (
-        <span className="nb-badge nb-badge--anon">
-          <Icon name="mask" /> Anonymous
-        </span>
+        <span>Anonymous</span>
       ) : (
         <>
           <b>{author.name}</b>
@@ -149,9 +147,7 @@ export function PostRow({
         )}
         <PostTop post={post} nowMs={nowMs} spaceSlug={spaceSlug} />
         <h3 className="nb-post__title">
-          <Link to={href}>
-            {post.questionOfTheDay ? <span className="nb-hl">{post.title}</span> : post.title}
-          </Link>
+          <Link to={href}>{post.title}</Link>
         </h3>
         {post.kind === 'poll' && post.poll ? (
           <PollBars options={post.poll.options} />
@@ -192,12 +188,7 @@ export function PostRow({
             </button>
           )}
           {post.kind === 'poll' && post.poll && (
-            <span className="nb-meta">
-              {plural(pollTotal(post.poll.options), 'vote', 'votes')}
-              {post.commentCount > 0
-                ? `, ${Math.round((post.anonCommentCount / post.commentCount) * 100)}% of comments are anonymous`
-                : ''}
-            </span>
+            <span className="nb-meta">{plural(pollTotal(post.poll.options), 'vote', 'votes')}</span>
           )}
           {read && <span className="nb-meta">Opened</span>}
           {post.sample && <span className="nb-meta">Sample</span>}

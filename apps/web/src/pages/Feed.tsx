@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { api, errorMessage } from '../api';
 import { useMember } from '../auth/AuthContext';
-import { Page, Sidebar } from '../components/Layout';
+import { Page } from '../components/Layout';
 import { FeedSkeleton, PostRow, type PostView } from '../components/Post';
 import { Empty, ErrorState, useToast } from '../components/Ui';
 import { useFeed, useMyVotes, useSearch, useSpaces, type MyVotes } from '../data/hooks';
@@ -114,11 +114,9 @@ export default function Feed() {
     document.title = space ? `${space.name}  | ${APP_NAME}` : APP_NAME;
   }, [space]);
 
-  const sidebar = <Sidebar spaceName={space?.name} spaceDescription={space?.description} />;
-
   if (unknownSpace) {
     return (
-      <Page sidebar={sidebar}>
+      <Page>
         <Empty title="That space doesn’t exist">
           <p>It might have been renamed. The spaces are listed on the left.</p>
           <Link className="nb-btn" to="/">
@@ -130,7 +128,7 @@ export default function Feed() {
   }
 
   return (
-    <Page sidebar={sidebar}>
+    <Page>
       {space ? (
         <header className="sp-head">
           <h1>{space.name}</h1>
@@ -233,7 +231,7 @@ export function Search() {
   }, []);
 
   return (
-    <Page sidebar={<Sidebar />}>
+    <Page>
       <header className="sp-head">
         <h1>Search</h1>
         <p>{text ? `Threads and spaces that mention “${text}”.` : 'Type a word or two in the search box.'}</p>

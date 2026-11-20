@@ -87,8 +87,22 @@ describe('createPostSchema', () => {
   });
 });
 
+describe('anonymous posts', () => {
+  it('are refused for new threads', () => {
+    expect(
+      createPostSchema.safeParse({ ...basePost, identityMode: 'anonymous', kind: 'text', body: 'Hi' })
+        .success,
+    ).toBe(false);
+  });
+});
+
 describe('createCommentSchema', () => {
-  const base = { postId: 'p1', parentId: null, identityMode: 'anonymous' };
+  const base = { postId: 'p1', parentId: null, identityMode: 'named' };
+  it('refuses anonymous comments', () => {
+    expect(createCommentSchema.safeParse({ ...base, identityMode: 'anonymous', body: 'Hi' }).success).toBe(
+      false,
+    );
+  });
   it('accepts a comment and rejects empty or oversized ones', () => {
     expect(createCommentSchema.safeParse({ ...base, body: 'I agree' }).success).toBe(true);
     expect(createCommentSchema.safeParse({ ...base, body: '   ' }).success).toBe(false);

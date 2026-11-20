@@ -1,7 +1,7 @@
 /** The product name lives here and only here, so it can change. */
-export const APP_NAME = 'Nobles Commons';
-/** The wordmark is plain type: "Nobles" then an italic "Commons". */
-export const APP_NAME_PARTS = { first: 'Nobles', second: 'Commons' } as const;
+export const APP_NAME = 'Neddit';
+/** One line that says what the site is. */
+export const APP_TAGLINE = 'The Nobles Discussion Board';
 export const SCHOOL_NAME = 'Noble and Greenough School';
 
 export const ROLES = ['student', 'faculty', 'moderator', 'admin'] as const;
@@ -123,17 +123,47 @@ export const DEFAULT_SPACES: SpaceSeed[] = [
 ];
 export const DAILY_QUESTION_SPACE = 'current-events';
 
-export const GROUND_RULES = [
-  'Be kind and be honest. You can disagree hard.',
-  'Argue with the idea, not the person.',
-  'Say what you actually think.',
-  'If a post looks wrong, report it.',
+export const MISSION =
+  'At Nobles, we forge human connections to inspire a lifelong process of discovery and unlock the potential to do good.';
+
+/** The school's core values. The left column shows the names; the values page has the rest. */
+export const CORE_VALUES = [
+  {
+    name: 'Curiosity',
+    text: 'Curiosity inspires intellectual inquiry. By questioning, reasoning, and thinking critically, we embrace complex ideas and value the exchange of diverse perspectives.',
+  },
+  {
+    name: 'Respect',
+    text: 'Respect for self and others is the bedrock of our community, guiding us to act with honesty, humility, kindness, empathy, and trust.',
+  },
+  {
+    name: 'Playfulness',
+    text: 'Playfulness sparks creativity, energizes us to give our best, and fortifies resilience to face challenges. We balance hard work with humor.',
+  },
+  {
+    name: 'Generosity',
+    text: 'We show up for each other. We practice generosity in all its forms—sharing our knowledge, time, resources, and passions. Giving deepens our understanding of each other and ourselves.',
+  },
+  {
+    name: 'Belonging',
+    text: 'Community means everyone. When we are known and valued, we flourish. Together, we create an environment where everyone feels respected and empowered to be their best selves.',
+  },
 ] as const;
 
-/** Shown on every composer. Keep it this plain. */
-export const ANONYMITY_NOTICE =
-  'Anonymous hides your name from other students. The administration can always see who wrote every post and comment.';
-export const ANONYMITY_SHORT = 'Anonymous means other students can’t see your name. The school can.';
+export const DEI_COMMITMENT =
+  'Nobles commits itself to building a community in which every member feels a sense of belonging, respect, recognition, value, and confidence. We hope all members are willing to learn, value the differences in our community, and self-reflect so they know how to participate in the world around them to effect positive change.';
+
+export const NEDDIT_TIPS = [
+  'Neddit is about learning to disagree respectfully. Focus on the ideas, not the people who wrote them.',
+  'Just like Reddit, Neddit is a space to discuss all kinds of ideas. Post often – the success of this platform depends on you!',
+  'Remember that what you say here maintains a permanent digital footprint!',
+] as const;
+
+export const NEDDIT_QUOTE = {
+  text: 'Great minds discuss ideas; average minds discuss events; small minds discuss people.',
+  by: 'Eleanor Roosevelt',
+} as const;
+
 export const AI_SUMMARY_LABEL = 'Summary. Written by a computer model, not a person.';
 
 export const REPORT_REASONS = [

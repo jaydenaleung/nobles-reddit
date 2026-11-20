@@ -3,7 +3,6 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api, errorMessage } from '../api';
 import { useAuth, useMember } from '../auth/AuthContext';
-import { Icon } from '../components/Icon';
 import { Page } from '../components/Layout';
 import { Dialog, Empty, ErrorState, Loading, downloadJson, useToast } from '../components/Ui';
 import { useMine, useSpaces } from '../data/hooks';
@@ -130,10 +129,7 @@ export default function Me() {
 
         <section className="panel" aria-labelledby="me-posts">
           <h2 id="me-posts">Your posts and comments</h2>
-          <p className="muted">
-            This includes what you posted as Anonymous. Only you can see this list. Everyone else still sees
-            “Anonymous”.
-          </p>
+          <p className="muted">Everything you’ve posted, and whether it’s up.</p>
           {mine.load === 'loading' ? (
             <Loading label="Loading your posts" />
           ) : mine.load === 'error' ? (
@@ -156,7 +152,6 @@ export default function Me() {
                 <thead>
                   <tr>
                     <th scope="col">What you wrote</th>
-                    <th scope="col">Posted as</th>
                     <th scope="col">Status</th>
                     <th scope="col">When</th>
                   </tr>
@@ -171,15 +166,6 @@ export default function Me() {
                           (item.title ?? excerpt(item.body, 90))
                         )}
                         <div className="nb-meta">{item.kind === 'post' ? 'Thread' : 'Comment'}</div>
-                      </td>
-                      <td>
-                        {item.identityMode === 'anonymous' ? (
-                          <span className="nb-badge nb-badge--anon">
-                            <Icon name="mask" /> Anonymous
-                          </span>
-                        ) : (
-                          'Your name'
-                        )}
                       </td>
                       <td>{STATUS_WORDS[item.status]}</td>
                       <td className="num">{relativeTime(item.createdAtMs, now)}</td>
@@ -208,7 +194,7 @@ export default function Me() {
 
         <section className="panel" aria-labelledby="me-data">
           <h2 id="me-data">Your data</h2>
-          <p>Download everything the site has on you as a file. That includes your anonymous posts.</p>
+          <p>Download everything the site has on you as a file.</p>
           <div className="row">
             <button className="nb-btn" type="button" onClick={() => void download()} disabled={exporting}>
               {exporting ? 'Preparing' : 'Download my data'}

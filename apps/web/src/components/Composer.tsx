@@ -1,6 +1,5 @@
 import {
   LIMITS,
-  isStaffRole,
   type ContentStatusResult,
   type IdentityMode,
   type WellbeingResources,
@@ -9,7 +8,6 @@ import { useId, useState, type FormEvent } from 'react';
 import { api, errorMessage, waitForOutcome } from '../api';
 import { useMember } from '../auth/AuthContext';
 import { Icon } from './Icon';
-import { IdentityToggle } from './Identity';
 import { Count } from './Ui';
 
 /** Shown to an author whose post raised a wellbeing flag. Caring, plain, and never a telling-off. */
@@ -48,10 +46,7 @@ export interface PendingComment {
   mode: IdentityMode;
 }
 
-/**
- * The reply box. It asks "Reply as" every time, with nothing preselected, and
- * shows the notice about what the administration can see every time.
- */
+/** The reply box. Every comment goes up under the writer's name. */
 export function ReplyComposer({
   postId,
   parentId,
@@ -74,20 +69,14 @@ export function ReplyComposer({
 }) {
   const member = useMember();
   const id = useId();
-  const [mode, setMode] = useState<IdentityMode | null>(null);
   const [body, setBody] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [needMode, setNeedMode] = useState(false);
   const [outcome, setOutcome] = useState<ContentStatusResult | null>(null);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
-    if (!mode) {
-      setNeedMode(true);
-      return;
-    }
     const text = body.trim();
     if (!text) {
       setError('Write something first.');
@@ -99,11 +88,10 @@ export function ReplyComposer({
     }
     const pendingKey = `pending-${Date.now()}`;
     setBusy(true);
-    onPending?.({ key: pendingKey, parentId, body: text, mode });
+    onPending?.({ key: pendingKey, parentId, body: text, mode: 'named' });
     try {
-      const created = await api.createComment({ postId, parentId, identityMode: mode, body: text });
+      const created = await api.createComment({ postId, parentId, identityMode: 'named', body: text });
       setBody('');
-      setMode(null);
       const result = await waitForOutcome(created.contentKey);
       if (result.outcome === 'held' || result.outcome === 'wellbeing') setOutcome(result);
       onSent?.(result, created.commentId ?? '');
@@ -118,18 +106,9 @@ export function ReplyComposer({
 
   return (
     <form className="reply" onSubmit={(event) => void submit(event)} noValidate>
-      <IdentityToggle
-        value={mode}
-        onChange={(next) => {
-          setMode(next);
-          setNeedMode(false);
-        }}
-        firstName={member.profile.firstName}
-        displayName={member.profile.displayName}
-        staff={isStaffRole(member.role)}
-        label="Reply as"
-        invalid={needMode}
-      />
+      <p className="reply__as">
+        Replying as <b>{member.profile.displayName}</b>
+      </p>
       <div className="field">
         <label className="nb-label" htmlFor={`${id}-body`}>
           {parentId ? 'Your reply' : 'Add a comment'}

@@ -108,10 +108,6 @@ const named = (who: keyof typeof users): AuthorDisplay => {
   if (u.classYear) display.classYear = u.classYear;
   return display;
 };
-const anonymous = (letter: string): AuthorDisplay => ({
-  mode: 'anonymous',
-  anonLabel: `Anonymous ${letter}`,
-});
 
 /* ---------- Threads ---------- */
 interface SeedComment {
@@ -138,7 +134,7 @@ interface SeedPost {
 const questionComments: SeedComment[] = [
   {
     body: 'I commute 50 minutes. Thirty extra minutes is real for me.',
-    author: anonymous('A'),
+    author: named('student'),
     uid: users.student.uid,
     hours: 5.5,
     board: true,
@@ -161,7 +157,7 @@ const questionComments: SeedComment[] = [
   },
   {
     body: 'Practice would end later. That matters for winter sports.',
-    author: anonymous('B'),
+    author: named('admin'),
     uid: users.admin.uid,
     hours: 4.6,
     replyTo: 2,
@@ -174,7 +170,7 @@ const questionComments: SeedComment[] = [
   },
   {
     body: 'I would sleep the same amount and just start homework later.',
-    author: anonymous('A'),
+    author: named('student'),
     uid: users.student.uid,
     hours: 4,
   },
@@ -186,7 +182,7 @@ const questionComments: SeedComment[] = [
   },
   {
     body: 'Buses and trains do not move just because we do.',
-    author: anonymous('B'),
+    author: named('admin'),
     uid: users.admin.uid,
     hours: 3.1,
     replyTo: 0,
@@ -194,7 +190,7 @@ const questionComments: SeedComment[] = [
   { body: 'Even 8:15 would feel different.', author: named('student'), uid: users.student.uid, hours: 2.4 },
   {
     body: 'Could we try it for one month and ask again?',
-    author: anonymous('A'),
+    author: named('student'),
     uid: users.student.uid,
     hours: 1.8,
     thoughtful: 3,
@@ -211,10 +207,10 @@ const questionComments: SeedComment[] = [
 const posts: SeedPost[] = [
   {
     slug: 'school-news',
-    title: 'Read this first: how Commons works',
+    title: 'Read this first: how Neddit works',
     body:
-      'Post about school stuff or the news, and argue with ideas, not people.\n\n' +
-      'Every time you post you pick your name or Anonymous. Anonymous hides your name from other students. The school can still see it.\n\n' +
+      'Neddit is the Nobles Discussion Board. Post about school stuff or the news, and talk it through.\n\n' +
+      'Neddit is about learning to disagree respectfully. Focus on the ideas, not the people who wrote them. Everything goes up under your name.\n\n' +
       'If a post looks wrong, hit Report and a mod will look at it.',
     author: { mode: 'named', name: ADMIN_DISPLAY_NAME, role: 'admin' },
     uid: users.admin.uid,
@@ -223,12 +219,12 @@ const posts: SeedPost[] = [
     extra: { pinned: true, pinnedBy: 'administration' },
     comments: [
       {
-        body: 'Thanks for spelling out the anonymous part so plainly.',
+        body: 'Thanks for spelling this out so plainly.',
         author: named('student'),
         uid: users.student.uid,
         hours: 40,
       },
-      { body: 'Glad this exists.', author: anonymous('A'), uid: users.faculty.uid, hours: 30 },
+      { body: 'Glad this exists.', author: named('faculty'), uid: users.faculty.uid, hours: 30 },
     ],
   },
   {
@@ -288,7 +284,7 @@ const posts: SeedPost[] = [
     slug: 'middle-school',
     title: 'Is it okay to ask upperclassmen for help with homework?',
     body: 'I’m new this year and I don’t really know who to ask. I don’t want to bug anyone who’s busy.',
-    author: anonymous('A'),
+    author: named('student'),
     uid: users.student.uid,
     hours: 8,
     thoughtful: 7,
@@ -315,7 +311,7 @@ const posts: SeedPost[] = [
     uid: users.faculty.uid,
     hours: 5,
     thoughtful: 4,
-    comments: [{ body: 'A map. Just a map.', author: anonymous('A'), uid: users.student.uid, hours: 4 }],
+    comments: [{ body: 'A map. Just a map.', author: named('student'), uid: users.student.uid, hours: 4 }],
   },
   {
     slug: 'athletics',

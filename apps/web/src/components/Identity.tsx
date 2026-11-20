@@ -1,22 +1,21 @@
-import { useId } from 'react';
 import {
-  ANONYMITY_NOTICE,
-  APP_NAME_PARTS,
+  APP_NAME,
   initials,
   isStaffRole,
   shortClassYear,
   type AuthorDisplay,
-  type IdentityMode,
   type Role,
 } from '@commons/shared';
 import { Link } from 'react-router-dom';
 import { Icon } from './Icon';
+import { LogoMarkSvg } from './Logo';
 
-/** The wordmark is plain type. There is no logo. */
+/** The logo mark, then "Neddit" in type. */
 export function Wordmark({ to = '/', asText = false }: { to?: string; asText?: boolean }) {
   const inner = (
     <>
-      {APP_NAME_PARTS.first} <em>{APP_NAME_PARTS.second}</em>
+      <LogoMarkSvg />
+      <span>{APP_NAME}</span>
     </>
   );
   if (asText) return <span className="nb-wordmark">{inner}</span>;
@@ -55,9 +54,9 @@ export function StaffBadge({ role }: { role: Role | undefined }) {
 }
 
 /**
- * Who wrote something, as other people see it. Colour is never the only cue:
- * anonymous authors get a dashed ring and the word "Anonymous"; staff get the
- * word "Faculty".
+ * Who wrote something, as other people see it. Staff get the word "Faculty"
+ * (or "Administration"), so colour is never the only cue. New posts are always
+ * named; the anonymous branch only covers posts written before that changed.
  */
 export function Byline({
   author,
@@ -87,95 +86,6 @@ export function Byline({
       {author.classYear !== undefined && <span>{shortClassYear(author.classYear)}</span>}
       <StaffBadge role={author.role} />
       {when && <span className="nb-meta">{when}</span>}
-    </div>
-  );
-}
-
-/**
- * "Post as": your name or Anonymous. Nothing is preselected, and the notice
- * about what the administration can see is shown every time.
- */
-export function IdentityToggle({
-  value,
-  onChange,
-  firstName,
-  displayName,
-  label = 'Post as',
-  staff = false,
-  invalid = false,
-}: {
-  value: IdentityMode | null;
-  onChange: (mode: IdentityMode) => void;
-  firstName: string;
-  displayName: string;
-  label?: string;
-  staff?: boolean;
-  invalid?: boolean;
-}) {
-  const name = useId();
-  const noticeId = `${name}-notice`;
-  return (
-    <div className="stack">
-      <div>
-        <span className="nb-label" id={`${name}-label`}>
-          {label}
-        </span>
-        <div
-          className="nb-identity"
-          role="radiogroup"
-          aria-labelledby={`${name}-label`}
-          aria-describedby={noticeId}
-        >
-          <label className="nb-identity__opt">
-            <input
-              type="radio"
-              name={name}
-              value="named"
-              checked={value === 'named'}
-              onChange={() => onChange('named')}
-              aria-invalid={invalid || undefined}
-            />
-            <span>
-              <b className={`nb-avatar${staff ? ' nb-avatar--staff' : ''}`} aria-hidden="true">
-                {initials(displayName)}
-              </b>{' '}
-              {firstName}
-            </span>
-          </label>
-          <label className="nb-identity__opt nb-identity__opt--anon">
-            <input
-              type="radio"
-              name={name}
-              value="anonymous"
-              checked={value === 'anonymous'}
-              onChange={() => onChange('anonymous')}
-              aria-invalid={invalid || undefined}
-            />
-            <span>
-              <b className="nb-avatar nb-avatar--anon" aria-hidden="true">
-                <Icon name="mask" />
-              </b>{' '}
-              Anonymous
-            </span>
-          </label>
-        </div>
-        {invalid && (
-          <p className="err" role="alert">
-            Pick your name or Anonymous.
-          </p>
-        )}
-      </div>
-      <AdminNotice id={noticeId} />
-    </div>
-  );
-}
-
-/** Shown on the composer every time, in plain words. */
-export function AdminNotice({ id }: { id?: string }) {
-  return (
-    <div className="nb-notice nb-notice--staff" id={id}>
-      <Icon name="shield" />
-      <div>{ANONYMITY_NOTICE}</div>
     </div>
   );
 }

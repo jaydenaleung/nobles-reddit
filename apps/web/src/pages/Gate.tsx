@@ -1,9 +1,9 @@
 import {
-  ANONYMITY_NOTICE,
   APP_NAME,
+  APP_TAGLINE,
+  CORE_VALUES,
   DIVISIONS,
   DIVISION_LABELS,
-  GROUND_RULES,
   SCHOOL_NAME,
   type Division,
 } from '@commons/shared';
@@ -12,7 +12,6 @@ import { Link, Navigate } from 'react-router-dom';
 import { errorMessage } from '../api';
 import { useAuth } from '../auth/AuthContext';
 import { USE_EMULATORS, config } from '../config';
-import { Icon } from '../components/Icon';
 import { PublicFrame } from '../components/Layout';
 import { Loading } from '../components/Ui';
 
@@ -133,10 +132,10 @@ export function SignIn() {
   return (
     <PublicFrame>
       <div className="gate__card" style={{ justifySelf: 'center' }}>
-        <h1>The Nobles message board</h1>
+        <h1>{APP_TAGLINE}</h1>
         <p className="page-lede">
-          For {SCHOOL_NAME} students and teachers. Post about something at school or in the news, and people
-          reply.
+          For {SCHOOL_NAME} students and teachers. Post about something at school or in the news, and talk it
+          through.
         </p>
         {notice && (
           <div className="nb-notice" role="alert">
@@ -169,17 +168,12 @@ export function SignIn() {
             )}
             <p className="muted">
               We only get your name and school email from Google. There are no ads or trackers.{' '}
-              <Link to="/about">How anonymous posting works</Link>
+              <Link to="/values">Our community values</Link>
             </p>
           </section>
         )}
         {USE_EMULATORS && <DevelopmentSignIn />}
-        <div className="nb-notice nb-notice--staff">
-          <Icon name="shield" />
-          <div>
-            <b>Who can see what.</b> {ANONYMITY_NOTICE}
-          </div>
-        </div>
+        <p className="muted">Everything you post on {APP_NAME} goes up under your name.</p>
       </div>
     </PublicFrame>
   );
@@ -225,7 +219,7 @@ export function Onboarding() {
     if (!/^\p{L}$/u.test(lastInitial.trim())) return setError('Add the first letter of your last name.');
     if (!who) return setError('Tell us whether you are a student or faculty.');
     if (who === 'student' && !classYear) return setError('Choose your class year.');
-    if (!understood) return setError('Please tick the box to say you understand how it works.');
+    if (!understood) return setError('Please tick the box to say you’ll stick to the community values.');
     setBusy(true);
     try {
       await completeOnboarding({
@@ -353,30 +347,34 @@ export function Onboarding() {
 
         <section className="nb-box">
           <h2 className="nb-box__head" style={{ margin: 0 }}>
-            Ground rules
+            Community values
           </h2>
           <div className="nb-box__body">
+            <p>
+              Neddit is about learning to disagree respectfully. Everything here should hold up to our core
+              values:
+            </p>
             <ol className="fp-rules">
-              {GROUND_RULES.map((rule) => (
-                <li key={rule}>{rule}</li>
+              {CORE_VALUES.map((value) => (
+                <li key={value.name}>{value.name}</li>
               ))}
             </ol>
+            <p>
+              <Link to="/values" target="_blank">
+                Read the community values
+              </Link>
+            </p>
           </div>
         </section>
 
-        <div className="nb-notice nb-notice--staff">
-          <Icon name="shield" />
-          <div>
-            <b>Who can see what.</b> {ANONYMITY_NOTICE} Mods can take posts down but can’t see who wrote them.
-            Every time an admin looks up an author, it’s logged.
-          </div>
-        </div>
+        <p className="muted">
+          Everything you post goes up under your name. Remember that what you say here maintains a permanent
+          digital footprint.
+        </p>
 
         <label className="check">
           <input type="checkbox" checked={understood} onChange={(e) => setUnderstood(e.target.checked)} />
-          <span>
-            I read the rules. I get that anonymous posts are hidden from students, not from the school.
-          </span>
+          <span>I read the community values and I’ll stick to them.</span>
         </label>
 
         {error && (
@@ -410,8 +408,8 @@ export function NotFound() {
           <Link className="nb-btn nb-btn--primary" to="/">
             Go to the front page
           </Link>
-          <Link className="nb-btn" to="/about">
-            How it works
+          <Link className="nb-btn" to="/values">
+            Community values
           </Link>
         </div>
       </div>

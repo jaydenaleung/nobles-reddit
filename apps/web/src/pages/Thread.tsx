@@ -18,7 +18,7 @@ import { ReplyComposer, type PendingComment } from '../components/Composer';
 import { ModDialog, ReportDialog, RevealDialog, type ModTarget } from '../components/Dialogs';
 import { Icon } from '../components/Icon';
 import { Avatar, Byline } from '../components/Identity';
-import { Page, Sidebar } from '../components/Layout';
+import { Page } from '../components/Layout';
 import { SummaryBox, pollPercents, pollTotal, type PostView } from '../components/Post';
 import { SafeText } from '../components/SafeText';
 import { Empty, Loading, useToast } from '../components/Ui';
@@ -153,14 +153,14 @@ export default function Thread() {
 
   if (load === 'loading') {
     return (
-      <Page sidebar={<Sidebar />}>
+      <Page>
         <Loading label="Opening the thread" />
       </Page>
     );
   }
   if (!post) {
     return (
-      <Page sidebar={<Sidebar />}>
+      <Page>
         <Empty title="This thread isn’t available">
           <p>It was removed, or a mod is looking at it.</p>
           <Link className="nb-btn" to="/">
@@ -252,10 +252,8 @@ export default function Thread() {
     return `Thoughtful ${shown}`;
   };
 
-  const pendingDisplay = (mode: PendingComment['mode']): AuthorDisplay =>
-    mode === 'anonymous'
-      ? { mode: 'anonymous', anonLabel: 'Anonymous' }
-      : buildAuthorDisplay(member.profile, 'named', 0);
+  const pendingDisplay = (_mode: PendingComment['mode']): AuthorDisplay =>
+    buildAuthorDisplay(member.profile, 'named', 0);
 
   const renderPending = (parentId: string | null) =>
     pending
@@ -379,7 +377,7 @@ export default function Thread() {
                 <Icon name="shield" /> Moderate
               </button>
             )}
-            {isAdmin && (
+            {isAdmin && c.authorDisplay.mode === 'anonymous' && (
               <button type="button" onClick={() => setReveal(key)}>
                 Who wrote this?
               </button>
@@ -424,7 +422,7 @@ export default function Thread() {
   const visibleCount = comments.filter((c) => c.status === 'visible').length;
 
   return (
-    <Page sidebar={<Sidebar spaceName={space?.name} spaceDescription={space?.description} />}>
+    <Page>
       <article className="th">
         <div className="th-card">
           <div className="ph-bar" style={{ display: 'flex' }}>
@@ -448,9 +446,7 @@ export default function Thread() {
               </div>
             </div>
           )}
-          <h1 className="th-title">
-            {post.questionOfTheDay ? <span className="nb-hl">{post.title}</span> : post.title}
-          </h1>
+          <h1 className="th-title">{post.title}</h1>
           <Byline author={post.authorDisplay} when={relativeTime(createdMs, now)} />
           {post.questionOfTheDay && <span className="nb-meta">Question of the day</span>}
 
@@ -558,7 +554,7 @@ export default function Thread() {
                 <Icon name="shield" /> Moderate
               </button>
             )}
-            {isAdmin && (
+            {isAdmin && post.authorDisplay.mode === 'anonymous' && (
               <button
                 className="nb-btn nb-btn--quiet nb-btn--sm"
                 type="button"

@@ -115,10 +115,6 @@ export default function Board() {
                     <b>{feed!.counts.replies}</b>
                     <span>{feed!.counts.replies === 1 ? 'reply' : 'replies'}</span>
                   </div>
-                  <div>
-                    <b>{feed!.counts.anonymousPercent}%</b>
-                    <span>chose to stay anonymous</span>
-                  </div>
                 </div>
                 {options.length > 0 && (
                   <div

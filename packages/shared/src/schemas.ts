@@ -31,6 +31,13 @@ export const contentKeySchema = z
   );
 
 export const identityModeSchema = z.enum(['named', 'anonymous']);
+/**
+ * Neddit has no anonymous posting: everything new goes up under the writer's
+ * name. Older anonymous content still reads as "Anonymous".
+ */
+export const newContentIdentitySchema = z.literal('named', {
+  error: 'Anonymous posting is off. Everything goes up under your name.',
+});
 
 export const titleSchema = z
   .string()
@@ -98,7 +105,7 @@ export const onboardSchema = z
 
 const postBase = {
   spaceId: firestoreId,
-  identityMode: identityModeSchema,
+  identityMode: newContentIdentitySchema,
   title: titleSchema,
 };
 export const createPostSchema = z.discriminatedUnion('kind', [
@@ -125,7 +132,7 @@ export const createCommentSchema = z
   .object({
     postId: firestoreId,
     parentId: firestoreId.nullable(),
-    identityMode: identityModeSchema,
+    identityMode: newContentIdentitySchema,
     body: commentBodySchema,
   })
   .strict();

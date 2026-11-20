@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { GROUND_RULES, HOT_EPOCH_SECONDS, type AuthorDisplay, type IdentityMode } from '@commons/shared';
+import { CORE_VALUES, HOT_EPOCH_SECONDS, type AuthorDisplay } from '@commons/shared';
 import { Icon, IconSprite, type IconName } from '../components/Icon';
-import { AdminNotice, Avatar, Byline, IdentityToggle, Wordmark } from '../components/Identity';
+import { Avatar, Byline, Wordmark } from '../components/Identity';
+import { LOGO_MARKS, LogoMarkSvg } from '../components/Logo';
 import { PostRow, SummaryBox, type PostView } from '../components/Post';
 import { SafeText } from '../components/SafeText';
 
@@ -25,7 +26,7 @@ const base = {
 };
 const student: AuthorDisplay = { mode: 'named', name: 'Sample S.', classYear: 2028, role: 'student' };
 const faculty: AuthorDisplay = { mode: 'named', name: 'Sample T.', role: 'faculty' };
-const anon: AuthorDisplay = { mode: 'anonymous', anonLabel: 'Anonymous B' };
+const anon: AuthorDisplay = { mode: 'named', name: 'Sample R.', classYear: 2029, role: 'student' };
 
 const posts: PostView[] = [
   {
@@ -33,8 +34,8 @@ const posts: PostView[] = [
     id: 'p1',
     kind: 'text',
     spaceName: 'School news',
-    title: 'Read this first: how Commons works and what we’re all agreeing to',
-    body: 'Disagree freely. Be specific. Go after ideas, not people. Anonymous means other students can’t see your name. The school can.',
+    title: 'Read this first: how Neddit works',
+    body: 'Disagree freely. Be specific. Go after ideas, not people.',
     authorDisplay: { mode: 'named', name: 'Administration', role: 'admin' },
     pinned: true,
     pinnedBy: 'administration',
@@ -130,7 +131,6 @@ const swatches = [
 ];
 
 function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
-  const [mode, setMode] = useState<IdentityMode | null>(null);
   const [voted, setVoted] = useState<Record<string, boolean>>({ p2: true });
   return (
     <section className="nb" data-theme={theme} aria-label={`${theme} theme`}>
@@ -168,6 +168,24 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
         ))}
       </div>
 
+      <h3 className="sg-h">Logo concepts</h3>
+      <div className="sg-logos">
+        {LOGO_MARKS.map((mark) => (
+          <figure key={mark}>
+            <div className="nb-top sg-logos__bar">
+              <span className="nb-wordmark">
+                <LogoMarkSvg mark={mark} />
+                <span>Neddit</span>
+              </span>
+            </div>
+            <div className="sg-logos__big">
+              <LogoMarkSvg mark={mark} size={96} />
+            </div>
+            <figcaption>{mark}</figcaption>
+          </figure>
+        ))}
+      </div>
+
       <h3 className="sg-h">Type</h3>
       <div className="stack">
         <div className="display-l">Lora for titles and the wordmark</div>
@@ -175,9 +193,6 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
         <div className="read-l">Libre Baskerville for posts and comments, set for reading.</div>
         <div className="body">Inter for small interface text, counts and buttons.</div>
         <div className="nb-meta">Meta, 148 votes, 6 hours ago</div>
-        <div>
-          The question of the day gets a <span className="nb-hl">yellow highlighter swipe</span>.
-        </div>
       </div>
 
       <h3 className="sg-h">Buttons and badges</h3>
@@ -202,9 +217,6 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
         <span className="nb-badge nb-badge--staff">
           <Icon name="shield" /> Faculty
         </span>
-        <span className="nb-badge nb-badge--anon">
-          <Icon name="mask" /> Anonymous
-        </span>
         <span className="nb-badge nb-badge--live">
           <Icon name="tv" /> Live now
         </span>
@@ -228,21 +240,13 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
         <Byline author={anon} when="8 hours ago" />
       </div>
 
-      <h3 className="sg-h">Identity toggle (nothing preselected) and the notice</h3>
-      <IdentityToggle value={mode} onChange={setMode} firstName="Sample" displayName="Sample S." />
-
       <h3 className="sg-h">Notices</h3>
       <div className="stack">
-        <AdminNotice />
         <div className="nb-notice nb-notice--kind">
           <Icon name="check" />
           <div>
             <b>Be kind. Be honest.</b>
           </div>
-        </div>
-        <div className="nb-notice nb-notice--anon">
-          <Icon name="mask" />
-          <div>You are posting as Anonymous B in this thread.</div>
         </div>
         <div className="nb-notice">
           <div>A plain notice.</div>
@@ -321,11 +325,11 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
       <h3 className="sg-h">Sidebar boxes</h3>
       <div className="field-row">
         <section className="nb-box">
-          <div className="nb-box__head">Ground rules</div>
+          <div className="nb-box__head">Core values</div>
           <div className="nb-box__body">
             <ol className="fp-rules">
-              {GROUND_RULES.map((rule) => (
-                <li key={rule}>{rule}</li>
+              {CORE_VALUES.map((value) => (
+                <li key={value.name}>{value.name}</li>
               ))}
             </ol>
           </div>

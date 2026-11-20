@@ -20,12 +20,11 @@ export async function notifyWellbeingContact(postId: string): Promise<void> {
   await db.collection('mail').add({
     to: [env.wellbeingEmail],
     message: {
-      subject: 'Nobles Commons: a post needs a caring look',
+      subject: 'Neddit: a post needs a caring look',
       text:
-        'Something written on Nobles Commons may be about someone’s safety or wellbeing.\n\n' +
+        'Something written on Neddit may be about someone’s safety or wellbeing.\n\n' +
         'It has NOT been published. It is at the top of the moderation queue, marked "wellbeing".\n\n' +
-        `Open ${link} to read it. An administrator can find out who wrote it from the admin page ` +
-        '(that lookup is logged).\n\n' +
+        `Open ${link} to read it and see who wrote it.\n\n` +
         'Please follow the school’s usual steps for a student of concern.',
     },
     reason: 'wellbeing',

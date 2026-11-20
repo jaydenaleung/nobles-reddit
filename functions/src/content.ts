@@ -25,31 +25,6 @@ import { FieldValue, db } from './admin';
 import { AppError, errors } from './errors';
 import { callable } from './guard';
 
-/**
- * Gives an anonymous author their letter in this thread ("Anonymous B").
- * The same person keeps the same letter within one thread, so a conversation
- * can be followed; in another thread they get a different one.
- * Must run inside a transaction, before any write.
- */
-async function anonIndexFor(
-  tx: Transaction,
-  postId: string,
-  uid: string,
-): Promise<{ index: number; writes: () => void }> {
-  const threadRef = db.doc(`threadAnon/${postId}`);
-  const memberRef = threadRef.collection('members').doc(uid);
-  const [member, thread] = await Promise.all([tx.get(memberRef), tx.get(threadRef)]);
-  if (member.exists) return { index: member.data()!.index as number, writes: () => undefined };
-  const index = (thread.data()?.count as number | undefined) ?? 0;
-  return {
-    index,
-    writes: () => {
-      tx.set(threadRef, { count: index + 1 }, { merge: true });
-      tx.set(memberRef, { index });
-    },
-  };
-}
-
 export const createPost = callable(
   { name: 'createPost', schema: createPostSchema, rate: 'posts' },
   async (data, caller): Promise<CreateContentResult> => {
@@ -65,7 +40,7 @@ export const createPost = callable(
         throw new AppError('permission-denied', 'You can’t post in that space.');
       }
 
-      // The author gets letter A in their own thread if they post anonymously.
+      // Always named: the schema refuses anonymous posts.
       const authorDisplay = buildAuthorDisplay(caller.profile, data.identityMode, 0);
       const now = FieldValue.serverTimestamp();
       const body = data.body ?? '';
@@ -100,10 +75,6 @@ export const createPost = callable(
       tx.create(postRef, post);
       // Who wrote it, in a collection no client can read. Same commit, same timestamp.
       tx.create(db.doc(`authorship/${key}`), { contentKey: key, authorUid: caller.uid, createdAt: now });
-      if (data.identityMode === 'anonymous') {
-        tx.set(db.doc(`threadAnon/${postRef.id}`), { count: 1 });
-        tx.set(db.doc(`threadAnon/${postRef.id}/members/${caller.uid}`), { index: 0 });
-      }
     });
 
     // Only safe fields go back: never a uid.
@@ -132,8 +103,7 @@ export const createComment = callable(
         }
       }
 
-      const anon = data.identityMode === 'anonymous' ? await anonIndexFor(tx, data.postId, caller.uid) : null;
-      const authorDisplay = buildAuthorDisplay(caller.profile, data.identityMode, anon?.index ?? 0);
+      const authorDisplay = buildAuthorDisplay(caller.profile, data.identityMode, 0);
       const now = FieldValue.serverTimestamp();
 
       tx.create(commentRef, {
@@ -148,7 +118,6 @@ export const createComment = callable(
         createdAt: now,
       });
       tx.create(db.doc(`authorship/${key}`), { contentKey: key, authorUid: caller.uid, createdAt: now });
-      anon?.writes();
     });
 
     return { postId: data.postId, commentId: commentRef.id, contentKey: key };

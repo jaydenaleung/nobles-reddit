@@ -1,8 +1,8 @@
-import { ANONYMITY_NOTICE, APP_NAME, GROUND_RULES, initials, isModeratorRole } from '@commons/shared';
+import { CORE_VALUES, initials, isModeratorRole } from '@commons/shared';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { useBoardFeed, useSpaces } from '../data/hooks';
+import { useSpaces } from '../data/hooks';
 import { Icon, IconSprite } from './Icon';
 import { Wordmark } from './Identity';
 
@@ -52,8 +52,8 @@ export function TopBar() {
           </>
         ) : (
           <>
-            <Link className="nb-btn nb-btn--sm" to="/about">
-              About
+            <Link className="nb-btn nb-btn--sm" to="/values">
+              Community values
             </Link>
             {state.status === 'signedOut' && (
               <Link
@@ -124,100 +124,27 @@ export function SpaceNav() {
           </ul>
         </nav>
       )}
+      <ValuesReminder />
       <p className="fp-foot">Want a space for your team or club? Ask a moderator.</p>
-      <p className="fp-foot">
-        <Link to="/about">How {APP_NAME} works</Link>
-      </p>
     </aside>
   );
 }
 
-/** Right column: about, ground rules, who can see what, the hall screen, the Nobleman. */
-export function Sidebar({ spaceName, spaceDescription }: { spaceName?: string; spaceDescription?: string }) {
-  const { feed } = useBoardFeed();
+/** Left column, under the spaces: a short reminder of the Nobles core values. */
+export function ValuesReminder() {
   return (
-    <aside className="fp-side" aria-label="About">
-      <section className="nb-box">
-        <h2 className="nb-box__head" style={{ margin: 0 }}>
-          {spaceName ? `About ${spaceName}` : `About ${APP_NAME}`}
-        </h2>
-        <div className="nb-box__body">
-          <p>
-            {spaceDescription ??
-              'The Nobles message board. Post about something at school or in the news, and people reply.'}
-          </p>
-          <Link className="nb-btn nb-btn--primary" to="/new" style={{ width: '100%' }}>
-            Start a thread
-          </Link>
-        </div>
-      </section>
-      <section className="nb-box">
-        <h2 className="nb-box__head" style={{ margin: 0 }}>
-          Ground rules
-        </h2>
-        <div className="nb-box__body">
-          <ol className="fp-rules">
-            {GROUND_RULES.map((rule) => (
-              <li key={rule}>{rule}</li>
-            ))}
-          </ol>
-        </div>
-      </section>
-      <div className="nb-notice nb-notice--staff">
-        <div>
-          <b>Who can see what.</b> {ANONYMITY_NOTICE}
-        </div>
-      </div>
-      <section className="nb-box">
-        <h2 className="nb-box__head" style={{ margin: 0 }}>
-          On the Gleason Hall screen
-        </h2>
-        <div className="nb-box__body fp-tv">
-          <Link className="scr" data-theme="board" to="/board">
-            <span className="nb-badge nb-badge--live">
-              <Icon name="tv" /> Live now
-            </span>
-            <p>{feed?.questionText || 'No question up yet.'}</p>
-          </Link>
-          <span className="nb-meta">Reply from your phone. A mod can put your reply on the screen.</span>
-        </div>
-      </section>
-      {feed && feed.nobleman.length > 0 && (
-        <section className="nb-box">
-          <h2 className="nb-box__head" style={{ margin: 0 }}>
-            From the Nobleman
-          </h2>
-          <div className="nb-box__body fp-src">
-            {feed.nobleman.map((item) => {
-              const inner = (
-                <>
-                  <div className="nb-source__title">{item.title}</div>
-                  <div className="nb-source__meta">
-                    {item.sample ? 'Sample headline' : 'The Nobleman'}
-                    {item.minutes ? `, ${item.minutes} min read` : ''}
-                  </div>
-                </>
-              );
-              return item.url ? (
-                <a
-                  className="nb-source"
-                  key={item.title}
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer nofollow"
-                >
-                  {inner}
-                </a>
-              ) : (
-                <div className="nb-source" key={item.title}>
-                  {inner}
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-    </aside>
+    <section className="fp-values" aria-labelledby="fp-values-h">
+      <h2 className="fp-side__h" id="fp-values-h">
+        Community values
+      </h2>
+      <p>Everything here should hold up to the Nobles community values and our core values:</p>
+      <ul>
+        {CORE_VALUES.map((value) => (
+          <li key={value.name}>{value.name}</li>
+        ))}
+      </ul>
+      <Link to="/values">Read the community values</Link>
+    </section>
   );
 }
 
@@ -252,26 +179,14 @@ export function TabBar() {
   );
 }
 
-/**
- * The page frame for members: top bar, spaces on the left, the page in the
- * middle, and (when a page asks for one) the sidebar on the right.
- */
-export function Page({
-  children,
-  sidebar,
-  label,
-}: {
-  children: ReactNode;
-  sidebar?: ReactNode;
-  label?: string;
-}) {
+/** The page frame for members: top bar, spaces and values on the left, the page filling the rest. */
+export function Page({ children, label }: { children: ReactNode; label?: string }) {
   return (
-    <div className={sidebar ? 'fp-grid' : 'fp-grid fp-grid--wide'}>
+    <div className="fp-grid">
       <SpaceNav />
       <main className="fp-col" id="main" tabIndex={-1} aria-label={label}>
         {children}
       </main>
-      {sidebar}
     </div>
   );
 }

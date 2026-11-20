@@ -1,5 +1,5 @@
 /**
- * Nobles Commons: Cloud Functions (2nd gen).
+ * Neddit: Cloud Functions (2nd gen).
  *
  * Every write in the product goes through one of these. No client can write
  * to Firestore directly (see firestore.rules).

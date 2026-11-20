@@ -12,7 +12,7 @@ const Thread = lazy(() => import('./pages/Thread'));
 const NewPost = lazy(() => import('./pages/NewPost'));
 const Me = lazy(() => import('./pages/Me'));
 const Spaces = lazy(() => import('./pages/Me').then((m) => ({ default: m.Spaces })));
-const About = lazy(() => import('./pages/About'));
+const Values = lazy(() => import('./pages/Values'));
 const Mod = lazy(() => import('./pages/Mod'));
 const Admin = lazy(() => import('./pages/Admin'));
 const AuditLog = lazy(() => import('./pages/Admin').then((m) => ({ default: m.AuditLog })));
@@ -73,7 +73,8 @@ export default function MemberApp() {
         <Route element={<WithAuth />}>
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/values" element={<Values />} />
+          <Route path="/about" element={<Navigate to="/values" replace />} />
           {DevEntry && <Route path="/dev" element={<DevEntry />} />}
           <Route element={<MembersOnly />}>
             <Route path="/" element={<Feed />} />

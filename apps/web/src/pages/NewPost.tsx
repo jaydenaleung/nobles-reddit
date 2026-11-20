@@ -2,10 +2,8 @@ import {
   APP_NAME,
   LIMITS,
   createPostSchema,
-  isStaffRole,
   type ContentStatusResult,
   type CreatePostInput,
-  type IdentityMode,
 } from '@commons/shared';
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -13,7 +11,6 @@ import { api, errorMessage, waitForOutcome } from '../api';
 import { useMember } from '../auth/AuthContext';
 import { HeldNotice, WellbeingPanel } from '../components/Composer';
 import { Icon } from '../components/Icon';
-import { IdentityToggle } from '../components/Identity';
 import { Page } from '../components/Layout';
 import { Count } from '../components/Ui';
 import { useMine, useSpaces } from '../data/hooks';
@@ -37,9 +34,6 @@ export default function NewPost() {
   const [body, setBody] = useState(draft?.body ?? '');
   const [url, setUrl] = useState(draft?.url ?? '');
   const [options, setOptions] = useState<string[]>(draft?.options?.length ? draft.options : ['', '']);
-  // Never preselected, and never restored from a draft: you choose each time.
-  const [mode, setMode] = useState<IdentityMode | null>(null);
-  const [needMode, setNeedMode] = useState(false);
   const [busy, setBusy] = useState<'idle' | 'sending' | 'checking'>('idle');
   const [error, setError] = useState<string | null>(null);
   const [outcome, setOutcome] = useState<ContentStatusResult | null>(null);
@@ -66,16 +60,11 @@ export default function NewPost() {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
-    if (!mode) {
-      setNeedMode(true);
-      setError('Pick your name or Anonymous.');
-      return;
-    }
     if (!spaceId) {
       setError('Pick a space.');
       return;
     }
-    const base = { spaceId, identityMode: mode, title };
+    const base = { spaceId, identityMode: 'named' as const, title };
     const input: CreatePostInput =
       kind === 'text'
         ? { ...base, kind, body }
@@ -146,17 +135,9 @@ export default function NewPost() {
           </Link>
         </div>
 
-        <IdentityToggle
-          value={mode}
-          onChange={(next) => {
-            setMode(next);
-            setNeedMode(false);
-          }}
-          firstName={member.profile.firstName}
-          displayName={member.profile.displayName}
-          staff={isStaffRole(member.role)}
-          invalid={needMode}
-        />
+        <p className="reply__as">
+          Posting as <b>{member.profile.displayName}</b>
+        </p>
 
         <div className="field" style={{ maxWidth: 360 }}>
           <label className="nb-label" htmlFor={`${id}-space`}>
@@ -275,12 +256,10 @@ export default function NewPost() {
           <p className="nb-help">*italic*, **bold** and https links work. Your draft stays on this device.</p>
         </div>
 
-        <div className="nb-notice nb-notice--kind">
-          <Icon name="check" />
-          <div>
-            <b>Be kind and be honest.</b> Argue with the idea, not the person.
-          </div>
-        </div>
+        <p className="nb-help">
+          Keep it to the <Link to="/values">community values</Link>. Focus on ideas, not the people who wrote
+          them.
+        </p>
 
         {error && (
           <p className="err" role="alert">
