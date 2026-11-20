@@ -10,7 +10,7 @@ import { AppError, errors } from './errors';
 import { callable } from './guard';
 
 /**
- * One "Thoughtful" per person per item. There are no downvotes, and a count
+ * One upvote per person per item. There are no downvotes, and a count
  * can never go below zero. Calling it again takes the mark back.
  */
 export const toggleThoughtful = callable(

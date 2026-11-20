@@ -112,28 +112,28 @@ test.describe.serial('the main flow', () => {
     await expect(comment).not.toContainText('Zephyrine');
     await expect(page.getByRole('heading', { name: '1 comment' })).toBeVisible();
 
-    // Thoughtful: the count moves at once (optimistic) and is still there after a reload.
-    const vote = card.getByRole('button', { name: /Thoughtful/ });
+    // Upvote: the count moves at once (optimistic) and is still there after a reload.
+    const vote = card.getByRole('button', { name: /^Upvote/ });
     await expect(vote).toHaveAttribute('aria-pressed', 'false');
     const saved = page.waitForResponse((response) => response.url().includes('toggleThoughtful'));
     await vote.click();
     // Optimistic: the button changes before the server has answered.
     await expect(vote).toHaveAttribute('aria-pressed', 'true');
-    await expect(vote).toContainText('Thoughtful 1');
+    await expect(vote).toContainText('1');
     expect((await saved).status()).toBe(200);
     await page.reload();
     await expect(
       page
         .locator('.th-card')
         .first()
-        .getByRole('button', { name: /Thoughtful/ }),
+        .getByRole('button', { name: /^Upvote/ }),
     ).toHaveAttribute('aria-pressed', 'true');
     await expect(
       page
         .locator('.th-card')
         .first()
-        .getByRole('button', { name: /Thoughtful/ }),
-    ).toContainText('Thoughtful 1');
+        .getByRole('button', { name: /^Upvote/ }),
+    ).toContainText('1');
     // The author can find their own anonymous post under You.
     await page.goto('/me');
     await expect(page.getByRole('link', { name: anonTitle })).toBeVisible();

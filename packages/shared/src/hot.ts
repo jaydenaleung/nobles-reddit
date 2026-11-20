@@ -1,7 +1,7 @@
 import { HOT_EPOCH_SECONDS, HOT_TIME_DIVISOR } from './constants';
 
 /**
- * "Thoughtful" marks count fully, comments count half.
+ * Upvotes count fully, comments count half.
  * There are no downvotes, so a score can never go below zero.
  */
 export function engagementScore(thoughtfulCount: number, commentCount: number): number {

@@ -115,7 +115,7 @@ export function PostRow({
 }: PostRowProps) {
   const href = `/t/${post.id}`;
   const body = post.body ? excerpt(post.body) : '';
-  const voteLabel = voted ? 'Thoughtful, press again to undo' : 'Mark thoughtful';
+  const voteLabel = voted ? 'Upvoted, press again to undo' : 'Upvote';
   return (
     <article className={`nb-post${read ? ' nb-post--read' : ''}`}>
       <div className="nb-votes">
@@ -128,15 +128,7 @@ export function PostRow({
         >
           <Icon name="up" />
         </button>
-        <span
-          aria-label={plural(
-            post.thoughtfulCount,
-            'person found this thoughtful',
-            'people found this thoughtful',
-          )}
-        >
-          {post.thoughtfulCount}
-        </span>
+        <span aria-label={plural(post.thoughtfulCount, 'upvote', 'upvotes')}>{post.thoughtfulCount}</span>
       </div>
       <div>
         {post.pinned && (

@@ -92,7 +92,7 @@ service cloud.firestore {
       }
     }
 
-    // "Thoughtful" marks and poll votes: you can read your own, nobody can read anyone else's.
+    // Upvotes and poll votes: you can read your own, nobody can read anyone else's.
     match /votes/{postId}/by/{uid} {
       allow get: if isOwner(uid);
       allow write: if false;

@@ -6,7 +6,7 @@ For administrators and moderators. No technical background needed.
 
 | Role | Who | Can |
 | --- | --- | --- |
-| Student | Anyone with a school email, by default | Read, post, comment, mark things "Thoughtful", vote in polls, report |
+| Student | Anyone with a school email, by default | Read, post, comment, upvote, vote in polls, report |
 | Faculty | Set by an administrator | The same, with a "Faculty" badge when posting under their name |
 | Moderator | Faculty nominated by the administration | Everything above, plus: see reports and the queue, hold, remove, restore and pin posts, approve the question of the day, choose replies for the hall screen. **Cannot see who wrote anything** |
 | Administrator | The people listed at deployment, and anyone they promote | Everything a moderator can, plus: change roles, manage spaces, look up an author (logged), read the audit log, see AI usage, change settings |
