@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
@@ -82,6 +82,56 @@ function hostingHeadersPlugin(): Plugin {
   };
 }
 
+/**
+ * Dev server only, emulator mode only. Lets the color palette on /dev write a
+ * changed color back into src/styles/tokens.css.
+ */
+function paletteSavePlugin(): Plugin {
+  const file = path.join(here, 'src/styles/tokens.css');
+  return {
+    name: 'commons-palette-save',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use('/__palette', (req, res) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 405;
+          res.end('POST only');
+          return;
+        }
+        let raw = '';
+        req.on('data', (chunk) => {
+          raw += chunk;
+          if (raw.length > 20_000) req.destroy();
+        });
+        req.on('end', () => {
+          try {
+            const { theme, tokens } = JSON.parse(raw) as { theme: string; tokens: Record<string, string> };
+            if (!['paper', 'night', 'board'].includes(theme)) throw new Error('Unknown theme.');
+            const lines = readFileSync(file, 'utf8').split('\n');
+            const start = theme === 'paper' ? ':root, [data-theme="paper"]' : `[data-theme="${theme}"]`;
+            const index = lines.findIndex((line) => line.startsWith(start));
+            if (index < 0) throw new Error('Theme not found in tokens.css.');
+            let line = lines[index]!;
+            for (const [name, value] of Object.entries(tokens)) {
+              if (!/^--[a-z-]+$/.test(name) || !/^#[0-9a-fA-F]{6}$/.test(value))
+                throw new Error('Bad value.');
+              const pattern = new RegExp(`(?<![\\w-])(${name}:)#[0-9a-fA-F]{6}`);
+              if (!pattern.test(line)) throw new Error(`${name} is not in the ${theme} theme.`);
+              line = line.replace(pattern, `$1${value.toUpperCase()}`);
+            }
+            lines[index] = line;
+            writeFileSync(file, lines.join('\n'));
+            res.end('saved');
+          } catch (err) {
+            res.statusCode = 400;
+            res.end(err instanceof Error ? err.message : 'Bad request.');
+          }
+        });
+      });
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => {
   const env = readEnv(mode);
   const useEmulators = mode === 'emulator';
@@ -108,7 +158,12 @@ export default defineConfig(({ mode }) => {
 
   return {
     root: here,
-    plugins: [react(), joinQrPlugin(appConfig.publicUrl), hostingHeadersPlugin()],
+    plugins: [
+      react(),
+      joinQrPlugin(appConfig.publicUrl),
+      hostingHeadersPlugin(),
+      ...(useEmulators ? [paletteSavePlugin()] : []),
+    ],
     define: {
       __APP_CONFIG__: JSON.stringify(appConfig),
       // A plain boolean, so the emulator-only sign-in code is removed from production builds.

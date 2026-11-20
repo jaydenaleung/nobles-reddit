@@ -19,6 +19,9 @@ const AuditLog = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Au
 const SignIn = lazy(() => import('./pages/Gate').then((m) => ({ default: m.SignIn })));
 const Onboarding = lazy(() => import('./pages/Gate').then((m) => ({ default: m.Onboarding })));
 const NotFound = lazy(() => import('./pages/Gate').then((m) => ({ default: m.NotFound })));
+// Emulator builds only. The constant is replaced at build time, so production leaves this out.
+declare const __USE_EMULATORS__: boolean;
+const DevEntry = __USE_EMULATORS__ ? lazy(() => import('./dev/DevEntry')) : null;
 
 function Waiting() {
   return (
@@ -71,6 +74,7 @@ export default function MemberApp() {
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/about" element={<About />} />
+          {DevEntry && <Route path="/dev" element={<DevEntry />} />}
           <Route element={<MembersOnly />}>
             <Route path="/" element={<Feed />} />
             <Route path="/s/:slug" element={<Feed />} />
