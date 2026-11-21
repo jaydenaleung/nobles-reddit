@@ -181,8 +181,7 @@ export function SignIn() {
               </p>
             )}
             <p className="welcome__hint">
-              Use your <b>@{config.allowedDomains.join(' or @')}</b> Google account. Personal Gmail won’t
-              work.
+              Use your <b>@{config.allowedDomains.join(' or @')}</b> Google account.
             </p>
           </div>
         )}
