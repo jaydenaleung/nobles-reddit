@@ -48,21 +48,7 @@ describe('createPost', () => {
     expect(typeof data.hotScore).toBe('number');
   });
 
-  it('stores an anonymous post with a label and nothing else about the author', async () => {
-    const created = await post(priya, spaces['middle-school']!, {
-      identityMode: 'anonymous',
-      title: 'Anonymous thread',
-    });
-    const data = (await adminDb.doc(`posts/${created.postId}`).get()).data()!;
-    expect(data.authorDisplay).toEqual({ mode: 'anonymous', anonLabel: 'Anonymous A' });
-    const everything = allStrings(data).join(' | ');
-    expect(everything).not.toContain(priya.uid);
-    expect(everything).not.toContain('Priyasample');
-    expect(everything).not.toContain('content.priya');
-    expect(everything).not.toContain('2027');
-  });
-
-  it('never puts a uid on any post, named or anonymous, and never returns one', async () => {
+  it('never puts a uid on any post and never returns one', async () => {
     await refill(priya);
     const raw = await priya.call<Record<string, unknown>>('createPost', {
       spaceId: spaces['clubs'],
@@ -78,10 +64,7 @@ describe('createPost', () => {
   });
 
   it('writes the authorship record in the same commit, with the same timestamp', async () => {
-    const created = await post(priya, spaces['clubs']!, {
-      identityMode: 'anonymous',
-      title: 'Authorship timing check',
-    });
+    const created = await post(priya, spaces['clubs']!, { title: 'Authorship timing check' });
     const [content, authorship] = await Promise.all([
       adminDb.doc(`posts/${created.postId}`).get(),
       adminDb.doc(`authorship/${created.contentKey}`).get(),
@@ -136,6 +119,7 @@ describe('createPost', () => {
     await expectError(priya.call('createPost', { ...base, body: 'x'.repeat(10_001) }), 'invalid-argument');
     await expectError(priya.call('createPost', { ...base, identityMode: undefined }), 'invalid-argument');
     await expectError(priya.call('createPost', { ...base, identityMode: 'secret' }), 'invalid-argument');
+    await expectError(priya.call('createPost', { ...base, identityMode: 'anonymous' }), 'invalid-argument');
     await expectError(
       priya.call('createPost', { ...base, kind: 'link', url: 'http://example.org' }),
       'invalid-argument',
@@ -190,10 +174,10 @@ describe('createPost', () => {
 });
 
 describe('createComment', () => {
-  it('adds comments, counts them and tracks how many are anonymous', async () => {
+  it('adds comments and counts them', async () => {
     const thread = await post(priya, spaces['clubs']!, { title: 'A thread to comment on' });
     const first = await comment(dev, thread.postId, { body: 'First comment' });
-    await comment(priya, thread.postId, { identityMode: 'anonymous', body: 'Second, anonymous' });
+    await comment(priya, thread.postId, { body: 'Second comment' });
     const firstData = (await adminDb.doc(`posts/${thread.postId}/comments/${first.commentId}`).get()).data()!;
     expect(firstData).toMatchObject({ depth: 0, parentId: null, status: 'visible' });
     expect(firstData.authorDisplay).toEqual({
@@ -207,41 +191,7 @@ describe('createComment', () => {
       (p) => p.commentCount === 2,
       'comment count',
     );
-    expect(counted.anonCommentCount).toBe(1);
     expect(counted.hotScore).toBeGreaterThan(0);
-  });
-
-  it('gives each anonymous author a stable letter within a thread', async () => {
-    const thread = await post(priya, spaces['clubs']!, {
-      identityMode: 'anonymous',
-      title: 'Letters in a thread',
-    });
-    const label = async (id: string) =>
-      (await adminDb.doc(`posts/${thread.postId}/comments/${id}`).get()).data()!.authorDisplay.anonLabel;
-    const d1 = await comment(dev, thread.postId, {
-      identityMode: 'anonymous',
-      body: 'Dev, anonymous, first',
-    });
-    const p1 = await comment(priya, thread.postId, {
-      identityMode: 'anonymous',
-      body: 'Original poster replies',
-    });
-    const d2 = await comment(dev, thread.postId, {
-      identityMode: 'anonymous',
-      body: 'Dev, anonymous, again',
-    });
-    // The original poster is A in their own thread and stays A; Dev is B both times.
-    expect(await label(p1.commentId)).toBe('Anonymous A');
-    expect(await label(d1.commentId)).toBe('Anonymous B');
-    expect(await label(d2.commentId)).toBe('Anonymous B');
-
-    // In another thread the letters start again, so they cannot be linked across threads.
-    const other = await post(dev, spaces['clubs']!, { title: 'A different thread' });
-    const p2 = await comment(priya, other.postId, { identityMode: 'anonymous', body: 'Priya elsewhere' });
-    expect(
-      (await adminDb.doc(`posts/${other.postId}/comments/${p2.commentId}`).get()).data()!.authorDisplay
-        .anonLabel,
-    ).toBe('Anonymous A');
   });
 
   it('nests replies up to the depth limit and no further', async () => {
@@ -267,6 +217,7 @@ describe('createComment', () => {
     await expectError(dev.call('createComment', { ...base, body: '   ' }), 'invalid-argument');
     await expectError(dev.call('createComment', { ...base, body: 'x'.repeat(4001) }), 'invalid-argument');
     await expectError(dev.call('createComment', { ...base, identityMode: undefined }), 'invalid-argument');
+    await expectError(dev.call('createComment', { ...base, identityMode: 'anonymous' }), 'invalid-argument');
   });
 });
 
@@ -301,10 +252,7 @@ describe('editing and deleting your own content', () => {
   });
 
   it('refuses to edit or delete somebody else’s content, with the same error for content that does not exist', async () => {
-    const created = await post(priya, spaces['clubs']!, {
-      identityMode: 'anonymous',
-      title: 'Not yours to change',
-    });
+    const created = await post(priya, spaces['clubs']!, { title: 'Not yours to change' });
     const forOthers = await expectError(
       dev.call('editOwnContent', { contentKey: created.contentKey, body: 'Hijacked' }),
       'permission-denied',

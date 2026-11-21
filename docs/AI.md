@@ -1,4 +1,4 @@
-# The AI in Nobles Commons
+# The AI in Neddit
 
 What each model does, what it is told, what it costs, how it fails, and how to swap in your own.
 
@@ -37,7 +37,7 @@ The prompts are plain files you can read and edit: `functions/src/ai/prompts/sum
 </thread_data>
 ```
 
-No names, no "Anonymous B", no roles, no ids. A model cannot reveal who wrote something it was never told.
+No names, no "Anonymous" labels, no roles, no ids. A model cannot reveal who wrote something it was never told.
 
 For the question of the day the model sees thread **titles** from the last week (never bodies), the school's calendar notes and the list of banned topics.
 

@@ -33,14 +33,14 @@ The brief said: when something is not specified, pick the default given or the m
 | Everyone's name shows as "First L.", faculty included, with a Faculty badge | The brief specifies first name and last initial. "Ms. Haddad"-style names would need a second field. **The school may prefer honorifics for faculty** | `packages/shared/src/authorDisplay.ts` |
 | Ticking "faculty or staff" at onboarding does not give the Faculty badge; an administrator does | Students must not be able to make themselves faculty | `functions/src/users.ts` |
 
-## Posting and anonymity
+## Posting
 
 | Decision | Why | Where |
 | --- | --- | --- |
 | **New posts and comments are held until the automatic check has read them** (a few seconds) | The most conservative reading of "self-harm signals publish nothing new". The cost is a short wait after posting | `functions/src/content.ts`, `triggers.ts` |
 | **If the check is unavailable, posts are published** after a small phrase check for self-harm and violence | The brief: when the budget is exceeded "nothing else breaks", and the classifier is "never the only line". **The school may prefer to hold everything for a moderator instead** | `functions/src/triggers.ts` |
-| The author of a thread is "Anonymous A" in it; each other anonymous author gets the next letter, kept for that thread only | Lets a conversation be followed without linking threads together | `functions/src/content.ts` |
-| A person's anonymous comments within one thread are therefore linked to each other | Follows from the brief's "stable per thread". Said plainly in `docs/SAFETY.md` | |
+| **No anonymous posting.** Every new post and comment goes up under the writer's name, and the server refuses `identityMode: "anonymous"` | Neddit is about learning to disagree respectfully, and the community values ask people to stand behind what they say | `packages/shared/src/schemas.ts` |
+| Content posted anonymously before that change still reads "Anonymous", and its author stays hidden from other students | Those people posted on the understanding that their name was hidden. Administrators can still look up the author, with a reason, logged | `apps/web/src/components/Identity.tsx`, `functions/src/adminFns.ts` |
 | Top-level comments are depth 0 and replies go to depth 4 | "Max depth 4" was ambiguous; this allows four levels of reply | `packages/shared/src/constants.ts` |
 | Editing re-runs the automatic check, and the post is hidden for those seconds | Otherwise an edit would be a way round the check | `functions/src/content.ts` |
 | Poll options and links cannot be edited after posting | Changing a poll after people voted would be unfair | |
@@ -106,4 +106,4 @@ The brief said: when something is not specified, pick the default given or the m
 2. **The wellbeing process.** Who gets the alert, how fast someone responds out of hours, the wording students see, and how email is delivered. Decide whether posts should wait for a moderator when the automatic check is down.
 3. **Who can look up authors, and when.** Name the administrators and moderators. Agree a reveal policy and who reviews the audit log.
 4. **Retention and deletion.** Whether 24 months is right, what happens to the archive, and whether keeping the authorship record after an account is deleted matches school policy.
-5. **Name, look and rules.** The name "Nobles Commons", use of the school's colours and (if wanted) logo, how faculty names should appear, and how the four ground rules connect to the handbook.
+5. **Name, look and values.** The name "Neddit", use of the school's colours, the logo mark, how faculty names should appear, and how the community values page connects to the handbook.

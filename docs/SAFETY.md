@@ -4,23 +4,21 @@
 
 ## What the design is trying to do
 
-Give students and faculty a place to disagree honestly and kindly, where a student can ask something without their name attached, and where the adults responsible for them can still act when someone is at risk or being hurt.
+Give students and faculty a place to learn to disagree respectfully, under their own names, held to the Nobles community values, and where the adults responsible for them can act when someone is at risk or being hurt.
 
-## Anonymity: exactly what it means here
+## Names: exactly what they mean here
 
-- **Other students and faculty cannot see who wrote an anonymous post.** Not on the page, not in the data the page loads, not through search, not from ids or timestamps, and not from error messages. This is tested (see `docs/ARCHITECTURE.md`).
-- **The administration can always see.** Every post and comment has a private record of its author. Administrators can look it up by giving a reason, and each lookup is logged with their name, the time and the reason. The log cannot be edited.
-- **Moderators cannot see.** They can remove a post without knowing whose it is.
-- **The composer says so every time,** in these words: "Anonymous hides your name from other students. The administration can always see who wrote every post and comment." Anonymous is never preselected.
+- **Everything new goes up under your name.** There is no anonymous posting. The composer says who you are posting as, and the server refuses anything that asks to be anonymous.
+- **Older anonymous posts stay anonymous.** Posts and comments written before anonymous posting was turned off still read "Anonymous". Other students and faculty cannot see who wrote them: not on the page, not in the data the page loads, not through search, not from ids or timestamps, and not from error messages. This is tested (see `docs/ARCHITECTURE.md`).
+- **The administration can look up the author of an older anonymous post.** Every post and comment has a private record of its author. Administrators can look it up by giving a reason, and each lookup is logged with their name, the time and the reason. The log cannot be edited.
+- **Moderators cannot look up authors.** They can remove a post without needing to know whose it is.
 
 ### Honest limits
 
-Students should hear these before they post, and the About page tells them:
+Students should hear these before they post. Onboarding tells them:
 
-- **A small community can guess.** Writing style, the topic, or "the only person who would know that" can identify someone even with no name attached.
-- **Anonymous to students is not anonymous to the school.** If a student needs to tell someone something the school should not know, this is the wrong place, and the school should make sure students know where the right places are.
+- **A permanent digital footprint.** What you say here is tied to your name, and can be read by the whole school.
 - **Screenshots exist.** Deleting a post does not delete a picture of it.
-- **Within a thread, an anonymous author keeps one letter** ("Anonymous B") so the conversation can be followed. Everything one person says anonymously in a thread is therefore linked together. Across threads the letters are not linked.
 - **Poll results and counts can reveal things in a tiny group.** "1 vote" in a space with three people is not very private.
 
 ## What happens to a new post
@@ -68,6 +66,6 @@ The alert email needs a mail service to be connected before it is delivered. Unt
 - A student who is held for review sees only "a moderator will take a look". The school may want a way to explain decisions.
 - The moderation tools have not been tested with real moderators.
 
-## Suggested ground rules for launch
+## Community values
 
-The four on the site: be kind and honest; talk about ideas, not people; say what you actually think and why; report what looks wrong. The school will want to connect these to its existing handbook and say what happens when they are broken.
+The site points to the Nobles community values (`/values`): the school's mission, the five core values, the commitment to diversity, equity and inclusion, and a few tips for Neddit. Onboarding asks each person to confirm they have read them. The school will want to connect these to its existing handbook and say what happens when they are broken.

@@ -44,10 +44,9 @@ afterAll(closeAll);
 
 /** A thread with `count` visible comments. */
 async function threadWithComments(title: string, body: string, count: number, firstComment?: string) {
-  const thread = await post(author, spaces['current-events']!, { identityMode: 'anonymous', title, body });
+  const thread = await post(author, spaces['current-events']!, { title, body });
   for (let i = 0; i < count; i++) {
     await comment(i % 2 === 0 ? reader : author, thread.postId, {
-      identityMode: i % 3 === 0 ? 'anonymous' : 'named',
       body: i === 0 && firstComment ? firstComment : `Sample comment number ${i + 1} with a point of view.`,
     });
   }

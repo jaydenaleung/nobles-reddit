@@ -141,7 +141,6 @@ describe('screening', () => {
   it('never publishes or deletes a wellbeing flag: it goes to the top of the queue and the school is emailed', async () => {
     const before = (await adminDb.collection('mail').get()).size;
     const created = await post(student, spaces['clubs']!, {
-      identityMode: 'anonymous',
       title: 'I need to tell someone something',
       body: 'Some days I want to hurt myself.',
     });
@@ -304,8 +303,7 @@ describe('moderator actions', () => {
 
   it('moderating closes the queue item, and returns nothing about the author', async () => {
     const created = await post(student, spaces['clubs']!, {
-      identityMode: 'anonymous',
-      title: 'An anonymous post that is held [mock:hold]',
+      title: 'A post that is held [mock:hold]',
     });
     const result = await moderator.call<Record<string, unknown>>('modAction', {
       contentKey: created.contentKey,
@@ -350,7 +348,6 @@ describe('moderator actions', () => {
 describe('revealAuthor', () => {
   it('a moderator cannot see who wrote something', async () => {
     const created = await post(student, spaces['clubs']!, {
-      identityMode: 'anonymous',
       title: 'Who wrote this one?',
     });
     await expectError(
@@ -369,7 +366,6 @@ describe('revealAuthor', () => {
 
   it('an admin must give a reason of at least 10 characters', async () => {
     const created = await post(student, spaces['clubs']!, {
-      identityMode: 'anonymous',
       title: 'A reason is required',
     });
     await expectError(admin.call('revealAuthor', { contentKey: created.contentKey }), 'invalid-argument');
@@ -383,7 +379,6 @@ describe('revealAuthor', () => {
 
   it('an admin with a reason sees the author, and the look is written to the audit log', async () => {
     const created = await post(student, spaces['clubs']!, {
-      identityMode: 'anonymous',
       title: 'A logged reveal',
     });
     const result = await admin.call<{ author: Record<string, unknown>; logged: boolean }>('revealAuthor', {
@@ -416,8 +411,7 @@ describe('revealAuthor', () => {
   it('works for comments, and says not-found for content that does not exist', async () => {
     const thread = await post(other, spaces['clubs']!, { title: 'Reveal on a comment' });
     const reply = await comment(student, thread.postId, {
-      identityMode: 'anonymous',
-      body: 'An anonymous reply',
+      body: 'A reply to reveal',
     });
     const result = await admin.call<{ author: { email: string } }>('revealAuthor', {
       contentKey: reply.contentKey,

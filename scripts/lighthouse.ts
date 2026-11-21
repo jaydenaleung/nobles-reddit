@@ -24,7 +24,7 @@ const MIN_ACCESSIBILITY = 95;
 
 async function isUp(): Promise<boolean> {
   try {
-    return (await fetch(`${BASE}/about`)).ok;
+    return (await fetch(`${BASE}/values`)).ok;
   } catch {
     return false;
   }

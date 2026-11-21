@@ -1,11 +1,11 @@
-# Nobles Commons
+# Neddit
 
-A discussion board for the Noble and Greenough School community. Students and faculty sign in with their school Google account and talk about school news, current events and anything else, in spaces for different parts of school life. A hall screen shows the question of the day.
+The Nobles Discussion Board: a discussion board for the Noble and Greenough School community. Students and faculty sign in with their school Google account and talk about school news, current events and anything else, in spaces for different parts of school life. A hall screen shows the question of the day.
 
 Two ideas shape everything:
 
-- **Kind and honest, both.** Disagree freely, about ideas and not people.
-- **Anonymous by choice, and honest about what that means.** Anonymous hides your name from other students. The administration can always see who wrote every post and comment, and each time they look it is logged.
+- **Learning to disagree respectfully.** Argue with ideas, not people, and hold everything to the Nobles community values.
+- **Everything goes up under your name.** There is no anonymous posting. What you say here keeps a permanent digital footprint.
 
 > **Deployed, not launched.** The site is live at https://nobles-reddit.web.app, but it is not open to students yet: Google sign-in still has to be switched on in the Firebase console, and `docs/PRIVACY.md` and `docs/SAFETY.md` are drafts for the school to review before any student uses it. See `docs/LAUNCH.md`.
 
@@ -15,17 +15,16 @@ Two ideas shape everything:
 
 ### Layout
 
-The look is meant to feel like a well-made student publication rather than a template: warm paper background, Nobles navy type, one white feed column with ruled rows, and a few hand touches (a wavy underline on the active sort tab, a yellow highlighter on the question of the day). It uses the school's official colours and three typefaces: Lora for titles, Libre Baskerville for posts and comments, and Inter for small interface text. There is no logo; the wordmark is plain type.
+The look is meant to feel like a well-made student publication rather than a template: warm paper background, Nobles navy type, one white feed column with ruled rows, and a few hand touches (a wavy underline on the active sort tab). The only highlighted text is the Administration and Faculty badges. It uses the school's official colours and three typefaces: Lora for titles, Libre Baskerville for posts and comments, and Inter for small interface text. The wordmark is a small logo mark beside the name "Neddit".
 
-**On a desktop** (900px and wider) every page has three columns:
+**On a desktop** (900px and wider) every page has two columns:
 
-- **Left:** the list of spaces with a thread count for each, plus links to the moderation and admin pages for people who have those roles.
-- **Centre:** the page itself. On the front page that is a "Start a thread" box, the sort tabs (Hot, New, Top this week, No replies), then the feed. Each thread is a row with a vote rail on its left.
-- **Right:** boxes for About, the ground rules, a "Who can see what" notice, a live preview of the hall screen, and headlines from the Nobleman.
+- **Left:** the list of spaces with a thread count for each, links to the moderation and admin pages for people who have those roles, and a short reminder of the community values that links to `/values`.
+- **Right:** the page itself, at full width. On the front page that is a "Start a thread" box, the sort tabs (Hot, New, Top this week, No replies), then the feed. Each thread is a row with a vote rail on its left.
 
 **On a phone** the side columns go away. Spaces become a row of chips across the top, threads become cards, the vote moves into each card's footer, and a tab bar along the bottom gives Home, Spaces, Post, Board and You. Every button and link is at least 40px tall.
 
-**On the Gleason Hall screen** (`/board`), a full-screen display shows today's question in large type, the poll results as bars, how many people have weighed in and what share chose to stay anonymous, the replies a moderator picked for the screen, a QR code to join, and a ticker of Nobleman headlines. It needs no login and reconnects by itself.
+**On the Gleason Hall screen** (`/board`), a full-screen display shows today's question in large type, the poll results as bars, how many people have weighed in, the replies a moderator picked for the screen, a QR code to join, and a ticker of Nobleman headlines. It needs no login and reconnects by itself.
 
 **Themes:** Paper (light) by default, Night (dark) when the device asks for it or the person picks it, and a high-contrast Board theme for the hall screen.
 
@@ -41,15 +40,16 @@ More screenshots, at phone, tablet and desktop sizes, are in [`docs/screens`](do
 | Address | Who | What it is |
 | --- | --- | --- |
 | `/sign-in` | Anyone | One button: sign in with a Nobles Google account. Other accounts are turned away with a kind message |
-| `/onboarding` | New members | Name as it will show (first name and last initial), class year, part of the school, the ground rules, and an "I understand" box |
+| `/onboarding` | New members | Name as it will show (first name and last initial), class year, part of the school, the core values, and an "I read the community values" box |
 | `/` | Members | The front page: every space, sorted |
 | `/s/:slug` | Members | One space, with its description |
 | `/t/:id` | Members | A thread: the post, its poll or link, the auto-summary, the comment tree and a reply box |
 | `/new` | Members | Start a thread: text, link or poll |
 | `/search` | Members | Search threads by their words |
 | `/spaces` | Members | Every space as a tile (the phone's Spaces tab) |
-| `/me` | Members | Your account, your posts (including anonymous ones), theme, saved threads, download your data, delete your account |
-| `/about` | Anyone | How it works, anonymity in three steps, honest limits, ground rules |
+| `/me` | Members | Your account, your posts, theme, saved threads, download your data, delete your account |
+| `/values` | Anyone | The Nobles mission, the five core values, the commitment to diversity, equity and inclusion, and a few tips for Neddit |
+| `/about` | Anyone | Redirects to `/values` |
 | `/mod` | Moderators | The moderation queue, reports and the question of the day |
 | `/admin` | Administrators | Roles, spaces, question approvals, author lookup, AI budget, settings |
 | `/admin/audit` | Administrators | The audit log |
@@ -60,7 +60,7 @@ More screenshots, at phone, tablet and desktop sizes, are in [`docs/screens`](do
 **Everyone signed in**
 
 - Start a thread in a space as text, a link or a poll (2 to 6 options), and comment or reply up to four levels deep.
-- Choose, every single time, whether to post under their name or as Anonymous. Nothing is preselected, and the composer always says plainly that the administration can see who wrote everything.
+- Post and comment under their own name (first name and last initial). The composer says who you are posting as.
 - Mark posts and comments "Thoughtful". It is the only reaction: there are no downvotes and no negative scores.
 - Vote in polls, and change their vote.
 - Sort the feed by Hot, New, Top this week or No replies, and search by the words in a thread.
@@ -70,12 +70,12 @@ More screenshots, at phone, tablet and desktop sizes, are in [`docs/screens`](do
 - Report anything to a moderator, including "I am worried about someone's safety".
 - Download everything the site holds about them, or delete their account.
 
-**Anonymity**
+**Names, and older anonymous posts**
 
-- Other students and faculty see an anonymous author only as "Anonymous" with a masked avatar and a dashed ring. Within one thread each anonymous person keeps the same letter ("Anonymous B") so a conversation can be followed; in another thread the letters start again.
-- A faculty member posting anonymously is just "Anonymous", with no Faculty badge.
-- Nothing about an anonymous author reaches another student's browser: not in the page, the data, search, ids, timestamps or error messages. Tests check this.
-- The administration can always find out who wrote something, but only by giving a reason, and every lookup is written to a log nobody can edit. Moderators cannot see authors at all.
+- There is no anonymous posting. The server refuses any post or comment that asks to be anonymous.
+- Posts from before anonymous posting was turned off still read "Anonymous", and nothing about their author reaches another student's browser: not in the page, the data, search, ids, timestamps or error messages. Tests check this.
+- Content stores a display name, never a uid. Who wrote what is kept in a separate collection no client can read.
+- For those older anonymous posts, the administration can find out who wrote one, but only by giving a reason, and every lookup is written to a log nobody can edit. Moderators cannot look up authors at all.
 
 **Moderators**
 
@@ -97,7 +97,7 @@ More screenshots, at phone, tablet and desktop sizes, are in [`docs/screens`](do
 **Accessibility**
 
 - Every page works with a keyboard alone, with a visible focus ring and a skip link.
-- Colour is never the only signal: anonymous posts also say "Anonymous", staff say "Faculty", pinned threads say "Pinned".
+- Colour is never the only signal: staff say "Faculty" or "Administration", pinned threads say "Pinned".
 - Every route passes automated accessibility checks (axe) in both themes, and Lighthouse scores accessibility 100 on the front page, a thread and the hall screen.
 
 **Privacy**
@@ -157,7 +157,7 @@ Nothing here touches a real Firebase project: the emulators use the made-up proj
 | `npm run typecheck` | TypeScript, strict, in every package |
 | `npm run test:unit` | Hot score, input checks, safe text formatter, rate limiter, AI prompt building and output checks |
 | `npm run test:rules` | Firestore rules against the emulator |
-| `npm run test:functions` | Every callable against the emulators, including the anti-deanonymisation tests |
+| `npm run test:functions` | Every callable against the emulators, including the tests that anonymous posting is refused and that older anonymous posts stay anonymous |
 | `npm run test:e2e` | Playwright end-to-end flow and axe accessibility checks, at desktop and phone sizes |
 | `npm run lighthouse` | Lighthouse on the front page, a thread and the hall screen |
 | `npm run screens` | Screenshots of every route into `docs/screens` |
@@ -182,7 +182,7 @@ It refuses to start, and names what is missing, until `.env.local` is complete. 
 
 ## Read next
 
-- `docs/ARCHITECTURE.md` for how it fits together, with a diagram of the anonymity flow
+- `docs/ARCHITECTURE.md` for how it fits together, with a diagram of how authorship is kept
 - `docs/ADMIN.md` if you are a moderator or administrator
 - `docs/AI.md` for what the models do and how to swap in your own
 - `docs/DECISIONS.md` for every choice made where the brief was silent

@@ -175,13 +175,10 @@ describe('setRole', () => {
 });
 
 describe('my data', () => {
-  it('lists and exports only my own content, including my anonymous posts', async () => {
+  it('lists and exports only my own content', async () => {
     const me = await member('export.me@nobles.edu', { firstName: 'Exporta' });
     const other = await member('export.other@nobles.edu', { firstName: 'Otherly' });
-    const mine = await post(me, spaces['clubs']!, {
-      identityMode: 'anonymous',
-      title: 'My anonymous thread',
-    });
+    const mine = await post(me, spaces['clubs']!, { title: 'My own thread' });
     await post(other, spaces['clubs']!, { title: 'Somebody else wrote this' });
 
     const list = await me.call<{ items: { contentKey: string; identityMode: string }[] }>(
@@ -189,7 +186,7 @@ describe('my data', () => {
       {},
     );
     expect(list.items.map((i) => i.contentKey)).toEqual([mine.contentKey]);
-    expect(list.items[0]!.identityMode).toBe('anonymous');
+    expect(list.items[0]!.identityMode).toBe('named');
 
     const exported = await me.call<{ profile: { email: string }; postsAndComments: unknown[] }>(
       'exportMyData',

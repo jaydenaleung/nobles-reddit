@@ -20,6 +20,7 @@ import {
   expectError,
   member,
   post,
+  refill,
   resetEmulators,
   seedSpaces,
   waitFor,
@@ -27,12 +28,13 @@ import {
 } from './helpers';
 
 /**
- * Anti-deanonymisation.
+ * Neddit has no anonymous posting. New posts and comments must go up under the
+ * writer's name, and the server refuses anything else.
  *
- * Student A posts and comments anonymously. Student B then looks everywhere a
- * student can look: the post, the thread, the feed, search, the hall screen
- * feed and every function response. Nothing B receives may contain A's uid,
- * name, email or class year, and ids and timestamps may not give A away.
+ * Content written before that changed still reads "Anonymous". Student A has
+ * such legacy posts; student B then looks everywhere a student can look: the
+ * post, the thread, the feed, search, the hall screen feed and every function
+ * response. Nothing B receives may contain A's uid, name, email or class year.
  */
 let spaces: Record<string, string>;
 let a: Persona;
@@ -56,6 +58,11 @@ function assertNoTrace(label: string, value: unknown) {
   }
 }
 
+/** Turns a document into one written before anonymous posting was turned off. */
+async function makeLegacyAnonymous(path: string): Promise<void> {
+  await adminDb.doc(path).update({ authorDisplay: { mode: 'anonymous', anonLabel: 'Anonymous A' } });
+}
+
 beforeAll(async () => {
   await resetEmulators();
   spaces = await seedSpaces();
@@ -73,15 +80,14 @@ beforeAll(async () => {
     `’${String(A_YEAR).slice(-2)}`,
   ];
 
+  // Legacy content: written by A, then stored as anonymous, as it was before the change.
   thread = await post(a, spaces['middle-school']!, {
-    identityMode: 'anonymous',
     title: 'Quokka question about asking for help',
     body: 'I am new this year and do not know who to ask.',
   });
-  reply = await comment(a, thread.postId, {
-    identityMode: 'anonymous',
-    body: 'Adding a quokka detail to my own thread.',
-  });
+  await makeLegacyAnonymous(`posts/${thread.postId}`);
+  reply = await comment(a, thread.postId, { body: 'Adding a quokka detail to my own thread.' });
+  await makeLegacyAnonymous(`posts/${thread.postId}/comments/${reply.commentId}`);
   await comment(b, thread.postId, { body: 'A named reply from someone else.' });
   await waitFor(
     async () => (await adminDb.doc(`posts/${thread.postId}`).get()).data()!.commentCount,
@@ -91,7 +97,54 @@ beforeAll(async () => {
 });
 afterAll(closeAll);
 
-describe('what student B can fetch contains no trace of anonymous student A', () => {
+describe('anonymous posting is refused', () => {
+  it('createPost refuses identityMode "anonymous" and writes nothing', async () => {
+    await refill(a);
+    const before = (await adminDb.collection('posts').get()).size;
+    for (const kind of [
+      { kind: 'text', body: 'Trying to hide my name.' },
+      { kind: 'link', url: 'https://example.org/story' },
+      { kind: 'poll', options: ['Yes', 'No'] },
+    ]) {
+      const message = await expectError(
+        a.call('createPost', {
+          spaceId: spaces['clubs'],
+          identityMode: 'anonymous',
+          title: 'An attempt at an anonymous post',
+          ...kind,
+        }),
+        'invalid-argument',
+      );
+      expect(message).toMatch(/under your name/);
+    }
+    expect((await adminDb.collection('posts').get()).size).toBe(before);
+    const authorship = await adminDb.collection('authorship').get();
+    expect(authorship.docs.filter((d) => d.data().authorUid === a.uid)).toHaveLength(2);
+  });
+
+  it('createComment refuses identityMode "anonymous" and writes nothing', async () => {
+    await refill(a);
+    const message = await expectError(
+      a.call('createComment', {
+        postId: thread.postId,
+        parentId: null,
+        identityMode: 'anonymous',
+        body: 'An attempt at an anonymous comment.',
+      }),
+      'invalid-argument',
+    );
+    expect(message).toMatch(/under your name/);
+    const comments = await adminDb.collection(`posts/${thread.postId}/comments`).get();
+    expect(comments.size).toBe(2);
+  });
+
+  it('nothing new is written to the old per-thread letters', async () => {
+    await post(a, spaces['clubs']!, { title: 'A named post after the change' });
+    expect((await adminDb.collection('threadAnon').get()).size).toBe(0);
+  });
+});
+
+describe('legacy anonymous content: what student B can fetch contains no trace of A', () => {
   it('the post document', async () => {
     const snap = await getDoc(doc(b.db, `posts/${thread.postId}`));
     expect(snap.exists()).toBe(true);
@@ -110,9 +163,7 @@ describe('what student B can fetch contains no trace of anonymous student A', ()
     expect(snap.size).toBe(2);
     const mine = snap.docs.find((d) => d.id === reply.commentId)!;
     expect(mine.data().authorDisplay).toEqual({ mode: 'anonymous', anonLabel: 'Anonymous A' });
-    for (const d of snap.docs) {
-      if (d.id === reply.commentId) assertNoTrace('anonymous comment', { id: d.id, data: d.data() });
-    }
+    assertNoTrace('anonymous comment', { id: mine.id, data: mine.data() });
     // Nothing in the whole thread carries A's uid, even next to a named comment.
     expect(allStrings(snap.docs.map((d) => d.data())).join(' | ')).not.toContain(a.uid);
   });
@@ -197,6 +248,7 @@ describe('what student B can fetch contains no trace of anonymous student A', ()
   });
 
   it('every function response B can get about the thread', async () => {
+    await refill(b);
     const responses: Record<string, unknown> = {};
     responses.createComment = await b.call('createComment', {
       postId: thread.postId,
@@ -249,13 +301,10 @@ describe('what student B can fetch contains no trace of anonymous student A', ()
 });
 
 describe('the places that do know the author are closed to B', () => {
-  it('authorship, thread letters, votes and profiles cannot be read', async () => {
+  it('authorship, votes and profiles cannot be read', async () => {
     await expect(getDoc(doc(b.db, `authorship/${thread.contentKey}`))).rejects.toBeTruthy();
     await expect(getDoc(doc(b.db, `authorship/${reply.contentKey}`))).rejects.toBeTruthy();
     await expect(getDocs(collection(b.db, 'authorship'))).rejects.toBeTruthy();
-    await expect(getDoc(doc(b.db, `threadAnon/${thread.postId}`))).rejects.toBeTruthy();
-    await expect(getDoc(doc(b.db, `threadAnon/${thread.postId}/members/${a.uid}`))).rejects.toBeTruthy();
-    await expect(getDocs(collection(b.db, `threadAnon/${thread.postId}/members`))).rejects.toBeTruthy();
     await expect(getDoc(doc(b.db, `users/${a.uid}`))).rejects.toBeTruthy();
     await expect(
       getDocs(query(collection(b.db, 'users'), where('email', '==', A_EMAIL))),
@@ -267,54 +316,8 @@ describe('the places that do know the author are closed to B', () => {
   });
 });
 
-describe('ids and timestamps give no extra signal', () => {
-  it('document ids are random and unrelated to the author', async () => {
-    for (const id of [thread.postId, reply.commentId]) {
-      expect(id).toMatch(/^[A-Za-z0-9]{20}$/);
-      expect(id).not.toContain(a.uid.slice(0, 8));
-    }
-    // Ids do not sort in creation order, so they cannot be used to line up activity.
-    const ids: string[] = [];
-    for (let i = 0; i < 4; i++)
-      ids.push((await post(a, spaces['clubs']!, { title: `Ordering check number ${i}` })).postId);
-    expect([...ids].sort()).not.toEqual(ids);
-  });
-
-  it('the authorship record has exactly the content’s timestamp, no finer', async () => {
-    for (const [contentPath, key] of [
-      [`posts/${thread.postId}`, thread.contentKey],
-      [`posts/${thread.postId}/comments/${reply.commentId}`, reply.contentKey],
-    ] as const) {
-      const [content, authorship] = await Promise.all([
-        adminDb.doc(contentPath).get(),
-        adminDb.doc(`authorship/${key}`).get(),
-      ]);
-      expect(authorship.data()!.createdAt.isEqual(content.data()!.createdAt)).toBe(true);
-      expect(Object.keys(authorship.data()!).sort()).toEqual(['authorUid', 'contentKey', 'createdAt']);
-    }
-  });
-
-  it('an anonymous post and a named post have the same fields apart from the author display', async () => {
-    const named = await post(b, spaces['clubs']!, { title: 'A named post to compare shapes' });
-    const anon = await post(a, spaces['clubs']!, {
-      identityMode: 'anonymous',
-      title: 'An anonymous post to compare shapes',
-    });
-    const [n, an] = await Promise.all([
-      adminDb.doc(`posts/${named.postId}`).get(),
-      adminDb.doc(`posts/${anon.postId}`).get(),
-    ]);
-    expect(Object.keys(an.data()!).sort()).toEqual(Object.keys(n.data()!).sort());
-    expect(Object.keys(an.data()!.authorDisplay).sort()).toEqual(['anonLabel', 'mode']);
-  });
-
-  it('A’s profile timestamps are not readable by B, so activity cannot be timed against posts', async () => {
-    await expect(getDoc(doc(b.db, `users/${a.uid}`))).rejects.toBeTruthy();
-  });
-});
-
 describe('the administration can always see, and it is logged', () => {
-  it('reveals the anonymous author to an admin and writes the audit entry', async () => {
+  it('reveals the legacy anonymous author to an admin and writes the audit entry', async () => {
     const admin = await member('sample.admin@nobles.edu');
     const result = await admin.call<{ author: { email: string; displayName: string; classYear: number } }>(
       'revealAuthor',
@@ -334,8 +337,9 @@ describe('the administration can always see, and it is logged', () => {
       .where('action', '==', 'revealAuthor')
       .get();
     expect(audit.size).toBe(1);
-    // A can see their own anonymous posts in "my content".
-    const mine = await a.call<{ items: { contentKey: string }[] }>('listMyContent', {});
-    expect(mine.items.map((i) => i.contentKey)).toContain(thread.contentKey);
+    // A still sees their own legacy anonymous posts in "my content".
+    const mine = await a.call<{ items: { contentKey: string; identityMode: string }[] }>('listMyContent', {});
+    const item = mine.items.find((i) => i.contentKey === thread.contentKey);
+    expect(item?.identityMode).toBe('anonymous');
   });
 });

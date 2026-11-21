@@ -51,8 +51,8 @@ If the school would rather that student text never leaves its own project, set `
 
 ## Your choices
 
-- **Post under your name or anonymously, every time.** Anonymous hides your name from other students. The administration can always see who wrote every post and comment.
-- **Download your data** from the You page: your profile, everything you wrote (including anonymous posts), your marks and votes, and your reports.
+- **Everything you post goes up under your name** (first name and last initial, plus your class year if you are a student). There is no anonymous posting. Posts written anonymously before that change still read "Anonymous".
+- **Download your data** from the You page: your profile, everything you wrote (including any older anonymous posts), your marks and votes, and your reports.
 - **Delete your account** from the You page. What happens, exactly:
   - your profile and sign-in are removed;
   - posts and comments under your name stay, showing "Former member" in place of your name;

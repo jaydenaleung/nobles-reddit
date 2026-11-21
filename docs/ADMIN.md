@@ -25,7 +25,7 @@ For each item you see the text, never the author. Your options:
 
 - **Restore:** it was fine. It becomes visible.
 - **Hold:** hide it while you think or ask someone.
-- **Remove:** it breaks the ground rules. It disappears for everyone except moderators. The record of who wrote it is kept.
+- **Remove:** it goes against the community values. It disappears for everyone except moderators. The record of who wrote it is kept.
 - **Mark as dealt with:** close the item without changing the post.
 
 Every action goes into the audit log with your name and your note. Write a note: future you will want it.
@@ -61,7 +61,8 @@ The program misses things and flags things that are fine. It is a helper. People
 
 Only administrators can do this, and only on purpose.
 
-- On a thread or a comment, choose **Who wrote this?** Or go to Administration, Find an author, and paste a thread link.
+- New posts and comments already show the writer's name. Lookups are only needed for older content posted anonymously, before anonymous posting was turned off.
+- On such a thread or comment, choose **Who wrote this?** Or go to Administration, Who wrote it, and paste a thread link.
 - You must type a reason of at least ten characters.
 - You see the person's name, school email, class year and role, and a notice that **this view was logged**.
 
@@ -69,10 +70,10 @@ The log entry records your name, the time, what you looked at and your reason. I
 
 ### A suggested policy (for the school to decide)
 
-- Look up an author only for safety, or for serious or repeated breaking of the ground rules.
+- Look up an author only for safety, or for serious or repeated breaking of the community values.
 - Not for curiosity, not for disagreement, not because a post is critical of the school.
 - A second administrator reads the audit log every month.
-- Tell students that this is the policy. The About page already tells them that lookups are possible and logged.
+- Tell students that this is the policy, and that lookups are possible and logged.
 
 ## The audit log
 

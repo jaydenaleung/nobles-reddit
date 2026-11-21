@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { addComment, chooseIdentity, freshEmail, signIn, signOut, startThread } from './helpers';
+import { addComment, freshEmail, makeLegacyAnonymous, signIn, signOut, startThread } from './helpers';
 
 /**
  * The main flow, on the Firebase emulators, under the same
@@ -36,11 +36,11 @@ test.describe.serial('the main flow', () => {
   } as const;
   const stamp = Date.now().toString(36);
   const namedTitle = `A named thread about lunch ${stamp}`;
-  // A word that appears only in the anonymous thread, so search results hold that thread alone.
-  const anonWord = `quokka${stamp}`;
-  const anonTitle = `An anonymous thread about homework ${anonWord}`;
+  // A word that appears only in the second thread, so search results hold that thread alone.
+  const searchWord = `quokka${stamp}`;
+  const threadTitle = `A thread about homework ${searchWord}`;
   let namedId = '';
-  let anonId = '';
+  let threadId = '';
   let authorUid = '';
 
   test('sign in with the emulator Google account and onboard', async ({ page }) => {
@@ -51,26 +51,16 @@ test.describe.serial('the main flow', () => {
     authorUid = await uidFor(page, author.email);
   });
 
-  test('the composer never preselects Anonymous and always shows the administration notice', async ({
-    page,
-  }) => {
+  test('the composer posts under your name, with no anonymous option', async ({ page }) => {
     await signIn(page, author.email, author);
     await page.goto('/new');
-    const group = page.getByRole('radiogroup', { name: 'Post as' });
-    await expect(group.getByRole('radio')).toHaveCount(2);
-    for (const radio of await group.getByRole('radio').all()) await expect(radio).not.toBeChecked();
-    await expect(
-      page.getByText(
-        'Anonymous hides your name from other students. The administration can always see who wrote every post and comment.',
-      ),
-    ).toBeVisible();
-    // Posting without choosing is refused with a plain message.
+    await expect(page.getByText('Posting as')).toContainText('Zephyrine Q.');
+    await expect(page.getByRole('radiogroup', { name: 'Post as' })).toHaveCount(0);
+    await expect(page.locator('form.nb-composer')).not.toContainText('Anonymous');
+    // Posting without a title is refused with a plain message.
     await page.getByLabel('Space', { exact: true }).selectOption({ label: 'Clubs' });
-    await page.getByLabel('Title', { exact: true }).fill('A thread with no identity chosen');
     await page.getByRole('button', { name: 'Post', exact: true }).click();
-    await expect(
-      page.getByRole('alert').filter({ hasText: 'Pick your name or Anonymous' }).first(),
-    ).toBeVisible();
+    await expect(page.getByRole('alert').first()).toBeVisible();
     await expect(page).toHaveURL(/\/new$/);
   });
 
@@ -79,8 +69,6 @@ test.describe.serial('the main flow', () => {
     namedId = await startThread(page, {
       title: namedTitle,
       body: 'This is **bold**, this is *italic*, and this is a link: https://example.org/menu',
-      as: 'name',
-      firstName: author.firstName,
     });
     const card = page.locator('.th-card').first();
     await expect(card.getByText('Zephyrine Q.')).toBeVisible();
@@ -93,23 +81,21 @@ test.describe.serial('the main flow', () => {
     await expect(link).toHaveAttribute('target', '_blank');
   });
 
-  test('post anonymously, comment and vote', async ({ page }) => {
+  test('start a thread, comment and vote', async ({ page }) => {
     await signIn(page, author.email, author);
-    anonId = await startThread(page, {
+    threadId = await startThread(page, {
       space: 'Middle school',
-      title: anonTitle,
+      title: threadTitle,
       body: 'I am new this year and do not know who to ask.',
-      as: 'anonymous',
-      firstName: author.firstName,
     });
     const card = page.locator('.th-card').first();
-    await expect(card.getByText('Anonymous A')).toBeVisible();
-    await expect(card).not.toContainText('Zephyrine');
+    await expect(card.getByText('Zephyrine Q.')).toBeVisible();
+    await expect(card).not.toContainText('Anonymous');
 
-    await addComment(page, 'An anonymous follow-up from the same person.', 'anonymous', author.firstName);
+    await addComment(page, 'A follow-up from the same person.');
     const comment = page.locator('.th-comments .nb-comment').first();
-    await expect(comment.getByText('Anonymous A')).toBeVisible();
-    await expect(comment).not.toContainText('Zephyrine');
+    await expect(comment.getByText('Zephyrine Q.')).toBeVisible();
+    await expect(comment).not.toContainText('Anonymous');
     await expect(page.getByRole('heading', { name: '1 comment' })).toBeVisible();
 
     // Thoughtful: the count moves at once (optimistic) and is still there after a reload.
@@ -134,9 +120,9 @@ test.describe.serial('the main flow', () => {
         .first()
         .getByRole('button', { name: /Thoughtful/ }),
     ).toContainText('Thoughtful 1');
-    // The author can find their own anonymous post under You.
+    // The author can find their own post under You.
     await page.goto('/me');
-    await expect(page.getByRole('link', { name: anonTitle })).toBeVisible();
+    await expect(page.getByRole('link', { name: threadTitle })).toBeVisible();
   });
 
   test('text that looks like HTML is shown as text and never runs', async ({ page }) => {
@@ -145,8 +131,6 @@ test.describe.serial('the main flow', () => {
     await startThread(page, {
       title,
       body: '<script>window.__xss = 2</script> <b>not bold</b>',
-      as: 'name',
-      firstName: author.firstName,
     });
     await expect(page.getByRole('heading', { level: 1 })).toContainText('<img src=x onerror=');
     await expect(page.locator('.th-body')).toContainText('<script>window.__xss = 2</script>');
@@ -154,18 +138,17 @@ test.describe.serial('the main flow', () => {
     expect(await page.evaluate(() => (window as unknown as { __xss?: number }).__xss)).toBeUndefined();
   });
 
-  test('another student sees the anonymous thread with no trace of who wrote it', async ({ page }) => {
+  test('another student finds the thread, sees who wrote it and never sees a uid', async ({ page }) => {
     await signIn(page, reader.email, reader);
-    const secrets = [authorUid, 'Zephyrine', author.email, 'e2e.author', '2031', '’31'];
     const check = async (label: string) => {
       const html = await page.content();
-      for (const secret of secrets) {
-        expect(html.includes(secret), `${label} must not contain "${secret}"`).toBe(false);
-      }
+      expect(html.includes(authorUid), `${label} must not contain the author's uid`).toBe(false);
+      expect(html.includes(author.email), `${label} must not contain the author's email`).toBe(false);
     };
 
-    await page.goto(`/t/${anonId}`);
-    await expect(page.getByRole('heading', { level: 1, name: anonTitle })).toBeVisible();
+    await page.goto(`/t/${threadId}`);
+    await expect(page.getByRole('heading', { level: 1, name: threadTitle })).toBeVisible();
+    await expect(page.locator('.th-card').first().getByText('Zephyrine Q.')).toBeVisible();
     await expect(page.locator('.th-comments .nb-comment').first()).toBeVisible();
     await check('the thread');
     // No edit, delete or "who wrote this" for another student.
@@ -173,19 +156,19 @@ test.describe.serial('the main flow', () => {
     await expect(page.getByRole('button', { name: 'Delete' })).toHaveCount(0);
 
     await page.goto('/s/middle-school?sort=new');
-    await expect(page.getByRole('link', { name: anonTitle })).toBeVisible();
+    await expect(page.getByRole('link', { name: threadTitle })).toBeVisible();
     await check('the feed');
 
-    await page.goto(`/search?q=${anonWord}`);
-    await expect(page.getByRole('link', { name: anonTitle })).toBeVisible();
+    await page.goto(`/search?q=${searchWord}`);
+    await expect(page.getByRole('link', { name: threadTitle })).toBeVisible();
     await check('search results');
     // Searching for the author finds nothing: authors are never indexed.
     await page.goto('/search?q=Zephyrine');
     await expect(page.getByText('No threads match that')).toBeVisible();
 
     // The reader can reply, and report, without learning anything.
-    await page.goto(`/t/${anonId}`);
-    await addComment(page, 'A named reply from someone else.', 'name', reader.firstName);
+    await page.goto(`/t/${threadId}`);
+    await addComment(page, 'A named reply from someone else.');
     await page.locator('.th-card').first().getByRole('button', { name: 'Report' }).click();
     const dialog = page.getByRole('dialog', { name: 'Report' });
     await dialog.getByLabel('Spam or off topic').check();
@@ -194,7 +177,7 @@ test.describe.serial('the main flow', () => {
     await check('the thread after replying and reporting');
   });
 
-  test('a moderator can hold the thread but cannot see the author', async ({ page }) => {
+  test('a moderator can hold the thread but cannot look up the author', async ({ page }) => {
     await signIn(page, 'sample.moderator@nobles.edu', {
       firstName: 'Sample',
       lastInitial: 'M',
@@ -203,12 +186,11 @@ test.describe.serial('the main flow', () => {
     await page.goto('/mod');
     await expect(page.getByRole('heading', { level: 1, name: 'Moderation' })).toBeVisible();
     // The report from the last test is in the queue, with the text and no author.
-    const item = page.locator('.q-item').filter({ hasText: anonTitle });
+    const item = page.locator('.q-item').filter({ hasText: threadTitle });
     await expect(item).toBeVisible();
-    await expect(page.locator('#main')).not.toContainText('Zephyrine');
     expect((await page.content()).includes(authorUid)).toBe(false);
 
-    await page.goto(`/t/${anonId}`);
+    await page.goto(`/t/${threadId}`);
     await expect(page.getByRole('button', { name: 'Who wrote this?' })).toHaveCount(0);
     await page.locator('.th-card').first().getByRole('button', { name: 'Moderate' }).click();
     const dialog = page.getByRole('dialog', { name: 'Moderate this thread' });
@@ -223,19 +205,24 @@ test.describe.serial('the main flow', () => {
 
   test('a held thread is not available to students', async ({ page }) => {
     await signIn(page, reader.email, reader);
-    await page.goto(`/t/${anonId}`);
+    await page.goto(`/t/${threadId}`);
     await expect(page.getByRole('heading', { name: 'This thread isn’t available' })).toBeVisible();
     await page.goto('/mod');
     await expect(page).toHaveURL(/\/$/);
   });
 
-  test('an admin reveals the author with a reason, and the audit log records it', async ({ page }) => {
+  test('an admin reveals the author of a legacy anonymous thread, and the audit log records it', async ({
+    page,
+  }) => {
+    // Only threads from before anonymous posting was turned off can be anonymous.
+    await makeLegacyAnonymous(page, threadId);
     await signIn(page, 'sample.admin@nobles.edu', {
       firstName: 'Sample',
       lastInitial: 'A',
       classYear: 'faculty',
     });
-    await page.goto(`/t/${anonId}`);
+    await page.goto(`/t/${threadId}`);
+    await expect(page.locator('.th-card').first()).toContainText('Anonymous');
     await page.locator('.th-card').first().getByRole('button', { name: 'Who wrote this?' }).click();
     const dialog = page.getByRole('dialog', { name: 'Who wrote this?' });
 
@@ -269,11 +256,36 @@ test.describe.serial('the main flow', () => {
     );
   });
 
+  test('another student sees the legacy anonymous thread with no trace of who wrote it', async ({ page }) => {
+    await signIn(page, reader.email, reader);
+    const secrets = [authorUid, 'Zephyrine', author.email, 'e2e.author', '2031', '’31'];
+    const check = async (label: string) => {
+      const html = await page.content();
+      for (const secret of secrets) {
+        expect(html.includes(secret), `${label} must not contain "${secret}"`).toBe(false);
+      }
+    };
+    await page.goto(`/t/${threadId}`);
+    await expect(page.getByRole('heading', { level: 1, name: threadTitle })).toBeVisible();
+    // The author's own comment is still named; the thread itself reads "Anonymous".
+    const card = page.locator('.th-card').first();
+    await expect(card).toContainText('Anonymous');
+    await expect(card).not.toContainText('Zephyrine');
+    await expect(page.getByRole('button', { name: 'Who wrote this?' })).toHaveCount(0);
+
+    await page.goto('/s/middle-school?sort=new');
+    await expect(page.getByRole('link', { name: threadTitle })).toBeVisible();
+    await check('the feed');
+
+    await page.goto(`/search?q=${searchWord}`);
+    await expect(page.getByRole('link', { name: threadTitle })).toBeVisible();
+    await check('search results');
+  });
+
   test('a post about self-harm is not published and the author gets a caring message', async ({ page }) => {
     await signIn(page, reader.email, reader);
     await page.goto('/new');
     await page.getByLabel('Space', { exact: true }).selectOption({ label: 'Clubs' });
-    await chooseIdentity(page, 'Post as', 'Anonymous');
     await page.getByLabel('Title', { exact: true }).fill(`Something I need to say ${stamp}`);
     await page.getByLabel('Text', { exact: true }).fill('Some days I want to hurt myself.');
     await page.getByRole('button', { name: 'Post', exact: true }).click();
@@ -314,12 +326,23 @@ test.describe('pages that need no sign-in', () => {
     await expect(page.getByRole('button', { name: /Sign in/ })).toHaveCount(0);
   });
 
-  test('the about page explains anonymous posts', async ({ page }) => {
-    await page.goto('/about');
-    for (const step of ['You pick', 'Students see “Anonymous”', 'The school can see it’s you']) {
-      await expect(page.getByRole('heading', { name: step })).toBeVisible();
+  test('the values page shows the mission, core values and commitment', async ({ page }) => {
+    await page.goto('/values');
+    await expect(page.getByRole('heading', { level: 1, name: 'Nobles Community Values' })).toBeVisible();
+    for (const section of [
+      'Mission',
+      'Core values',
+      'Commitment to Diversity, Equity, and Inclusion',
+      'A few tips',
+    ]) {
+      await expect(page.getByRole('heading', { name: section })).toBeVisible();
     }
-    await expect(page.getByRole('heading', { name: 'What anonymous can’t hide' })).toBeVisible();
+  });
+
+  test('the old about page redirects to the values page', async ({ page }) => {
+    await page.goto('/about');
+    await expect(page).toHaveURL(/\/values$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Nobles Community Values' })).toBeVisible();
   });
 
   test('an account from another domain is signed out with a kind message', async ({ page }) => {
@@ -339,7 +362,7 @@ test.describe('pages that need no sign-in', () => {
 
   test('Night follows the device setting and the choice is remembered', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
-    await page.goto('/about');
+    await page.goto('/values');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'night');
     const dark = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
     expect(dark).toBe('rgb(0, 19, 61)');
@@ -356,7 +379,7 @@ test.describe('pages that need no sign-in', () => {
     const errors: string[] = [];
     page.on('console', (message) => message.type() === 'error' && errors.push(message.text()));
     page.on('pageerror', (error) => errors.push(String(error)));
-    const response = await page.goto('/about');
+    const response = await page.goto('/values');
     const csp = response!.headers()['content-security-policy'] ?? '';
     expect(csp).toContain("default-src 'self'");
     expect(csp).toContain("frame-ancestors 'none'");

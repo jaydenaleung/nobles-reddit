@@ -1,4 +1,4 @@
-# Deploying Nobles Commons
+# Deploying Neddit
 
 Nothing has been deployed yet. This is the checklist for the first time, and the routine for every time after.
 

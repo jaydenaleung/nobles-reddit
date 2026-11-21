@@ -35,7 +35,7 @@ async function shoot(page: Page, name: string, route: string) {
 
 test('public pages', async ({ page }) => {
   await shoot(page, 'sign-in', '/sign-in');
-  await shoot(page, 'about', '/about');
+  await shoot(page, 'values', '/values');
 });
 
 test('the hall screen at 1920x1080', async ({ page }) => {
