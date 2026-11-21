@@ -44,7 +44,7 @@ The brief said: when something is not specified, pick the default given or the m
 | Top-level comments are depth 0 and replies go to depth 4 | "Max depth 4" was ambiguous; this allows four levels of reply | `packages/shared/src/constants.ts` |
 | Editing re-runs the automatic check, and the post is hidden for those seconds | Otherwise an edit would be a way round the check | `functions/src/content.ts` |
 | Poll options and links cannot be edited after posting | Changing a poll after people voted would be unfair | |
-| You can mark your own post "Thoughtful" | Not specified; simplest | |
+| You can upvote your own post | Not specified; simplest | |
 | "Save" keeps a thread on this device only. "Share" copies the link | They are in the reference design but not in the data model; nothing new is collected | `apps/web/src/lib/storage.ts` |
 | Deleting an account keeps a small record (name, school email) next to the authorship record | Without it, "the administration can always see who wrote it" would stop being true for remaining posts. The page says so first | `functions/src/users.ts` |
 | Moderators can read reports, which include the reporter's internal id but not their name | The brief's data model. Moderators cannot read profiles, so the id tells them nothing. **Worth a second look** | `firestore.rules` |

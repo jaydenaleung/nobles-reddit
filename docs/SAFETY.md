@@ -52,8 +52,8 @@ The alert email needs a mail service to be connected before it is delivered. Unt
 - **School accounts only.** Sign-in is Google, limited to the school's email domain, checked on the server.
 - **Text is text.** Posts cannot contain HTML or scripts. Links must be https, open in a new tab and are never fetched by the server.
 - **No images or uploads** in this version.
-- **Rate limits:** 5 threads, 40 comments, 200 "Thoughtful" marks and 10 reports per person per hour.
-- **No downvotes and no negative scores.** The only reaction is "Thoughtful".
+- **Rate limits:** 5 threads, 40 comments, 200 upvotes and 10 reports per person per hour.
+- **No downvotes and no negative scores.** The only reaction is an upvote.
 - **Editing** is possible for 10 minutes; edited text is checked again.
 - **The hall screen** shows only replies a moderator chose for it.
 - **Computer-written text is always labelled** ("Summary. Written by a computer model, not a person."), and the model is never told who wrote anything.

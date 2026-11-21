@@ -61,7 +61,7 @@ More screenshots, at phone, tablet and desktop sizes, are in [`docs/screens`](do
 
 - Start a thread in a space as text, a link or a poll (2 to 6 options), and comment or reply up to four levels deep.
 - Post and comment under their own name (first name and last initial). The composer says who you are posting as.
-- Mark posts and comments "Thoughtful". It is the only reaction: there are no downvotes and no negative scores.
+- Upvote posts and comments. It is the only reaction: there are no downvotes and no negative scores.
 - Vote in polls, and change their vote.
 - Sort the feed by Hot, New, Top this week or No replies, and search by the words in a thread.
 - Use a small amount of formatting: paragraphs, *italic*, **bold** and https links. Anything that looks like HTML is shown as plain text.

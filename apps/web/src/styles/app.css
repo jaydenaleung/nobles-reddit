@@ -1579,33 +1579,6 @@ dialog.dlg::backdrop {
 }
 
 /* Styleguide (development only) */
-.sg-logos {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: var(--space-4);
-}
-.sg-logos figure {
-  margin: 0;
-  display: grid;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--surface-raised);
-}
-.sg-logos__bar {
-  position: static;
-}
-.sg-logos__big {
-  display: grid;
-  place-items: center;
-  padding: var(--space-5);
-}
-.sg-logos figcaption {
-  padding: var(--space-2) var(--space-3);
-  border-top: 1px solid var(--rule);
-  font: 600 13px/18px var(--font-sans);
-  color: var(--ink-muted);
-}
 .sg {
   display: grid;
   gap: var(--space-6);

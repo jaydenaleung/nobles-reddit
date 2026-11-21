@@ -233,7 +233,7 @@ export function useSearch(text: string) {
   return { posts, load, tokens, patch };
 }
 
-/* ---------- My own marks ("Thoughtful") and poll votes ---------- */
+/* ---------- My own upvotes and poll votes ---------- */
 
 export interface MyVotes {
   thoughtful: Set<string>;

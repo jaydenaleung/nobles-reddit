@@ -82,7 +82,7 @@ All ids are Firestore auto ids. All timestamps are server timestamps. Types live
 | `posts/{id}/comments/{id}` | A comment: parent, depth, body, `authorDisplay`, status | Same as posts |
 | `authorship/{contentKey}` | Who wrote a post or comment | **Nobody** |
 | `threadAnon/{postId}/members/{uid}` | Which anonymous letter a person had in a thread. No longer written; kept for older content | **Nobody** |
-| `votes/...`, `pollVotes/...` | One "Thoughtful" or poll vote per person per item | Only the person who cast it |
+| `votes/...`, `pollVotes/...` | One upvote or poll vote per person per item | Only the person who cast it |
 | `reports/{id}` | A report: content, reason, note, reporter | Moderators and administrators |
 | `moderationQueue/{id}` | Things waiting for a moderator: reason, labels, a text snapshot | Moderators and administrators |
 | `auditLog/{id}` | Every moderation action, role change and author lookup. Append-only | Administrators |

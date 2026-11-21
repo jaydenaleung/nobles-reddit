@@ -247,10 +247,10 @@ export default function Thread() {
   const canEdit = (contentKey: string, createdMs: number) =>
     mine.keys.has(contentKey) && now - createdMs < EDIT_WINDOW_MS;
 
-  const thoughtfulLabel = (contentKey: string, count: number) => {
-    const shown = Math.max(0, count + (countDelta[contentKey] ?? 0));
-    return `Thoughtful ${shown}`;
-  };
+  const upvoteCount = (contentKey: string, count: number) =>
+    Math.max(0, count + (countDelta[contentKey] ?? 0));
+  const upvoteLabel = (contentKey: string, count: number) =>
+    `${votes.thoughtful.has(contentKey) ? 'Upvoted, press again to undo' : 'Upvote'}. ${upvoteCount(contentKey, count)} so far`;
 
   const pendingDisplay = (_mode: PendingComment['mode']): AuthorDisplay =>
     buildAuthorDisplay(member.profile, 'named', 0);
@@ -328,8 +328,13 @@ export default function Thread() {
           )}
           <div className="nb-comment__actions">
             {!hidden && (
-              <button type="button" aria-pressed={votes.thoughtful.has(key)} onClick={() => void toggle(key)}>
-                <Icon name="up" /> {thoughtfulLabel(key, c.thoughtfulCount)}
+              <button
+                type="button"
+                aria-pressed={votes.thoughtful.has(key)}
+                aria-label={upvoteLabel(key, c.thoughtfulCount)}
+                onClick={() => void toggle(key)}
+              >
+                <Icon name="up" /> {upvoteCount(key, c.thoughtfulCount)}
               </button>
             )}
             {!hidden && c.depth < LIMITS.maxDepth && (
@@ -508,9 +513,10 @@ export default function Thread() {
                 className="nb-btn nb-btn--sm th-vote"
                 type="button"
                 aria-pressed={votes.thoughtful.has(pKey)}
+                aria-label={upvoteLabel(pKey, post.thoughtfulCount)}
                 onClick={() => void toggle(pKey)}
               >
-                <Icon name="up" /> {thoughtfulLabel(pKey, post.thoughtfulCount)}
+                <Icon name="up" /> {upvoteCount(pKey, post.thoughtfulCount)}
               </button>
             )}
             {post.status === 'visible' && (

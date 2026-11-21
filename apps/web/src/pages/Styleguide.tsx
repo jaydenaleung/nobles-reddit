@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { CORE_VALUES, HOT_EPOCH_SECONDS, type AuthorDisplay } from '@commons/shared';
 import { Icon, IconSprite, type IconName } from '../components/Icon';
 import { Avatar, Byline, Wordmark } from '../components/Identity';
-import { LOGO_MARKS, LogoMarkSvg } from '../components/Logo';
+import { LogoMarkSvg } from '../components/Logo';
 import { PostRow, SummaryBox, type PostView } from '../components/Post';
 import { SafeText } from '../components/SafeText';
 
@@ -168,22 +168,11 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
         ))}
       </div>
 
-      <h3 className="sg-h">Logo concepts</h3>
-      <div className="sg-logos">
-        {LOGO_MARKS.map((mark) => (
-          <figure key={mark}>
-            <div className="nb-top sg-logos__bar">
-              <span className="nb-wordmark">
-                <LogoMarkSvg mark={mark} />
-                <span>Neddit</span>
-              </span>
-            </div>
-            <div className="sg-logos__big">
-              <LogoMarkSvg mark={mark} size={96} />
-            </div>
-            <figcaption>{mark}</figcaption>
-          </figure>
-        ))}
+      <h3 className="sg-h">Logo</h3>
+      <div className="row">
+        <LogoMarkSvg size={96} />
+        <LogoMarkSvg size={48} />
+        <LogoMarkSvg size={24} />
       </div>
 
       <h3 className="sg-h">Type</h3>
@@ -298,7 +287,7 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
           />
           <div className="nb-comment__actions">
             <button type="button" aria-pressed="false">
-              <Icon name="up" /> Thoughtful 18
+              <Icon name="up" /> 18
             </button>
             <button type="button">
               <Icon name="comment" /> Reply

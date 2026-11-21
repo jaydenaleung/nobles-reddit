@@ -13,7 +13,7 @@
 | Which part of the school (optional) | You tell us | You and administrators |
 | What you write | You | Other members, as you chose to sign it. Moderators see hidden posts too |
 | Who wrote each post and comment | Recorded automatically | **Administrators only**, through a logged lookup with a reason |
-| Your "Thoughtful" marks and poll votes | You | Only you. Others see totals |
+| Your upvotes and poll votes | You | Only you. Others see totals |
 | Reports you make | You | Moderators and administrators |
 | When you last signed in | Recorded automatically | You and administrators |
 

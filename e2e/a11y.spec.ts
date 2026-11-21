@@ -151,7 +151,7 @@ test('everything can be reached with the keyboard', async ({ page, isMobile }) =
   await expect(skip).toBeFocused();
   await expect(skip).toBeInViewport();
   // A focused control shows a 2px outline.
-  const vote = page.getByRole('button', { name: 'Mark thoughtful' }).first();
+  const vote = page.getByRole('button', { name: 'Upvote' }).first();
   await vote.focus();
   await page.keyboard.press('Tab');
   await page.keyboard.press('Shift+Tab');

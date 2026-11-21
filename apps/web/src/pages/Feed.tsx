@@ -68,7 +68,7 @@ export function ThreadList({
   );
 }
 
-/** Optimistic "Thoughtful" on a feed row: the count moves at once and rolls back if the server says no. */
+/** Optimistic upvote on a feed row: the count moves at once and rolls back if the server says no. */
 export function useFeedVoting(
   uid: string,
   posts: PostView[],
