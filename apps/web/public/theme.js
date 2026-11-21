@@ -14,4 +14,13 @@
     /* storage can be blocked; Paper is fine */
   }
   document.documentElement.setAttribute('data-theme', theme);
+
+  // Classic is the default look; the redesign is opt-in from the You page.
+  var design = 'classic';
+  try {
+    if (window.localStorage.getItem('commons.design') === 'modern') design = 'modern';
+  } catch {
+    /* storage can be blocked; Classic is fine */
+  }
+  document.documentElement.setAttribute('data-design', design);
 })();

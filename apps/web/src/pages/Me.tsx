@@ -6,6 +6,7 @@ import { useAuth, useMember } from '../auth/AuthContext';
 import { Page } from '../components/Layout';
 import { Dialog, Empty, ErrorState, Loading, downloadJson, useToast } from '../components/Ui';
 import { useMine, useSpaces } from '../data/hooks';
+import { applyDesign, useDesign, type Design } from '../lib/design';
 import { applyTheme, savedThreads, themeChoice, type ThemeChoice } from '../lib/storage';
 
 const STATUS_WORDS = {
@@ -21,6 +22,7 @@ export default function Me() {
   const toast = useToast();
   const navigate = useNavigate();
   const [theme, setTheme] = useState<ThemeChoice>(() => themeChoice());
+  const design = useDesign();
   const [exporting, setExporting] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [typed, setTyped] = useState('');
@@ -120,6 +122,29 @@ export default function Me() {
                   name="theme"
                   checked={theme === value}
                   onChange={() => chooseTheme(value)}
+                />
+                {label}
+              </label>
+            ))}
+          </fieldset>
+        </section>
+
+        <section className="panel" aria-labelledby="me-design">
+          <h2 id="me-design">Design</h2>
+          <fieldset className="radio-list">
+            <legend>Design</legend>
+            {(
+              [
+                ['classic', 'Classic'],
+                ['modern', 'Modern'],
+              ] as [Design, string][]
+            ).map(([value, label]) => (
+              <label key={value}>
+                <input
+                  type="radio"
+                  name="design"
+                  checked={design === value}
+                  onChange={() => applyDesign(value)}
                 />
                 {label}
               </label>

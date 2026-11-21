@@ -3,6 +3,7 @@ import { useState, type FormEvent, type ReactNode } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { useSpaces } from '../data/hooks';
+import { useDesign } from '../lib/design';
 import { Icon, IconSprite } from './Icon';
 import { Wordmark } from './Identity';
 
@@ -76,6 +77,7 @@ export function SpaceNav() {
   const { spaces } = useSpaces();
   const { state } = useAuth();
   const { pathname } = useLocation();
+  const design = useDesign();
   const total = spaces.reduce((sum, space) => sum + (space.postCount ?? 0), 0);
   const mod = state.status === 'member' && isModeratorRole(state.role);
   const admin = state.status === 'member' && state.role === 'admin';
@@ -86,7 +88,7 @@ export function SpaceNav() {
         <ul className="nb-spaces">
           <li>
             <Link to="/" aria-current={pathname === '/' ? 'page' : undefined}>
-              <span>My feed</span>
+              <span>{design === 'modern' ? 'My feed' : 'Front page'}</span>
               <span>{total}</span>
             </Link>
           </li>

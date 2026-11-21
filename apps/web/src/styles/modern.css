@@ -1,0 +1,419 @@
+/*
+ * The "modern" design. Everything here applies only when <html data-design="modern">.
+ * The classic design is the plain tokens.css / components.css / app.css, untouched.
+ * Picked in Settings (You page); see lib/design.ts.
+ */
+
+/* Colours: neutral grays, #0E1D40 header, bright blue links, Nobles-blue upvotes */
+html[data-design='modern']:not([data-theme]),
+html[data-design='modern'][data-theme='paper'] {
+  --surface: #f5f5f5;
+  --surface-raised: #ffffff;
+  --surface-sunken: #f0f0f0;
+  --ink: #171717;
+  --ink-muted: #5e5e5e;
+  --rule: #e5e5e5;
+  --border-strong: #8c8c8c;
+  --border-soft: #d0d0d0;
+  --masthead: #0e1d40;
+  --on-masthead: #ffffff;
+  --brand: #1f55c9;
+  --on-brand: #ffffff;
+  --vote: #0b2d63;
+  --on-vote: #ffffff;
+  --sky: #e9effb;
+  --on-sky: #123a8f;
+  --signal: #c2342b;
+  --orange: #f87c56;
+  --on-orange: #001f5f;
+  --gold: #0e1d40;
+  --on-gold: #ffffff;
+  --staff: #123a8f;
+  --staff-tint: #e9effb;
+  --kind: #006b35;
+  --kind-tint: #ddf1e3;
+  --anon: #5e5e5e;
+  --anon-tint: #ebebeb;
+  --auto-tint: #e9effb;
+  --focus: #0b2d63;
+  --shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.08);
+  --shadow-pop: 0 12px 28px -12px rgba(0, 0, 0, 0.3);
+}
+html[data-design='modern'][data-theme='night'] {
+  --surface: #0d0d0d;
+  --surface-raised: #161616;
+  --surface-sunken: #101010;
+  --ink: #ededed;
+  --ink-muted: #aaaaaa;
+  --rule: #2a2a2a;
+  --border-strong: #8a8a8a;
+  --border-soft: #3a3a3a;
+  --masthead: #091330;
+  --on-masthead: #ffffff;
+  --brand: #82a8ff;
+  --on-brand: #0b1530;
+  --vote: #93b1e8;
+  --on-vote: #0b1a38;
+  --sky: #1a2742;
+  --on-sky: #bcd0ff;
+  --signal: #ff7a70;
+  --orange: #f87c56;
+  --on-orange: #001f5f;
+  --gold: #1a2742;
+  --on-gold: #bcd0ff;
+  --staff: #bcd0ff;
+  --staff-tint: #1a2742;
+  --kind: #4fd686;
+  --kind-tint: #004636;
+  --anon: #aaaaaa;
+  --anon-tint: #262626;
+  --auto-tint: #1a2742;
+  --focus: #82a8ff;
+  --shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-pop: 0 12px 28px -12px rgba(0, 0, 0, 0.85);
+}
+
+/* Shape and type */
+html[data-design='modern'] {
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --font-read: 'Inter', Helvetica, Arial, sans-serif;
+  --doodle-alpha: 0;
+  --logo-bubble: #e9effb;
+  --logo-n: #123a8f;
+}
+html[data-design='modern'][data-theme='night'] {
+  --doodle-alpha: 0;
+}
+
+/* Components that v2 changed in place */
+html[data-design='modern'][data-theme='night'] .nb-top .nb-btn--primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--on-brand);
+}
+html[data-design='modern'] .nb-feed {
+  border-radius: var(--radius-lg);
+}
+html[data-design='modern'] .nb-post--card {
+  border-radius: var(--radius-lg);
+}
+html[data-design='modern'] .nb-vote {
+  border-radius: var(--radius-md);
+}
+html[data-design='modern'] .nb-vote[aria-pressed='true'] {
+  background: var(--vote);
+  border-color: var(--vote);
+  color: var(--on-vote);
+}
+html[data-design='modern'] .th-vote[aria-pressed='true'] {
+  background: var(--vote);
+  border-color: var(--vote);
+  color: var(--on-vote);
+}
+html[data-design='modern'] .nb-post__pin {
+  color: var(--ink-muted);
+}
+html[data-design='modern'] .nb-spaces a {
+  border-radius: var(--radius-md);
+  font-weight: 500;
+}
+html[data-design='modern'] .nb-box {
+  border-radius: var(--radius-lg);
+}
+html[data-design='modern'] .nb-input,
+html[data-design='modern'] .nb-textarea,
+html[data-design='modern'] .nb-select {
+  border-radius: var(--radius-md);
+}
+html[data-design='modern'] .meter {
+  border-radius: var(--radius-sm);
+}
+@media (max-width: 899px) {
+  html[data-design='modern'] .nb-feed > .nb-post,
+  html[data-design='modern'] .nb-feed > .nb-post:first-child {
+    border-radius: var(--radius-lg);
+  }
+}
+
+/* ---------- Look from the HTML mockup: sidebar, composer, sort row, feed rows ---------- */
+
+/* Sidebar: small caps headings, black links, soft selected row */
+html[data-design='modern'] .nb .fp-side h4,
+html[data-design='modern'] .nb .fp-side .fp-side__h {
+  font: 600 11.5px/16px var(--font-sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+html[data-design='modern'] .nb .nb-spaces a {
+  color: var(--ink);
+  padding: 7px 10px;
+}
+html[data-design='modern'] .nb .nb-spaces a[aria-current='page'] {
+  color: var(--on-sky);
+  font-weight: 600;
+}
+html[data-design='modern'] .nb .nb-spaces a[aria-current='page'] span:last-child {
+  color: var(--on-sky);
+}
+
+/* Composer */
+html[data-design='modern'] .fp-start {
+  padding: 12px 14px;
+  gap: 12px;
+  border-radius: var(--radius-lg);
+}
+html[data-design='modern'] .fp-start .in {
+  height: 40px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  font: 400 15px/22px var(--font-sans);
+}
+html[data-design='modern'] .nb .fp-start .nb-btn {
+  border-width: 1px;
+  border-color: var(--border-soft);
+}
+
+/* Badges */
+html[data-design='modern'] .nb-badge {
+  height: 18px;
+  padding: 0 7px;
+  gap: 4px;
+  border-radius: 5px;
+  font-size: 11.5px;
+}
+html[data-design='modern'] .nb-badge--staff {
+  background: var(--staff-tint);
+  color: var(--staff);
+}
+html[data-design='modern'] .nb-badge--admin {
+  background: var(--gold);
+  color: var(--on-gold);
+}
+html[data-design='modern'] .nb-qotd {
+  padding: 0 7px;
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1px var(--border-soft);
+  font-weight: 500;
+  line-height: 18px;
+}
+
+/* Sort row: pills, no card */
+html[data-design='modern'] .nb-sort {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 4px 0 0;
+  gap: 4px;
+}
+html[data-design='modern'] .nb .nb-sort a {
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  color: var(--ink-muted);
+  text-decoration: none;
+}
+html[data-design='modern'] .nb .nb-sort a[aria-current='true'] {
+  background: var(--surface-raised);
+  border-color: var(--border-soft);
+  color: var(--ink);
+  text-decoration: none;
+}
+html[data-design='modern'] .nb-sort .end {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+/* Feed rows */
+html[data-design='modern'] .nb-vote {
+  border: 1px solid var(--border-soft);
+  color: var(--ink-muted);
+}
+html[data-design='modern'] .nb-vote[aria-pressed='true'] {
+  color: var(--on-vote);
+}
+html[data-design='modern'] .nb-vote[aria-pressed='true'] + span {
+  color: var(--vote);
+}
+@media (min-width: 900px) {
+  html[data-design='modern'] .nb-post {
+    grid-template-columns: 60px 1fr;
+  }
+  html[data-design='modern'] .nb-votes {
+    gap: 4px;
+    background: transparent;
+    padding: 14px 0 0 8px;
+  }
+  html[data-design='modern'] .nb-votes > span {
+    line-height: 19px;
+  }
+  html[data-design='modern'] .nb-vote .nb-icon {
+    width: 14px;
+    height: 14px;
+  }
+  html[data-design='modern'] .nb-vote {
+    width: 28px;
+    height: 28px;
+  }
+  html[data-design='modern'] .nb-post > div:last-child {
+    padding: 14px 18px 10px 6px;
+  }
+}
+html[data-design='modern'] .nb-post__top {
+  column-gap: 8px;
+  font-size: 12.5px;
+}
+html[data-design='modern'] .nb-post__top .nb-space {
+  font: 600 12.5px/16px var(--font-sans);
+}
+html[data-design='modern'] .nb-post__top b::before,
+html[data-design='modern'] .nb-post__top > span:last-child::before {
+  content: '·';
+  margin-right: 8px;
+  font-weight: 400;
+  color: var(--ink-muted);
+}
+html[data-design='modern'] .nb .nb-post__title {
+  margin: 5px 0 4px;
+  font: 600 19px/1.3 var(--font-serif);
+  letter-spacing: -0.005em;
+}
+html[data-design='modern'] .nb .nb-post__title a {
+  color: var(--ink);
+}
+html[data-design='modern'] .nb .nb-post--read .nb-post__title a {
+  color: var(--ink-muted);
+}
+html[data-design='modern'] .nb-post__excerpt {
+  margin: 0 0 6px;
+  max-width: 760px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 400 14px/21px var(--font-sans);
+}
+html[data-design='modern'] .nb .nb-post__foot a {
+  color: var(--ink-muted);
+}
+html[data-design='modern'] .nb .nb-post__foot button.nb-act {
+  color: var(--ink-muted);
+}
+html[data-design='modern'] .nb .nb-post__foot button.nb-act[aria-pressed='true'] {
+  color: var(--brand);
+}
+html[data-design='modern'] .nb .nb-post__foot a:hover,
+html[data-design='modern'] .nb .nb-post__foot button.nb-act:hover {
+  color: var(--ink);
+}
+html[data-design='modern'] .nb .fp-link {
+  color: var(--brand);
+  font-weight: 500;
+}
+
+/* Poll: bars fill the option row; the leading answer is bold and tinted blue */
+html[data-design='modern'] .fp-poll {
+  gap: 8px;
+  max-width: 420px;
+  margin: 8px 0;
+}
+html[data-design='modern'] .fp-opt {
+  position: relative;
+  align-items: center;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 7px;
+  background: var(--surface-sunken);
+  overflow: hidden;
+  font: 500 13px/18px var(--font-sans);
+}
+html[data-design='modern'] .fp-opt > span {
+  position: relative;
+  z-index: 1;
+}
+html[data-design='modern'] .fp-opt .t {
+  position: absolute;
+  inset: 0;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+html[data-design='modern'] .fp-opt .t i,
+html[data-design='modern'] .fp-opt.alt .t i {
+  background: color-mix(in srgb, var(--ink-muted) 24%, transparent);
+}
+html[data-design='modern'] .fp-opt.lead {
+  font-weight: 700;
+}
+html[data-design='modern'] .fp-opt.lead .t i {
+  background: color-mix(in srgb, var(--brand) 28%, transparent);
+}
+html[data-design='modern'] .fp-opt.lead span:nth-child(2) {
+  color: var(--vote);
+}
+
+/* Thread page: the comments heading is sans like the rest; only the title stays serif */
+html[data-design='modern'] .th-h {
+  font: 600 18px/26px var(--font-sans);
+}
+
+/* Poll bars fill the whole option row, from the left edge (feed polls and the poll on a thread page) */
+html[data-design='modern'] .fp-opt .t {
+  grid-column: auto;
+  grid-row: auto;
+}
+html[data-design='modern'] .poll {
+  gap: 8px;
+  max-width: 420px;
+}
+html[data-design='modern'] .poll__opt {
+  align-items: center;
+  height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--surface-sunken);
+  overflow: hidden;
+  font: 500 14px/20px var(--font-sans);
+}
+html[data-design='modern'] .poll__opt > span:not(.t) {
+  position: relative;
+  z-index: 1;
+}
+html[data-design='modern'] .poll__opt .t {
+  position: absolute;
+  inset: 0;
+  grid-column: auto;
+  grid-row: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+html[data-design='modern'] .poll__opt .t i,
+html[data-design='modern'] .poll__opt.alt .t i {
+  background: color-mix(in srgb, var(--ink-muted) 24%, transparent);
+}
+html[data-design='modern'] .poll__opt.lead {
+  font-weight: 700;
+}
+html[data-design='modern'] .poll__opt.lead .t i {
+  background: color-mix(in srgb, var(--brand) 28%, transparent);
+}
+html[data-design='modern'] .poll__opt.lead span:nth-child(3) {
+  color: var(--vote);
+}
+html[data-design='modern'] .poll__opt:has(input:checked) {
+  border: 0;
+  box-shadow: none;
+  outline: 2px solid var(--brand);
+  outline-offset: -2px;
+}
+html[data-design='modern'] .poll__opt:has(input:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}

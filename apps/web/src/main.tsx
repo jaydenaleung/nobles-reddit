@@ -5,6 +5,7 @@ import './styles/fonts';
 import './styles/tokens.css';
 import './styles/components.css';
 import './styles/app.css';
+import './styles/modern.css';
 import { App } from './App';
 
 // Replaced at build time (see vite.config.ts), so the dev tools are left out of production builds.
