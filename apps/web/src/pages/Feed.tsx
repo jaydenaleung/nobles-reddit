@@ -96,9 +96,30 @@ export function useFeedVoting(
   return { votes, onVote };
 }
 
+/** What the box above the feed says. One is picked each time the page loads. */
+const GREETINGS = [
+  "What's cookin', {name}?",
+  'Got something on your mind, {name}?',
+  'Hey {name}, what did you notice today?',
+  'Settle a debate, {name}?',
+  'What are we talking about, {name}?',
+  'Hot take, {name}?',
+  'Well, {name}? Go on.',
+  'Ask the question everyone is thinking, {name}.',
+  'Anything worth arguing about today, {name}?',
+  'Spill it, {name}.',
+];
+
+function pickGreeting(displayName: string): string {
+  const first = displayName.trim().split(/\s+/)[0] || 'friend';
+  const line = GREETINGS[Math.floor(Math.random() * GREETINGS.length)] ?? GREETINGS[0]!;
+  return line.replace('{name}', first);
+}
+
 export default function Feed() {
   const { slug } = useParams();
   const member = useMember();
+  const [greeting] = useState(() => pickGreeting(member.profile.displayName));
   const { spaces, bySlug, load: spacesLoad } = useSpaces();
   const [params, setParams] = useSearchParams();
   const sortParam = params.get('sort') as Sort | null;
@@ -135,7 +156,7 @@ export default function Feed() {
           <p>{space.description}</p>
         </header>
       ) : (
-        <h1 className="nb-sr">Front page</h1>
+        <h1 className="nb-sr">My feed</h1>
       )}
 
       <nav className="nb-chips ph-only" aria-label="Spaces">
@@ -158,8 +179,8 @@ export default function Feed() {
         <span className="nb-avatar" aria-hidden="true">
           {initials(member.profile.displayName)}
         </span>
-        <Link className="in" to={space ? `/new?space=${space.slug}` : '/new'}>
-          Start a thread
+        <Link className="in" to={space ? `/new?space=${space.slug}` : '/new'} aria-label="Start a thread">
+          {greeting}
         </Link>
         <Link className="nb-btn nb-btn--sm" to={space ? `/new?space=${space.slug}` : '/new'}>
           Post

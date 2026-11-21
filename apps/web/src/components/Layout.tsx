@@ -86,7 +86,7 @@ export function SpaceNav() {
         <ul className="nb-spaces">
           <li>
             <Link to="/" aria-current={pathname === '/' ? 'page' : undefined}>
-              <span>Front page</span>
+              <span>My feed</span>
               <span>{total}</span>
             </Link>
           </li>

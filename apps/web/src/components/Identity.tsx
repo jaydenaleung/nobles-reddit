@@ -47,7 +47,7 @@ export function StaffBadge({ role }: { role: Role | undefined }) {
   if (!isStaffRole(role)) return null;
   const word = role === 'admin' ? 'Administration' : role === 'moderator' ? 'Moderator' : 'Faculty';
   return (
-    <span className="nb-badge nb-badge--staff">
+    <span className={`nb-badge nb-badge--staff${role === 'admin' ? ' nb-badge--admin' : ''}`}>
       <Icon name="shield" /> {word}
     </span>
   );

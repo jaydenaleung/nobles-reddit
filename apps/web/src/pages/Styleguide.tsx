@@ -179,7 +179,7 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
       <div className="stack">
         <div className="display-l">Lora for titles and the wordmark</div>
         <div className="headline">A headline in Lora 600</div>
-        <div className="read-l">Libre Baskerville for posts and comments, set for reading.</div>
+        <div className="read-l">Inter for posts and comments, set for reading.</div>
         <div className="body">Inter for small interface text, counts and buttons.</div>
         <div className="nb-meta">Meta, 148 votes, 6 hours ago</div>
       </div>

@@ -29,10 +29,11 @@ function pollLabel(options: PollOption[]): string {
 /** Read-only poll bars, as on the front page. Every other bar is hatched so colour is not the only cue. */
 export function PollBars({ options }: { options: PollOption[] }) {
   const percents = pollPercents(options);
+  const top = Math.max(...percents);
   return (
     <div className="fp-poll" role="img" aria-label={pollLabel(options)}>
       {options.map((option, i) => (
-        <div className={`fp-opt${i % 2 === 1 ? ' alt' : ''}`} key={option.id}>
+        <div className={`fp-opt${i % 2 === 1 ? ' alt' : ''}${top > 0 && percents[i] === top ? ' lead' : ''}`} key={option.id}>
           <span>{option.label}</span>
           <span>{percents[i]}%</span>
           <div className="t">
@@ -63,8 +64,8 @@ function PostTop({ post, nowMs, spaceSlug }: { post: PostView; nowMs: number; sp
     return (
       <div className="nb-post__top">
         {space}
-        {post.questionOfTheDay && <span>Question of the day</span>}
-        <span className="nb-badge nb-badge--staff">Administration</span>
+        {post.questionOfTheDay && <span className="nb-qotd">Question of the day</span>}
+        <span className="nb-badge nb-badge--staff nb-badge--admin">Administration</span>
         <span>{when}</span>
       </div>
     );
@@ -72,7 +73,7 @@ function PostTop({ post, nowMs, spaceSlug }: { post: PostView; nowMs: number; sp
   return (
     <div className="nb-post__top">
       {space}
-      {post.questionOfTheDay && <span>Question of the day</span>}
+      {post.questionOfTheDay && <span className="nb-qotd">Question of the day</span>}
       {author.mode === 'anonymous' ? (
         <span>Anonymous</span>
       ) : (

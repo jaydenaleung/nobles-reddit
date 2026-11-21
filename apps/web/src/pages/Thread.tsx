@@ -11,7 +11,7 @@ import {
   type SummaryResult,
 } from '@commons/shared';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api, errorMessage } from '../api';
 import { useMember } from '../auth/AuthContext';
 import { ReplyComposer, type PendingComment } from '../components/Composer';
@@ -65,13 +65,17 @@ function PollVote({
   const options = post.poll?.options ?? [];
   const percents = pollPercents(options);
   const total = pollTotal(options);
+  const top = Math.max(0, ...percents);
   return (
     <fieldset className="poll">
       <legend>
         {total} {total === 1 ? 'vote' : 'votes'} so far. You can change your vote.
       </legend>
       {options.map((option, i) => (
-        <label className={`poll__opt${i % 2 === 1 ? ' alt' : ''}`} key={option.id}>
+        <label
+          className={`poll__opt${i % 2 === 1 ? ' alt' : ''}${top > 0 && percents[i] === top ? ' lead' : ''}`}
+          key={option.id}
+        >
           <input
             type="radio"
             name={`poll-${post.id}`}
@@ -92,6 +96,7 @@ function PollVote({
 
 export default function Thread() {
   const { postId = '' } = useParams();
+  const navigate = useNavigate();
   const member = useMember();
   const toast = useToast();
   const isMod = isModeratorRole(member.role);
@@ -431,8 +436,19 @@ export default function Thread() {
       <article className="th">
         <div className="th-card">
           <div className="ph-bar" style={{ display: 'flex' }}>
-            <Link className="nb-btn nb-btn--quiet nb-btn--sm th-back" to={space ? `/s/${space.slug}` : '/'}>
-              ← {post.spaceName}
+            <Link
+              className="nb-btn nb-btn--quiet nb-btn--sm th-back"
+              to={space ? `/s/${space.slug}` : '/'}
+              onClick={(event) => {
+                // Go back to wherever the reader came from; the space is only the fallback for a direct link.
+                const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
+                if (idx > 0) {
+                  event.preventDefault();
+                  navigate(-1);
+                }
+              }}
+            >
+              ← Back
             </Link>
             <span className="nb-meta">
               {post.commentCount} {post.commentCount === 1 ? 'reply' : 'replies'}

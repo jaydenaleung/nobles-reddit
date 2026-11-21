@@ -24,11 +24,11 @@ body.nb {
 /* Hand-drawn doodles behind the page. The SVG is used as a mask so the colour follows the theme. */
 :root {
   --doodle: #001f5f;
-  --doodle-alpha: 0.11;
+  --doodle-alpha: 0;
 }
 [data-theme='night'] {
   --doodle: #f7f4ec;
-  --doodle-alpha: 0.07;
+  --doodle-alpha: 0;
 }
 [data-theme='board'] {
   --doodle-alpha: 0;
@@ -232,7 +232,7 @@ textarea {
 .fp-opt .t {
   grid-column: 1 / -1;
   height: 8px;
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
   background: var(--surface-sunken);
   box-shadow: inset 0 0 0 1px var(--rule);
   overflow: hidden;
@@ -542,9 +542,9 @@ textarea {
   gap: var(--space-2);
 }
 .th-vote[aria-pressed='true'] {
-  background: var(--brand);
-  border-color: var(--brand);
-  color: var(--on-brand);
+  background: var(--vote);
+  border-color: var(--vote);
+  color: var(--on-vote);
 }
 .th-h {
   margin: 0;
@@ -645,7 +645,7 @@ textarea {
   display: block;
   grid-column: 1 / -1;
   height: 8px;
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
   background: var(--surface-sunken);
   box-shadow: inset 0 0 0 1px var(--rule);
   overflow: hidden;
@@ -917,7 +917,7 @@ dialog.dlg::backdrop {
 }
 .meter {
   height: 10px;
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
   background: var(--surface-sunken);
   box-shadow: inset 0 0 0 1px var(--rule);
   overflow: hidden;
@@ -1199,7 +1199,7 @@ dialog.dlg::backdrop {
     grid-template-columns: 1fr;
     padding: 14px;
     border: 1px solid var(--rule);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
   }
   .nb-post > .nb-votes {
     display: none;
@@ -1630,4 +1630,285 @@ dialog.dlg::backdrop {
 .nb-ai__list {
   list-style: none;
   padding-left: 0;
+}
+
+/* ---------- Look from the HTML mockup: sidebar, composer, sort row, feed rows ---------- */
+
+/* Sidebar: small caps headings, black links, soft selected row */
+.nb .fp-side h4,
+.nb .fp-side .fp-side__h {
+  font: 600 11.5px/16px var(--font-sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.nb .nb-spaces a {
+  color: var(--ink);
+  padding: 7px 10px;
+}
+.nb .nb-spaces a[aria-current='page'] {
+  color: var(--on-sky);
+  font-weight: 600;
+}
+.nb .nb-spaces a[aria-current='page'] span:last-child {
+  color: var(--on-sky);
+}
+
+/* Composer */
+.fp-start {
+  padding: 12px 14px;
+  gap: 12px;
+  border-radius: var(--radius-lg);
+}
+.fp-start .in {
+  height: 40px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  font: 400 15px/22px var(--font-sans);
+}
+.nb .fp-start .nb-btn {
+  border-width: 1px;
+  border-color: var(--border-soft);
+}
+
+/* Badges */
+.nb-badge {
+  height: 18px;
+  padding: 0 7px;
+  gap: 4px;
+  border-radius: 5px;
+  font-size: 11.5px;
+}
+.nb-badge--staff {
+  background: var(--staff-tint);
+  color: var(--staff);
+}
+.nb-badge--admin {
+  background: var(--gold);
+  color: var(--on-gold);
+}
+.nb-qotd {
+  padding: 0 7px;
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1px var(--border-soft);
+  font-weight: 500;
+  line-height: 18px;
+}
+
+/* Sort row: pills, no card */
+.nb-sort {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 4px 0 0;
+  gap: 4px;
+}
+.nb .nb-sort a {
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  color: var(--ink-muted);
+  text-decoration: none;
+}
+.nb .nb-sort a[aria-current='true'] {
+  background: var(--surface-raised);
+  border-color: var(--border-soft);
+  color: var(--ink);
+  text-decoration: none;
+}
+.nb-sort .end {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+/* Feed rows */
+.nb-vote {
+  border: 1px solid var(--border-soft);
+  color: var(--ink-muted);
+}
+.nb-vote[aria-pressed='true'] {
+  color: var(--on-vote);
+}
+.nb-vote[aria-pressed='true'] + span {
+  color: var(--vote);
+}
+@media (min-width: 900px) {
+  .nb-post {
+    grid-template-columns: 60px 1fr;
+  }
+  .nb-votes {
+    gap: 4px;
+    background: transparent;
+    padding: 14px 0 0 8px;
+  }
+  .nb-votes > span {
+    line-height: 19px;
+  }
+  .nb-vote .nb-icon {
+    width: 14px;
+    height: 14px;
+  }
+  .nb-vote {
+    width: 28px;
+    height: 28px;
+  }
+  .nb-post > div:last-child {
+    padding: 14px 18px 10px 6px;
+  }
+}
+.nb-post__top {
+  column-gap: 8px;
+  font-size: 12.5px;
+}
+.nb-post__top .nb-space {
+  font: 600 12.5px/16px var(--font-sans);
+}
+.nb-post__top b::before,
+.nb-post__top > span:last-child::before {
+  content: '·';
+  margin-right: 8px;
+  font-weight: 400;
+  color: var(--ink-muted);
+}
+.nb .nb-post__title {
+  margin: 5px 0 4px;
+  font: 600 19px/1.3 var(--font-serif);
+  letter-spacing: -0.005em;
+}
+.nb .nb-post__title a {
+  color: var(--ink);
+}
+.nb .nb-post--read .nb-post__title a {
+  color: var(--ink-muted);
+}
+.nb-post__excerpt {
+  margin: 0 0 6px;
+  max-width: 760px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 400 14px/21px var(--font-sans);
+}
+.nb .nb-post__foot a {
+  color: var(--ink-muted);
+}
+.nb .nb-post__foot button.nb-act {
+  color: var(--ink-muted);
+}
+.nb .nb-post__foot button.nb-act[aria-pressed='true'] {
+  color: var(--brand);
+}
+.nb .nb-post__foot a:hover,
+.nb .nb-post__foot button.nb-act:hover {
+  color: var(--ink);
+}
+.nb .fp-link {
+  color: var(--brand);
+  font-weight: 500;
+}
+
+/* Poll: bars fill the option row; the leading answer is bold and tinted blue */
+.fp-poll {
+  gap: 8px;
+  max-width: 420px;
+  margin: 8px 0;
+}
+.fp-opt {
+  position: relative;
+  align-items: center;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 7px;
+  background: var(--surface-sunken);
+  overflow: hidden;
+  font: 500 13px/18px var(--font-sans);
+}
+.fp-opt > span {
+  position: relative;
+  z-index: 1;
+}
+.fp-opt .t {
+  position: absolute;
+  inset: 0;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.fp-opt .t i,
+.fp-opt.alt .t i {
+  background: color-mix(in srgb, var(--ink-muted) 24%, transparent);
+}
+.fp-opt.lead {
+  font-weight: 700;
+}
+.fp-opt.lead .t i {
+  background: color-mix(in srgb, var(--brand) 28%, transparent);
+}
+.fp-opt.lead span:nth-child(2) {
+  color: var(--vote);
+}
+
+/* Thread page: the comments heading is sans like the rest; only the title stays serif */
+.th-h {
+  font: 600 18px/26px var(--font-sans);
+}
+
+/* Poll bars fill the whole option row, from the left edge (feed polls and the poll on a thread page) */
+.fp-opt .t {
+  grid-column: auto;
+  grid-row: auto;
+}
+.poll {
+  gap: 8px;
+  max-width: 420px;
+}
+.poll__opt {
+  align-items: center;
+  height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--surface-sunken);
+  overflow: hidden;
+  font: 500 14px/20px var(--font-sans);
+}
+.poll__opt > span:not(.t) {
+  position: relative;
+  z-index: 1;
+}
+.poll__opt .t {
+  position: absolute;
+  inset: 0;
+  grid-column: auto;
+  grid-row: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.poll__opt .t i,
+.poll__opt.alt .t i {
+  background: color-mix(in srgb, var(--ink-muted) 24%, transparent);
+}
+.poll__opt.lead {
+  font-weight: 700;
+}
+.poll__opt.lead .t i {
+  background: color-mix(in srgb, var(--brand) 28%, transparent);
+}
+.poll__opt.lead span:nth-child(3) {
+  color: var(--vote);
+}
+.poll__opt:has(input:checked) {
+  border: 0;
+  box-shadow: none;
+  outline: 2px solid var(--brand);
+  outline-offset: -2px;
+}
+.poll__opt:has(input:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
