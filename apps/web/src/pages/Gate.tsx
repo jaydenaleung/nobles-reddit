@@ -1,6 +1,5 @@
 import {
   APP_NAME,
-  APP_TAGLINE,
   CORE_VALUES,
   DIVISIONS,
   DIVISION_LABELS,
@@ -12,6 +11,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { errorMessage } from '../api';
 import { useAuth } from '../auth/AuthContext';
 import { USE_EMULATORS, config } from '../config';
+import { LogoMarkSvg } from '../components/Logo';
 import { PublicFrame } from '../components/Layout';
 import { Loading } from '../components/Ui';
 
@@ -98,6 +98,33 @@ function DevelopmentSignIn() {
   );
 }
 
+const LANDING_TITLE = 'Join the Noblest place on the internet';
+const LANDING_SUBTITLE = 'The school discussion board for Noble and Greenough School students and faculty';
+
+/** Google's "G", for the sign-in button (the multicolour mark Google asks sign-in buttons to use). */
+function GoogleMark() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+      <path
+        fill="#EA4335"
+        d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+      />
+      <path
+        fill="#4285F4"
+        d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+      />
+      <path
+        fill="#34A853"
+        d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+      />
+    </svg>
+  );
+}
+
 export function SignIn() {
   const { state, notice, signIn } = useAuth();
   const [busy, setBusy] = useState(false);
@@ -131,12 +158,10 @@ export function SignIn() {
 
   return (
     <PublicFrame>
-      <div className="gate__card" style={{ justifySelf: 'center' }}>
-        <h1>{APP_TAGLINE}</h1>
-        <p className="page-lede">
-          For {SCHOOL_NAME} students and teachers. Post about something at school or in the news, and talk it
-          through.
-        </p>
+      <div className="welcome">
+        <LogoMarkSvg size={64} />
+        <h1 className="welcome__title">{LANDING_TITLE}</h1>
+        <p className="welcome__sub">{LANDING_SUBTITLE}</p>
         {notice && (
           <div className="nb-notice" role="alert">
             <div>{notice}</div>
@@ -145,35 +170,41 @@ export function SignIn() {
         {state.status === 'loading' ? (
           <Loading label="Checking if you’re signed in" />
         ) : (
-          <section className="panel">
-            <h2>Sign in</h2>
-            <p>
-              Use your <b>@{config.allowedDomains.join(' or @')}</b> Google account. Personal Gmail won’t
-              work.
-            </p>
-            <div className="row">
-              <button
-                className="nb-btn nb-btn--primary"
-                type="button"
-                onClick={() => void go()}
-                disabled={busy}
-              >
-                {busy ? 'Opening Google' : 'Sign in with your Nobles Google account'}
-              </button>
-            </div>
+          <div className="welcome__cta">
+            <button className="welcome__google" type="button" onClick={() => void go()} disabled={busy}>
+              <GoogleMark />
+              <span>{busy ? 'Opening Google…' : 'Continue with Google'}</span>
+            </button>
             {error && (
               <p className="err" role="alert">
                 {error}
               </p>
             )}
-            <p className="muted">
-              We only get your name and school email from Google. There are no ads or trackers.{' '}
-              <Link to="/values">Our community values</Link>
+            <p className="welcome__hint">
+              Use your <b>@{config.allowedDomains.join(' or @')}</b> Google account. Personal Gmail won’t
+              work.
             </p>
-          </section>
+          </div>
         )}
-        {USE_EMULATORS && <DevelopmentSignIn />}
-        <p className="muted">Everything you post on {APP_NAME} goes up under your name.</p>
+        <ul className="welcome__values" aria-label="Our core values">
+          {CORE_VALUES.map((value) => (
+            <li key={value.name}>{value.name}</li>
+          ))}
+        </ul>
+        {USE_EMULATORS && (
+          <div className="welcome__dev">
+            <DevelopmentSignIn />
+          </div>
+        )}
+        <div className="welcome__fine">
+          <p>
+            We only get your name and school email from Google. There are no ads or trackers. Everything you
+            post on {APP_NAME} goes up under your name. <Link to="/values">Our community values</Link>
+          </p>
+          <p>
+            {APP_NAME} is a student-run site and is not affiliated with {SCHOOL_NAME}.
+          </p>
+        </div>
       </div>
     </PublicFrame>
   );
