@@ -177,7 +177,8 @@ export default defineConfig(({ mode }) => {
       sourcemap: false,
       target: 'es2022',
     },
-    server: { host: '127.0.0.1', port: 5173, strictPort: true },
+    // `npm run dev:lan` sets LAN_DEV so other devices on the local network can open the dev server.
+    server: { host: process.env.LAN_DEV ? '0.0.0.0' : '127.0.0.1', port: 5173, strictPort: true },
     preview: { host: '127.0.0.1', port: 5000, strictPort: true },
   };
 });

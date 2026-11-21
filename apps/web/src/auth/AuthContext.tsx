@@ -14,9 +14,10 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { api } from '../api';
 import { USE_EMULATORS, config, isAllowedEmail } from '../config';
 import { app, db } from '../firebase';
+import { EMULATOR_HOST } from '../lib/emulatorHost';
 
 const auth = getAuth(app);
-if (USE_EMULATORS) connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+if (USE_EMULATORS) connectAuthEmulator(auth, `http://${EMULATOR_HOST}:9099`, { disableWarnings: true });
 
 export type AuthState =
   | { status: 'loading' }
