@@ -141,6 +141,8 @@ npm run seed
 
 Then open http://127.0.0.1:5173 and use the "Local development" box on the sign-in page (sample student, teacher, moderator or admin). That box only exists in emulator builds.
 
+To show it to other devices on your local wifi, run `npm run dev:lan` instead of `npm run dev`. It prints an address such as `http://192.168.1.20:5173` to open on the other device (allow Node.js through the Windows firewall for private networks if it will not load). It uses the same test data and test sign-ins, and deploys nothing. The emulators have no real security, so only do this on a network you trust.
+
 To run the tests, stop the dev servers first (Ctrl+C in the first terminal: the tests start their own emulators on the same ports), then:
 
 ```bash

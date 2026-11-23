@@ -1,5 +1,4 @@
 import {
-  AI_SUMMARY_LABEL,
   excerpt,
   isStaffRole,
   relativeTime,
@@ -33,7 +32,10 @@ export function PollBars({ options }: { options: PollOption[] }) {
   return (
     <div className="fp-poll" role="img" aria-label={pollLabel(options)}>
       {options.map((option, i) => (
-        <div className={`fp-opt${i % 2 === 1 ? ' alt' : ''}${top > 0 && percents[i] === top ? ' lead' : ''}`} key={option.id}>
+        <div
+          className={`fp-opt${i % 2 === 1 ? ' alt' : ''}${top > 0 && percents[i] === top ? ' lead' : ''}`}
+          key={option.id}
+        >
           <span>{option.label}</span>
           <span>{percents[i]}%</span>
           <div className="t">
@@ -191,39 +193,15 @@ export function PostRow({
   );
 }
 
-/** Computer-written text is tinted and labelled in plain words. */
-export function SummaryBox({
-  text,
-  bullets,
-  basedOn,
-  children,
-}: {
-  text: string;
-  bullets: string[];
-  basedOn?: number;
-  children?: React.ReactNode;
-}) {
-  const [label, how] = AI_SUMMARY_LABEL.split('. ');
+/** Computer-written text is tinted and carries a small "Auto-summary" tag. */
+export function SummaryBox({ text, children }: { text: string; children?: React.ReactNode }) {
   return (
     <section className="nb-ai" aria-label="Summary">
       <div className="nb-ai__head">
-        <span className="nb-badge nb-badge--ai">{label}</span>
-        <span className="nb-ai__how">{how}</span>
+        <span className="nb-badge nb-badge--ai">Auto-summary</span>
       </div>
       <p className="nb-ai__text">{text}</p>
-      {bullets.length > 0 && (
-        <ul className="nb-ai__list">
-          {bullets.map((bullet, i) => (
-            <li key={i}>{bullet}</li>
-          ))}
-        </ul>
-      )}
-      {(basedOn !== undefined || children) && (
-        <div className="nb-ai__foot">
-          {basedOn !== undefined && <span>From the first {basedOn} comments. It can get things wrong.</span>}
-          {children}
-        </div>
-      )}
+      {children && <div className="nb-ai__foot">{children}</div>}
     </section>
   );
 }

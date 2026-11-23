@@ -22,9 +22,10 @@ import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-ch
 import { connectFunctionsEmulator, getFunctions, httpsCallable } from 'firebase/functions';
 import { USE_EMULATORS, config } from './config';
 import { app } from './firebase';
+import { EMULATOR_HOST } from './lib/emulatorHost';
 
 const functions = getFunctions(app, config.region);
-if (USE_EMULATORS) connectFunctionsEmulator(functions, '127.0.0.1', 5001);
+if (USE_EMULATORS) connectFunctionsEmulator(functions, EMULATOR_HOST, 5001);
 
 // App Check is optional: it turns on when a reCAPTCHA Enterprise site key is configured.
 if (!USE_EMULATORS && config.recaptchaSiteKey) {

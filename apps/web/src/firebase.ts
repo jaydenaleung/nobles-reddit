@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
 import { USE_EMULATORS, config } from './config';
+import { EMULATOR_HOST } from './lib/emulatorHost';
 
 /**
  * The Firebase app and Firestore. Auth and Functions live in their own
@@ -12,5 +13,5 @@ export const app = initializeApp(config.firebase);
 export const db = getFirestore(app);
 
 if (USE_EMULATORS) {
-  connectFirestoreEmulator(db, '127.0.0.1', 8080);
+  connectFirestoreEmulator(db, EMULATOR_HOST, 8080);
 }

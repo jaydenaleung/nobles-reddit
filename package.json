@@ -15,6 +15,7 @@
   ],
   "scripts": {
     "dev": "node scripts/sync-functions-env.mjs --emulator && concurrently -k -n emu,web \"firebase emulators:start --project demo-nobles-commons --only auth,firestore,functions\" \"npm run dev -w apps/web\"",
+    "dev:lan": "node scripts/dev-lan.mjs",
     "seed": "tsx scripts/seed.ts",
     "build": "npm run build -w functions && npm run build -w apps/web",
     "build:emulator": "npm run build -w functions && npm run build:emulator -w apps/web",

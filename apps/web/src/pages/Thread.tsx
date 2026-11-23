@@ -23,7 +23,6 @@ import { SummaryBox, pollPercents, pollTotal, type PostView } from '../component
 import { SafeText } from '../components/SafeText';
 import { Empty, Loading, useToast } from '../components/Ui';
 import { useMine, useMyVotes, useSpaces, useThread, type CommentView } from '../data/hooks';
-import { useDesign } from '../lib/design';
 import { markOpened } from '../lib/storage';
 
 interface Node {
@@ -98,7 +97,6 @@ function PollVote({
 export default function Thread() {
   const { postId = '' } = useParams();
   const navigate = useNavigate();
-  const design = useDesign();
   const member = useMember();
   const toast = useToast();
   const isMod = isModeratorRole(member.role);
@@ -442,8 +440,7 @@ export default function Thread() {
               className="nb-btn nb-btn--quiet nb-btn--sm th-back"
               to={space ? `/s/${space.slug}` : '/'}
               onClick={(event) => {
-                if (design !== 'modern') return;
-                // Modern: go back to wherever the reader came from; the space is only the fallback for a direct link.
+                // Go back to wherever the reader came from; the space is only the fallback for a direct link.
                 const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
                 if (idx > 0) {
                   event.preventDefault();
@@ -451,7 +448,7 @@ export default function Thread() {
                 }
               }}
             >
-              ← {design === 'modern' ? 'Back' : post.spaceName}
+              ← Back
             </Link>
             <span className="nb-meta">
               {post.commentCount} {post.commentCount === 1 ? 'reply' : 'replies'}
@@ -592,11 +589,7 @@ export default function Thread() {
         </div>
 
         {shownSummary ? (
-          <SummaryBox
-            text={shownSummary.text}
-            bullets={shownSummary.bullets}
-            basedOn={shownSummary.commentCountAtGeneration}
-          >
+          <SummaryBox text={shownSummary.text}>
             {summaryStale && !summary && (
               <button
                 className="nb-btn nb-btn--sm"
@@ -613,7 +606,6 @@ export default function Thread() {
             <section className="nb-ai" aria-label="Auto-summary">
               <div className="nb-ai__head">
                 <span className="nb-badge nb-badge--ai">Auto-summary</span>
-                <span className="nb-ai__how">Written by our model, not by a person.</span>
               </div>
               {summary && !summary.available ? (
                 <p className="nb-ai__how" role="status">
