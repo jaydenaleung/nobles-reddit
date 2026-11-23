@@ -15,12 +15,12 @@
   }
   document.documentElement.setAttribute('data-theme', theme);
 
-  // Classic is the default look; the redesign is opt-in from the You page.
-  var design = 'classic';
+  // Modern is the default look; the original (classic) is opt-in from the You page.
+  var design = 'modern';
   try {
-    if (window.localStorage.getItem('commons.design') === 'modern') design = 'modern';
+    if (window.localStorage.getItem('commons.design') === 'classic') design = 'classic';
   } catch {
-    /* storage can be blocked; Classic is fine */
+    /* storage can be blocked; Modern is fine */
   }
   document.documentElement.setAttribute('data-design', design);
 })();

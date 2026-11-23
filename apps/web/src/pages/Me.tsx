@@ -135,8 +135,8 @@ export default function Me() {
             <legend>Design</legend>
             {(
               [
-                ['classic', 'Classic'],
                 ['modern', 'Modern'],
+                ['classic', 'Classic'],
               ] as [Design, string][]
             ).map(([value, label]) => (
               <label key={value}>
