@@ -37,7 +37,7 @@ export class MockProvider implements AiProvider {
     const all = `${thread.title}\n${thread.body}\n${thread.comments.map((c) => c.text).join('\n')}`;
     if (all.includes('[mock:down]')) throw new AiUnavailable('down', 'mock');
     let raw: unknown = {
-      text: `People replied ${thread.comments.length} times to this thread. This is a sample summary written by the stand-in model used for tests and local development.`,
+      text: `${thread.comments.length} people have replied. Most think the question is worth asking and several shared their own experience, though they differ on what should change.`,
       bullets: ['Several people shared their own experience.', 'Not everyone agreed.'],
       agreements: 'Most people think the question is worth asking.',
       disagreements: 'People differ on what should change.',

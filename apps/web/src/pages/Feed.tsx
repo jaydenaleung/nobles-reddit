@@ -6,7 +6,6 @@ import { useMember } from '../auth/AuthContext';
 import { Page } from '../components/Layout';
 import { FeedSkeleton, PostRow, type PostView } from '../components/Post';
 import { Empty, ErrorState, useToast } from '../components/Ui';
-import { useDesign } from '../lib/design';
 import { useFeed, useMyVotes, useSearch, useSpaces, type MyVotes } from '../data/hooks';
 import { openedThreads, savedThreads, toggleSaved } from '../lib/storage';
 
@@ -121,7 +120,6 @@ export default function Feed() {
   const { slug } = useParams();
   const member = useMember();
   const [greeting] = useState(() => pickGreeting(member.profile.displayName));
-  const design = useDesign();
   const { spaces, bySlug, load: spacesLoad } = useSpaces();
   const [params, setParams] = useSearchParams();
   const sortParam = params.get('sort') as Sort | null;
@@ -158,7 +156,7 @@ export default function Feed() {
           <p>{space.description}</p>
         </header>
       ) : (
-        <h1 className="nb-sr">{design === 'modern' ? 'My feed' : 'Front page'}</h1>
+        <h1 className="nb-sr">My feed</h1>
       )}
 
       <nav className="nb-chips ph-only" aria-label="Spaces">
@@ -182,7 +180,7 @@ export default function Feed() {
           {initials(member.profile.displayName)}
         </span>
         <Link className="in" to={space ? `/new?space=${space.slug}` : '/new'} aria-label="Start a thread">
-          {design === 'modern' ? greeting : 'Start a thread'}
+          {greeting}
         </Link>
         <Link className="nb-btn nb-btn--sm" to={space ? `/new?space=${space.slug}` : '/new'}>
           Post

@@ -271,9 +271,7 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
 
       <h3 className="sg-h">Auto-summary</h3>
       <SummaryBox
-        text="Most agree on the sleep. The disagreement is about practice schedules and commute times."
-        bullets={['Later starts help only if bedtimes move too.', 'Commute times vary a lot.']}
-        basedOn={40}
+        text="Most people agree a later start would help with sleep, as long as bedtimes move too. The disagreement is about practice schedules and long commutes."
       />
 
       <h3 className="sg-h">Comment</h3>
