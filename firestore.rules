@@ -7,9 +7,8 @@ rules_version = '2';
 //   2. NO client can write anything. Every write goes through a Cloud Function
 //      that validates, rate-limits and stamps the author.
 //   3. Only verified, onboarded members of the allowed email domain can read.
-//   4. `authorship` and `threadAnon` (who wrote what) are closed to every
-//      client, including moderators and admins. Admins find an author only
-//      through the `revealAuthor` function, which writes to the audit log.
+//   4. `authorship` (who wrote what) is closed to every client, including
+//      moderators and admins.
 //
 // These rules are proven by tests/rules/firestore.rules.test.ts.
 service cloud.firestore {
@@ -66,7 +65,7 @@ service cloud.firestore {
     }
 
     // Posts and comments carry only `authorDisplay` (a name the author chose
-    // to show, or "Anonymous B"). They never contain a uid.
+    // to show, ). They never contain a uid.
     // Held and removed content is hidden from everyone except moderators.
     match /posts/{postId} {
       allow read: if isMember() && (resource.data.status == 'visible' || isModerator());
@@ -81,15 +80,6 @@ service cloud.firestore {
     // Who wrote what. Closed to every client, always.
     match /authorship/{contentKey} {
       allow read, write: if false;
-    }
-
-    // Which anonymous letter belongs to whom in a thread. Closed to every client.
-    match /threadAnon/{postId} {
-      allow read, write: if false;
-
-      match /members/{uid} {
-        allow read, write: if false;
-      }
     }
 
     // Upvotes and poll votes: you can read your own, nobody can read anyone else's.

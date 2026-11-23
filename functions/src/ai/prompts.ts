@@ -53,7 +53,7 @@ function fill(template: string, data: string): BuiltPrompt {
 
 /**
  * The summary prompt. The model receives the text of the post and comments
- * and nothing else: no names, no anonymous labels, no roles, no ids. It cannot
+ * and nothing else: no names, no roles, no ids. It cannot
  * reveal who wrote something because it is never told.
  */
 export function buildSummaryPrompt(thread: ThreadForSummary): BuiltPrompt {

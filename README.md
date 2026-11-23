@@ -51,7 +51,7 @@ More screenshots, at phone, tablet and desktop sizes, are in [`docs/screens`](do
 | `/values` | Anyone | The Nobles mission, the five core values, the commitment to diversity, equity and inclusion, and a few tips for Neddit |
 | `/about` | Anyone | Redirects to `/values` |
 | `/mod` | Moderators | The moderation queue, reports and the question of the day |
-| `/admin` | Administrators | Roles, spaces, question approvals, author lookup, AI budget, settings |
+| `/admin` | Administrators | Roles, spaces, question approvals, AI budget, settings |
 | `/admin/audit` | Administrators | The audit log |
 | `/board` | Anyone | The hall screen |
 
@@ -70,12 +70,10 @@ More screenshots, at phone, tablet and desktop sizes, are in [`docs/screens`](do
 - Report anything to a moderator, including "I am worried about someone's safety".
 - Download everything the site holds about them, or delete their account.
 
-**Names, and older anonymous posts**
+**Names**
 
-- There is no anonymous posting. The server refuses any post or comment that asks to be anonymous.
-- Posts from before anonymous posting was turned off still read "Anonymous", and nothing about their author reaches another student's browser: not in the page, the data, search, ids, timestamps or error messages. Tests check this.
+- There is no anonymous posting. Everything goes up under the writer's name.
 - Content stores a display name, never a uid. Who wrote what is kept in a separate collection no client can read.
-- For those older anonymous posts, the administration can find out who wrote one, but only by giving a reason, and every lookup is written to a log nobody can edit. Moderators cannot look up authors at all.
 
 **Moderators**
 
@@ -85,12 +83,12 @@ More screenshots, at phone, tablet and desktop sizes, are in [`docs/screens`](do
 
 **Administrators**
 
-- Everything moderators can do, plus give people roles, add and edit spaces, look up an author (with a reason, logged), read and export the audit log, watch the daily AI budget, and edit settings such as topics the question of the day should avoid and the resources shown to a student after a wellbeing flag.
+- Everything moderators can do, plus give people roles, add and edit spaces, read and export the audit log, watch the daily AI budget, and edit settings such as topics the question of the day should avoid and the resources shown to a student after a wellbeing flag.
 
 **Computer-written help** (all labelled in plain words)
 
 - **A safety check on every new post and comment.** Most posts go up after a few seconds. Possible harassment, hate, sexual content or personal information is held for a moderator. Possible self-harm or harm to others is never published and never deleted: it goes to the top of the queue, the school's wellbeing contact is emailed, and the author sees a caring message with places to get help.
-- **Auto-summaries** of threads with 10 or more comments, labelled "Summary. Written by a computer model, not a person." The model is never told who wrote anything.
+- **Auto-summaries** of threads with 10 or more comments, shown as a short paragraph under an "Auto-summary" tag. The model is never told who wrote anything.
 - **Question-of-the-day suggestions** every school morning. Nothing is published until a moderator approves one.
 - A daily budget caps the cost. When it runs out, or the model is unavailable, the AI features say so and everything else keeps working.
 
@@ -159,7 +157,7 @@ Nothing here touches a real Firebase project: the emulators use the made-up proj
 | `npm run typecheck` | TypeScript, strict, in every package |
 | `npm run test:unit` | Hot score, input checks, safe text formatter, rate limiter, AI prompt building and output checks |
 | `npm run test:rules` | Firestore rules against the emulator |
-| `npm run test:functions` | Every callable against the emulators, including the tests that anonymous posting is refused and that older anonymous posts stay anonymous |
+| `npm run test:functions` | Every callable against the emulators |
 | `npm run test:e2e` | Playwright end-to-end flow and axe accessibility checks, at desktop and phone sizes |
 | `npm run lighthouse` | Lighthouse on the front page, a thread and the hall screen |
 | `npm run screens` | Screenshots of every route into `docs/screens` |

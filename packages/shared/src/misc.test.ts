@@ -1,12 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  anonLabel,
-  anonLetter,
-  buildAuthorDisplay,
-  formatDisplayName,
-  initials,
-  shortClassYear,
-} from './authorDisplay';
+import { buildAuthorDisplay, formatDisplayName, initials, shortClassYear } from './authorDisplay';
 import { commentKey, contentPath, parseContentKey, postKey } from './contentKey';
 import { RATE_LIMITS } from './constants';
 import { takeToken } from './rateLimit';
@@ -19,38 +12,17 @@ describe('authorDisplay', () => {
   const faculty = { firstName: 'Maya', lastInitial: 'H', classYear: null, role: 'faculty' as const };
 
   it('named students show name, class year and role', () => {
-    expect(buildAuthorDisplay(student, 'named', 0)).toEqual({
-      mode: 'named',
+    expect(buildAuthorDisplay(student)).toEqual({
       name: 'Priya N.',
       classYear: 2027,
       role: 'student',
     });
   });
   it('named faculty show name and role, no class year', () => {
-    expect(buildAuthorDisplay(faculty, 'named', 0)).toEqual({
-      mode: 'named',
+    expect(buildAuthorDisplay(faculty)).toEqual({
       name: 'Maya H.',
       role: 'faculty',
     });
-  });
-  it('anonymous shows only the label: no name, no class year, no role', () => {
-    const display = buildAuthorDisplay(student, 'anonymous', 1);
-    expect(display).toEqual({ mode: 'anonymous', anonLabel: 'Anonymous B' });
-    expect(Object.keys(display).sort()).toEqual(['anonLabel', 'mode']);
-  });
-  it('hides the faculty badge when faculty post anonymously', () => {
-    const display = buildAuthorDisplay(faculty, 'anonymous', 0);
-    expect(JSON.stringify(display)).not.toMatch(/faculty|Maya|role/i);
-  });
-  it('an anonymous display is identical for two different people at the same index', () => {
-    expect(buildAuthorDisplay(student, 'anonymous', 3)).toEqual(buildAuthorDisplay(faculty, 'anonymous', 3));
-  });
-  it('letters run A to Z then AA', () => {
-    expect(anonLetter(0)).toBe('A');
-    expect(anonLetter(25)).toBe('Z');
-    expect(anonLetter(26)).toBe('AA');
-    expect(anonLetter(27)).toBe('AB');
-    expect(anonLabel(2)).toBe('Anonymous C');
   });
   it('formats names, initials and class years', () => {
     expect(formatDisplayName(' Dev ', 's')).toBe('Dev S.');

@@ -111,7 +111,7 @@ async function refreshBoardIfQuestion(postId: string): Promise<void> {
   if ((await boardQuestionId()) === postId) await rebuildBoardFeed();
 }
 
-/** Keeps commentCount, anonCommentCount and hotScore right whenever a comment is added or its status changes. */
+/** Keeps commentCount and hotScore right whenever a comment is added or its status changes. */
 export const onCommentWritten = onDocumentWritten(
   { ...triggerOptions, document: 'posts/{postId}/comments/{commentId}' },
   async (event) => {
@@ -125,17 +125,12 @@ export const onCommentWritten = onDocumentWritten(
     const postRef = db.doc(`posts/${event.params.postId}`);
     if (statusChanged) {
       const visible = postRef.collection('comments').where('status', '==', 'visible');
-      const [total, anonymous, post] = await Promise.all([
-        visible.count().get(),
-        visible.where('authorDisplay.mode', '==', 'anonymous').count().get(),
-        postRef.get(),
-      ]);
+      const [total, post] = await Promise.all([visible.count().get(), postRef.get()]);
       const p = post.data();
       if (p) {
         const commentCount = total.data().count;
         await postRef.update({
           commentCount,
-          anonCommentCount: anonymous.data().count,
           hotScore: hotScore(p.thoughtfulCount ?? 0, commentCount, p.createdAt?.seconds ?? 0),
         });
       }

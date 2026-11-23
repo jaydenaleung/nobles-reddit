@@ -8,12 +8,11 @@ import {
   modActionSchema,
   onboardSchema,
   reportContentSchema,
-  revealAuthorSchema,
   setRoleSchema,
   votePollSchema,
 } from './schemas';
 
-const basePost = { spaceId: 'space1', identityMode: 'named', title: 'A perfectly good title' };
+const basePost = { spaceId: 'space1', title: 'A perfectly good title' };
 
 describe('cleanText', () => {
   it('removes control and bidi-override characters and trims', () => {
@@ -47,9 +46,11 @@ describe('createPostSchema', () => {
       false,
     );
   });
-  it('requires an identity mode and never defaults it', () => {
-    const { identityMode: _omit, ...rest } = basePost;
-    expect(createPostSchema.safeParse({ ...rest, kind: 'text', body: 'Hello' }).success).toBe(false);
+  it('refuses an identityMode field, since every post is signed', () => {
+    expect(
+      createPostSchema.safeParse({ ...basePost, identityMode: 'anonymous', kind: 'text', body: 'Hi' })
+        .success,
+    ).toBe(false);
   });
   it('rejects unknown fields such as a smuggled author', () => {
     expect(
@@ -87,22 +88,8 @@ describe('createPostSchema', () => {
   });
 });
 
-describe('anonymous posts', () => {
-  it('are refused for new threads', () => {
-    expect(
-      createPostSchema.safeParse({ ...basePost, identityMode: 'anonymous', kind: 'text', body: 'Hi' })
-        .success,
-    ).toBe(false);
-  });
-});
-
 describe('createCommentSchema', () => {
-  const base = { postId: 'p1', parentId: null, identityMode: 'named' };
-  it('refuses anonymous comments', () => {
-    expect(createCommentSchema.safeParse({ ...base, identityMode: 'anonymous', body: 'Hi' }).success).toBe(
-      false,
-    );
-  });
+  const base = { postId: 'p1', parentId: null };
   it('accepts a comment and rejects empty or oversized ones', () => {
     expect(createCommentSchema.safeParse({ ...base, body: 'I agree' }).success).toBe(true);
     expect(createCommentSchema.safeParse({ ...base, body: '   ' }).success).toBe(false);
@@ -133,13 +120,6 @@ describe('httpsUrlSchema', () => {
 });
 
 describe('other inputs', () => {
-  it('reveal needs a reason of at least 10 characters', () => {
-    expect(revealAuthorSchema.safeParse({ contentKey: 'post:a', reason: 'because' }).success).toBe(false);
-    expect(
-      revealAuthorSchema.safeParse({ contentKey: 'post:a', reason: 'Safety concern raised by a dean' })
-        .success,
-    ).toBe(true);
-  });
   it('onboarding needs the "I understand" box and a one-letter initial', () => {
     const ok = { firstName: 'Priya', lastInitial: 'N', classYear: 2027, understood: true };
     expect(onboardSchema.safeParse(ok).success).toBe(true);

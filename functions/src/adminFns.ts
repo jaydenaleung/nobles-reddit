@@ -2,12 +2,9 @@ import {
   emptySchema,
   exportAuditLogSchema,
   manageSpaceSchema,
-  revealAuthorSchema,
   schoolDate,
   updateConfigSchema,
   type AiUsageResult,
-  type RevealAuthorResult,
-  type UserProfile,
 } from '@commons/shared';
 import { FieldValue, db } from './admin';
 import { tokensUsedToday } from './ai';
@@ -15,46 +12,6 @@ import { auditIn, auditNow } from './audit';
 import { env } from './env';
 import { AppError, errors } from './errors';
 import { ADMIN_ROLES, callable } from './guard';
-
-/**
- * The only way anyone finds out who wrote a post or comment.
- *
- * Admin only. A reason is required. The audit entry is written in the same
- * transaction that reads the authorship record: if the log cannot be written,
- * nothing is revealed.
- */
-export const revealAuthor = callable(
-  { name: 'revealAuthor', schema: revealAuthorSchema, roles: ADMIN_ROLES, rate: 'admin' },
-  async (data, caller): Promise<RevealAuthorResult> => {
-    return db.runTransaction(async (tx) => {
-      const authorship = await tx.get(db.doc(`authorship/${data.contentKey}`));
-      if (!authorship.exists) throw errors.notFound('That post or comment');
-      const authorUid = authorship.data()!.authorUid as string;
-      const user = await tx.get(db.doc(`users/${authorUid}`));
-      const profile = user.data() as UserProfile | undefined;
-
-      auditIn(tx, {
-        actorUid: caller.uid,
-        actorEmail: caller.email,
-        action: 'revealAuthor',
-        contentKey: data.contentKey,
-        reason: data.reason,
-      });
-
-      return {
-        contentKey: data.contentKey,
-        author: {
-          displayName: profile?.displayName ?? 'Unknown',
-          email: profile?.email ?? 'Unknown',
-          classYear: profile?.classYear ?? null,
-          role: profile?.role ?? 'student',
-          accountDeleted: !profile || !!profile.deleted,
-        },
-        logged: true as const,
-      };
-    });
-  },
-);
 
 /** Admin only. Adds a space or changes one. Spaces are never deleted, so old threads keep their home. */
 export const manageSpace = callable(

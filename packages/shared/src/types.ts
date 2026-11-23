@@ -9,14 +9,16 @@ export interface TimestampLike {
 export type ContentStatus = 'visible' | 'held' | 'removed';
 /** Where a piece of content is in moderation screening. */
 export type ScreeningState = 'pending' | 'clear' | 'flagged' | 'wellbeing' | 'skipped';
-export type IdentityMode = 'named' | 'anonymous';
 
 /**
  * What other people see about an author. This is the ONLY author information
  * stored on a post or comment. It never contains a uid or an email.
  */
-export type AuthorDisplay =
-  { mode: 'named'; name: string; classYear?: number; role?: Role } | { mode: 'anonymous'; anonLabel: string };
+export interface AuthorDisplay {
+  name: string;
+  classYear?: number;
+  role?: Role;
+}
 
 export interface UserProfile {
   email: string;
@@ -82,7 +84,6 @@ export interface Post {
   authorDisplay: AuthorDisplay;
   thoughtfulCount: number;
   commentCount: number;
-  anonCommentCount: number;
   hotScore: number;
   pinned: boolean;
   pinnedBy?: 'administration';
@@ -156,9 +157,8 @@ export interface DailyQuestion {
 }
 
 export interface BoardReply {
-  /** A display name for a named author, or the anonymous label. Never a uid. */
+  /** The author's display name. Never a uid. */
   displayName: string;
-  anonymous: boolean;
   role?: Role;
   text: string;
 }
@@ -173,7 +173,7 @@ export interface BoardFeed {
   questionText: string;
   spaceName: string;
   pollOptions: PollOption[];
-  counts: { weighedIn: number; replies: number; anonymousPercent: number };
+  counts: { weighedIn: number; replies: number };
   approvedReplies: BoardReply[];
   nobleman: NoblemanItem[];
   updatedAt: TimestampLike;
@@ -213,21 +213,8 @@ export interface MyContentItem {
   kind: 'post' | 'comment';
   title?: string;
   body: string;
-  identityMode: IdentityMode;
   status: ContentStatus;
   createdAtMs: number;
-}
-export interface RevealAuthorResult {
-  contentKey: string;
-  author: {
-    displayName: string;
-    email: string;
-    classYear: number | null;
-    role: Role;
-    accountDeleted: boolean;
-  };
-  /** Always true. The interface shows "this view was logged". */
-  logged: true;
 }
 export interface SummaryResult {
   available: boolean;

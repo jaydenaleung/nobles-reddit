@@ -248,7 +248,7 @@ describe('question of the day', () => {
       pinnedBy: 'administration',
       questionOfTheDay: true,
       kind: 'poll',
-      authorDisplay: { mode: 'named', name: 'Administration', role: 'admin' },
+      authorDisplay: { name: 'Administration', role: 'admin' },
     });
     // The approving moderator is recorded as the author, in the private collection only.
     expect((await adminDb.doc(`authorship/post:${result.postId}`).get()).data()!.authorUid).toBe(

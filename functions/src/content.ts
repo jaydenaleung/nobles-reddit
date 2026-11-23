@@ -40,8 +40,7 @@ export const createPost = callable(
         throw new AppError('permission-denied', 'You can’t post in that space.');
       }
 
-      // Always named: the schema refuses anonymous posts.
-      const authorDisplay = buildAuthorDisplay(caller.profile, data.identityMode, 0);
+      const authorDisplay = buildAuthorDisplay(caller.profile);
       const now = FieldValue.serverTimestamp();
       const body = data.body ?? '';
 
@@ -54,7 +53,6 @@ export const createPost = callable(
         authorDisplay,
         thoughtfulCount: 0,
         commentCount: 0,
-        anonCommentCount: 0,
         hotScore: hotScore(0, 0, Math.floor(Date.now() / 1000)),
         pinned: false,
         // New content is held until the screening check has run (see triggers.ts).
@@ -103,7 +101,7 @@ export const createComment = callable(
         }
       }
 
-      const authorDisplay = buildAuthorDisplay(caller.profile, data.identityMode, 0);
+      const authorDisplay = buildAuthorDisplay(caller.profile);
       const now = FieldValue.serverTimestamp();
 
       tx.create(commentRef, {

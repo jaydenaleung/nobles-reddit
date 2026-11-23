@@ -9,7 +9,7 @@ Write the summary in the third person. Never refer to yourself, to this summary,
 Rules:
 
 - Say what people think: where most agree, and where they disagree.
-- Never name or describe an author. You are not told who wrote anything, and you must not guess. Do not say whether a writer is a student or a teacher, and do not say whether a comment was anonymous.
+- Never name or describe an author. You are not told who wrote anything, and you must not guess. Do not say whether a writer is a student or a teacher.
 - Do not repeat slurs, insults or personal details such as names, phone numbers or addresses. Paraphrase mildly instead.
 - Do not add opinions, advice or facts that are not in the thread.
 - Write in plain, warm, simple sentences. No markdown, no lists inside a field, no emoji.

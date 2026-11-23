@@ -154,21 +154,15 @@ export default function Board() {
             {(feed?.approvedReplies ?? []).slice(0, 2).map((reply, i) => {
               return (
                 <div className="reply" key={i}>
-                  <div className={`nb-byline${reply.anonymous ? ' nb-byline--anon' : ''}`}>
-                    {reply.anonymous ? (
-                      <span className="nb-avatar nb-avatar--anon" aria-hidden="true">
-                        <Icon name="mask" />
-                      </span>
-                    ) : (
-                      <span
-                        className={`nb-avatar${isStaffRole(reply.role) ? ' nb-avatar--staff' : ''}`}
-                        aria-hidden="true"
-                      >
-                        {initials(reply.displayName)}
-                      </span>
-                    )}
-                    <b>{reply.anonymous ? 'Anonymous' : reply.displayName}</b>
-                    {!reply.anonymous && isStaffRole(reply.role) && (
+                  <div className="nb-byline">
+                    <span
+                      className={`nb-avatar${isStaffRole(reply.role) ? ' nb-avatar--staff' : ''}`}
+                      aria-hidden="true"
+                    >
+                      {initials(reply.displayName)}
+                    </span>
+                    <b>{reply.displayName}</b>
+                    {isStaffRole(reply.role) && (
                       <span className="nb-badge nb-badge--staff">
                         <Icon name="shield" /> Faculty
                       </span>

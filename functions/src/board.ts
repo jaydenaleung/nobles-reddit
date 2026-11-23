@@ -1,4 +1,4 @@
-import { LIMITS, excerpt, type BoardReply, type PollOption } from '@commons/shared';
+import { FORMER_MEMBER_LABEL, LIMITS, excerpt, type BoardReply, type PollOption } from '@commons/shared';
 import { FieldValue, db } from './admin';
 import { noblemanSource } from './sources/nobleman';
 
@@ -13,8 +13,7 @@ export async function boardQuestionId(): Promise<string | null> {
  *
  * It is a sanitised snapshot: the question, the poll counts, and only the
  * replies a moderator approved for the screen. It contains no uid and no
- * authorship. A named reply shows the name its author chose to post under;
- * an anonymous one shows only "Anonymous".
+ * authorship. Each reply shows its author's name.
  */
 export async function rebuildBoardFeed(): Promise<void> {
   const questionPostId = await boardQuestionId();
@@ -26,7 +25,7 @@ export async function rebuildBoardFeed(): Promise<void> {
     questionText: '',
     spaceName: '',
     pollOptions: [] as PollOption[],
-    counts: { weighedIn: 0, replies: 0, anonymousPercent: 0 },
+    counts: { weighedIn: 0, replies: 0 },
     approvedReplies: [] as BoardReply[],
     nobleman,
     updatedAt: FieldValue.serverTimestamp(),
@@ -60,17 +59,14 @@ export async function rebuildBoardFeed(): Promise<void> {
   }));
   const pollVotes = pollOptions.reduce((sum, o) => sum + o.count, 0);
   const replies = (post.commentCount as number) ?? 0;
-  const anonReplies = (post.anonCommentCount as number) ?? 0;
 
   const approvedReplies: BoardReply[] = repliesSnap.docs.map((d) => {
     const c = d.data();
-    const anonymous = c.authorDisplay?.mode !== 'named';
     const reply: BoardReply = {
-      displayName: anonymous ? 'Anonymous' : String(c.authorDisplay.name),
-      anonymous,
+      displayName: String(c.authorDisplay?.name ?? FORMER_MEMBER_LABEL),
       text: excerpt(String(c.body ?? ''), LIMITS.boardReplyMax),
     };
-    if (!anonymous && c.authorDisplay.role) reply.role = c.authorDisplay.role;
+    if (c.authorDisplay?.role) reply.role = c.authorDisplay.role;
     return reply;
   });
 
@@ -82,7 +78,6 @@ export async function rebuildBoardFeed(): Promise<void> {
     counts: {
       weighedIn: pollOptions.length > 0 ? pollVotes : ((post.thoughtfulCount as number) ?? 0) + replies,
       replies,
-      anonymousPercent: replies > 0 ? Math.round((anonReplies / replies) * 100) : 0,
     },
     approvedReplies,
     nobleman,

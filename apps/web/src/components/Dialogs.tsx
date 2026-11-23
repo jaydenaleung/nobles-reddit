@@ -1,13 +1,6 @@
-import {
-  LIMITS,
-  REPORT_REASONS,
-  type ModAction,
-  type ReportReason,
-  type RevealAuthorResult,
-} from '@commons/shared';
+import { LIMITS, REPORT_REASONS, type ModAction, type ReportReason } from '@commons/shared';
 import { useId, useState, type FormEvent } from 'react';
 import { api, errorMessage } from '../api';
-import { Icon } from './Icon';
 import { Dialog, useToast } from './Ui';
 
 /** "Report": anyone can ask a moderator to look at something. */
@@ -221,117 +214,6 @@ export function ModDialog({
           </button>
         </div>
       </form>
-    </Dialog>
-  );
-}
-
-/**
- * "Who wrote this?" For administrators only. A reason is required, and the
- * page says plainly that the lookup was logged.
- */
-export function RevealForm({ contentKey, onClose }: { contentKey: string; onClose?: () => void }) {
-  const id = useId();
-  const [reason, setReason] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<RevealAuthorResult | null>(null);
-
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
-    if (reason.trim().length < LIMITS.revealReasonMin) {
-      setError(`Your reason needs at least ${LIMITS.revealReasonMin} characters.`);
-      return;
-    }
-    setBusy(true);
-    setError(null);
-    try {
-      setResult(await api.revealAuthor({ contentKey, reason: reason.trim() }));
-    } catch (err) {
-      setError(errorMessage(err));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  if (result) {
-    return (
-      <div className="stack">
-        <dl className="kv">
-          <dt>Name</dt>
-          <dd>{result.author.displayName}</dd>
-          <dt>Email</dt>
-          <dd>{result.author.email}</dd>
-          <dt>Class year</dt>
-          <dd>{result.author.classYear ?? 'None'}</dd>
-          <dt>Role</dt>
-          <dd>{result.author.role}</dd>
-          {result.author.accountDeleted && (
-            <>
-              <dt>Account</dt>
-              <dd>Deleted by its owner</dd>
-            </>
-          )}
-        </dl>
-        <div className="nb-notice nb-notice--staff" role="status">
-          <Icon name="shield" />
-          <div>
-            <b>This lookup is in the audit log</b>, along with your reason.
-          </div>
-        </div>
-        {onClose && (
-          <div className="row">
-            <button className="nb-btn" type="button" onClick={onClose}>
-              Close
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <form className="stack" onSubmit={(event) => void submit(event)}>
-      <p className="muted">
-        Only look someone up for a safety issue or a serious rule break. The lookup is saved with your name
-        and reason.
-      </p>
-      <div className="field">
-        <label className="nb-label" htmlFor={`${id}-reason`}>
-          Why do you need to know? (required)
-        </label>
-        <textarea
-          className="nb-textarea"
-          id={`${id}-reason`}
-          value={reason}
-          maxLength={LIMITS.reasonMax}
-          onChange={(event) => setReason(event.target.value)}
-          aria-invalid={!!error || undefined}
-          rows={2}
-        />
-      </div>
-      {error && (
-        <p className="err" role="alert">
-          {error}
-        </p>
-      )}
-      <div className="row row--between">
-        {onClose && (
-          <button className="nb-btn nb-btn--quiet" type="button" onClick={onClose}>
-            Cancel
-          </button>
-        )}
-        <button className="nb-btn nb-btn--primary" type="submit" disabled={busy}>
-          {busy ? 'Looking up' : 'Show who wrote it'}
-        </button>
-      </div>
-    </form>
-  );
-}
-
-export function RevealDialog({ contentKey, onClose }: { contentKey: string | null; onClose: () => void }) {
-  return (
-    <Dialog open={!!contentKey} onClose={onClose} title="Who wrote this?">
-      {contentKey && <RevealForm key={contentKey} contentKey={contentKey} onClose={onClose} />}
     </Dialog>
   );
 }

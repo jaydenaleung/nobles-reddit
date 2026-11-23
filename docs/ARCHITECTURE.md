@@ -31,7 +31,7 @@ Three rules make the rest simple:
 
 ## How authorship is kept
 
-Neddit has no anonymous posting: every new post and comment goes up under the writer's name. Even so, the post itself never holds a uid. Who wrote what lives in one place that no client can read.
+Every post and comment goes up under the writer's name, and the post itself never holds a uid. Who wrote what lives in one place that no client can read.
 
 ```mermaid
 sequenceDiagram
@@ -41,34 +41,25 @@ sequenceDiagram
   participant P as posts/{id}
   participant S as authorship/post:{id}
   participant B as Student B
-  participant Adm as Administrator
-  participant L as auditLog
 
-  A->>F: title, body, identityMode: "named"
-  Note over F: the shared schema refuses identityMode "anonymous".<br/>Reads A's profile on the server, builds authorDisplay = { mode: "named", name, classYear, role }
+  A->>F: title, body
+  Note over F: Reads A's profile on the server, builds authorDisplay = { name, classYear, role }
   F->>P: the post, with authorDisplay only (no uid, no email)
   F->>S: { authorUid: A } in the same commit, same timestamp
   F-->>A: { postId, contentKey } and nothing else
   B->>P: reads the post (rules allow: visible)
   B--xS: tries to read authorship: DENIED by the rules, for everyone
-  Adm->>F: revealAuthor(contentKey, reason of 10+ characters)
-  F->>S: reads authorship (server only)
-  F->>L: writes who looked, when and why, in the same transaction
-  F-->>Adm: name, email, class year, role + "this view was logged"
 ```
 
 What this buys:
 
 - **No uid is on any post or comment.** `authorDisplay` holds the display name ("Priya N."), class year and role, and nothing else.
-- **Anonymous posting is refused on the server.** `createPostSchema` and `createCommentSchema` in `packages/shared/src/schemas.ts` only accept `identityMode: "named"`, so a client that sends `"anonymous"` gets `invalid-argument` and nothing is written.
-- **Older anonymous content stays anonymous.** Posts and comments written before anonymous posting was turned off keep `authorDisplay = { mode: "anonymous", anonLabel }` and still read "Anonymous". Nothing about their author reaches another student: not on the page, in search, in ids, in timestamps or in error messages.
 - **The record of who wrote it exists once**, in `authorship`, which no client can read: not students, not moderators, not administrators. The rules tests prove each of those separately.
-- **The only way to it is `revealAuthor`**, which needs the admin role, needs a reason, and writes the audit entry in the same transaction that reads the author. If the log cannot be written, nothing is revealed. The website offers "Who wrote this?" only on older anonymous content.
 - **Ids and timestamps give nothing away.** Post and comment ids are random Firestore ids. The authorship record carries the same timestamp as the content, no finer.
 - **Search never indexes authors.** `searchTokens` is built from the title, the start of the body and the space name.
 - **Moderators work blind.** The moderation queue stores a snapshot of the text and nothing about who wrote it. Moderators cannot read `users` either.
 
-The tests that hold this in place are `tests/rules/firestore.rules.test.ts`, `tests/functions/anonymity.test.ts` (anonymous posts and comments are refused; older anonymous content hides its author) and the legacy anonymous thread steps in `e2e/flow.spec.ts`.
+The tests that hold this in place are `tests/rules/firestore.rules.test.ts`, and the end-to-end flow in `e2e/flow.spec.ts`.
 
 ## Data model
 
@@ -81,11 +72,10 @@ All ids are Firestore auto ids. All timestamps are server timestamps. Types live
 | `posts/{id}` | A thread. `authorDisplay`, counts, hot score, status, optional poll, link and summary | Members, when `status == 'visible'`. Moderators see all |
 | `posts/{id}/comments/{id}` | A comment: parent, depth, body, `authorDisplay`, status | Same as posts |
 | `authorship/{contentKey}` | Who wrote a post or comment | **Nobody** |
-| `threadAnon/{postId}/members/{uid}` | Which anonymous letter a person had in a thread. No longer written; kept for older content | **Nobody** |
 | `votes/...`, `pollVotes/...` | One upvote or poll vote per person per item | Only the person who cast it |
 | `reports/{id}` | A report: content, reason, note, reporter | Moderators and administrators |
 | `moderationQueue/{id}` | Things waiting for a moderator: reason, labels, a text snapshot | Moderators and administrators |
-| `auditLog/{id}` | Every moderation action, role change and author lookup. Append-only | Administrators |
+| `auditLog/{id}` | Every moderation action and role change. Append-only | Administrators |
 | `dailyQuestions/{id}` | Proposed questions of the day | Moderators and administrators |
 | `config/*` | Roles by email, banned AI topics, calendar notes, wellbeing resources, the board question | Administrators |
 | `boardFeed/current` | A sanitised snapshot for the hall screen. No uid, no authorship | **Public** (the TV has no login) |

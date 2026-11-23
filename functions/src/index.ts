@@ -19,14 +19,7 @@ export { reportContent, resolveReport } from './reports';
 
 // Moderation and administration
 export { modAction } from './moderation';
-export {
-  revealAuthor,
-  manageSpace,
-  exportAuditLog,
-  updateConfig,
-  getAiUsage,
-  exportTrainingData,
-} from './adminFns';
+export { manageSpace, exportAuditLog, updateConfig, getAiUsage, exportTrainingData } from './adminFns';
 
 // AI
 export { requestSummary } from './summary';

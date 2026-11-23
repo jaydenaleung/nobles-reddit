@@ -22,7 +22,7 @@ import {
 import { afterAll, beforeAll, beforeEach, describe, it } from 'vitest';
 
 /**
- * These tests prove the access rules that the anonymity guarantee rests on.
+ * These tests prove the access rules that keep author records private.
  * They run against the Firestore emulator with the real firestore.rules file.
  */
 let env: RulesTestEnvironment;
@@ -69,7 +69,7 @@ const post = (status: string) => ({
   kind: 'text',
   title: 'A sample thread',
   body: 'Sample body',
-  authorDisplay: { mode: 'anonymous', anonLabel: 'Anonymous A' },
+  authorDisplay: { name: 'Sample S.' },
   thoughtfulCount: 0,
   commentCount: 0,
   hotScore: 1,
@@ -127,8 +127,6 @@ beforeEach(async () => {
       contentKey: 'comment:visible1:c1',
       authorUid: 'studentA',
     });
-    await setDoc(doc(db, 'threadAnon/visible1'), { count: 1 });
-    await setDoc(doc(db, 'threadAnon/visible1/members/studentA'), { index: 0 });
     await setDoc(doc(db, 'votes/visible1/by/studentA'), {
       uid: 'studentA',
       postId: 'visible1',
@@ -157,7 +155,7 @@ beforeEach(async () => {
     });
     await setDoc(doc(db, 'auditLog/a1'), {
       actorUid: 'adminA',
-      action: 'revealAuthor',
+      action: 'setRole',
       reason: 'A sample reason',
     });
     await setDoc(doc(db, 'dailyQuestions/2026-11-16-1'), { text: 'A sample question?', status: 'proposed' });
@@ -184,7 +182,7 @@ describe('authorship: nobody reads it from a client, ever', () => {
   it('a moderator cannot read authorship', async () => {
     for (const p of paths) await assertFails(getDoc(doc(moderator(), p)));
   });
-  it('an admin cannot read authorship directly either (only through the logged revealAuthor function)', async () => {
+  it('an admin cannot read authorship directly either ', async () => {
     for (const p of paths) await assertFails(getDoc(doc(admin(), p)));
   });
   it('nobody can list or query authorship', async () => {
@@ -199,21 +197,6 @@ describe('authorship: nobody reads it from a client, ever', () => {
       await assertFails(updateDoc(doc(db, 'authorship/post:visible1'), { authorUid: 'studentB' }));
       await assertFails(deleteDoc(doc(db, 'authorship/post:visible1')));
     }
-  });
-});
-
-describe('threadAnon: the per-thread letters stay private', () => {
-  it('nobody can read who holds which letter', async () => {
-    for (const db of [student(), otherStudent(), moderator(), admin()]) {
-      await assertFails(getDoc(doc(db, 'threadAnon/visible1')));
-      await assertFails(getDoc(doc(db, 'threadAnon/visible1/members/studentA')));
-      await assertFails(getDocs(collection(db, 'threadAnon/visible1/members')));
-      await assertFails(getDocs(collectionGroup(db, 'members')));
-    }
-  });
-  it('nobody can write it', async () => {
-    await assertFails(setDoc(doc(student(), 'threadAnon/visible1/members/studentA'), { index: 5 }));
-    await assertFails(setDoc(doc(admin(), 'threadAnon/visible1/members/x'), { index: 5 }));
   });
 });
 

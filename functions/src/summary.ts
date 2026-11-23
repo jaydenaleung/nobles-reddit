@@ -31,7 +31,7 @@ function toResult(
  * a thread is summarised again at 20, 30, 40 comments, not on every view.
  *
  * What the model is sent: the post and up to 60 comments, as text only.
- * No names, no anonymous labels, no roles, no ids. It cannot reveal an author
+ * No names, no roles, no ids. It cannot reveal an author
  * because it is never told one.
  */
 export const requestSummary = callable(

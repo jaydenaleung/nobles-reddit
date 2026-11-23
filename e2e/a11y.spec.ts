@@ -1,13 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import {
-  freshEmail,
-  makeLegacyAnonymous,
-  openQuestionThread,
-  setTheme,
-  signIn,
-  startThread,
-} from './helpers';
+import { freshEmail, openQuestionThread, setTheme, signIn } from './helpers';
 
 /**
  * axe on every route, in Paper and Night (and Board for the hall screen),
@@ -106,15 +99,6 @@ test('dialogs and forms in use', async ({ page }) => {
   await expectNoSeriousViolations(page, 'report dialog');
   await page.getByRole('dialog').getByRole('button', { name: 'Cancel' }).click();
 
-  // "Who wrote this?" is only offered on anonymous threads, which can only be older ones.
-  const legacyId = await startThread(page, { title: `A thread to check the reveal dialog ${Date.now()}` });
-  await makeLegacyAnonymous(page, legacyId);
-  await page.reload();
-  await ready(page);
-  await page.locator('.th-card').first().getByRole('button', { name: 'Who wrote this?' }).click();
-  await expectNoSeriousViolations(page, 'reveal dialog');
-  await page.getByRole('dialog').getByRole('button', { name: 'Cancel' }).click();
-
   // The composer with an error showing.
   await page.goto('/new');
   await page.getByRole('tab', { name: 'Poll' }).click();
@@ -123,7 +107,7 @@ test('dialogs and forms in use', async ({ page }) => {
 
   // Each administration tab.
   await page.goto('/admin');
-  for (const tab of ['Spaces', 'Question of the day', 'Who wrote it', 'AI budget', 'Settings']) {
+  for (const tab of ['Spaces', 'Question of the day', 'AI budget', 'Settings']) {
     await page.getByRole('tab', { name: tab }).click();
     await ready(page);
     await expectNoSeriousViolations(page, `admin tab: ${tab}`);

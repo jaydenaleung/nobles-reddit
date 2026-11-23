@@ -193,7 +193,6 @@ export async function post(
     compact({
       spaceId,
       kind: 'text',
-      identityMode: 'named',
       title: 'A sample thread for testing',
       body: 'Sample body text.',
       ...overrides,
@@ -210,7 +209,7 @@ export async function comment(
   await refill(persona);
   const created = await persona.call<{ postId: string; commentId: string; contentKey: string }>(
     'createComment',
-    compact({ postId, parentId: null, identityMode: 'named', body: 'A sample comment.', ...overrides }),
+    compact({ postId, parentId: null, body: 'A sample comment.', ...overrides }),
   );
   await screened(`posts/${postId}/comments/${created.commentId}`);
   return created;

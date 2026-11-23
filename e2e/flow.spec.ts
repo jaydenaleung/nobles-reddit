@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { addComment, freshEmail, makeLegacyAnonymous, signIn, signOut, startThread } from './helpers';
+import { addComment, freshEmail, signIn, signOut, startThread } from './helpers';
 
 /**
  * The main flow, on the Firebase emulators, under the same
@@ -211,35 +211,13 @@ test.describe.serial('the main flow', () => {
     await expect(page).toHaveURL(/\/$/);
   });
 
-  test('an admin reveals the author of a legacy anonymous thread, and the audit log records it', async ({
-    page,
-  }) => {
-    // Only threads from before anonymous posting was turned off can be anonymous.
-    await makeLegacyAnonymous(page, threadId);
+  test('an admin restores a held thread, and the audit log records the moderation', async ({ page }) => {
     await signIn(page, 'sample.admin@nobles.edu', {
       firstName: 'Sample',
       lastInitial: 'A',
       classYear: 'faculty',
     });
     await page.goto(`/t/${threadId}`);
-    await expect(page.locator('.th-card').first()).toContainText('Anonymous');
-    await page.locator('.th-card').first().getByRole('button', { name: 'Who wrote this?' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Who wrote this?' });
-
-    // A reason is required.
-    await dialog.getByRole('button', { name: 'Show who wrote it' }).click();
-    await expect(dialog.getByRole('alert')).toContainText('at least 10');
-    await expect(dialog).not.toContainText(author.email);
-
-    const reason = `Safety follow-up ${stamp}`;
-    await dialog.getByLabel('Why do you need to know? (required)').fill(reason);
-    await dialog.getByRole('button', { name: 'Show who wrote it' }).click();
-    await expect(dialog.getByText(author.email)).toBeVisible();
-    await expect(dialog.getByText('Zephyrine Q.')).toBeVisible();
-    await expect(dialog.getByText('This lookup is in the audit log')).toBeVisible();
-    await dialog.getByRole('button', { name: 'Close' }).click();
-
-    // Restore the thread, then read the audit log.
     await page.locator('.th-card').first().getByRole('button', { name: 'Moderate' }).click();
     const mod = page.getByRole('dialog', { name: 'Moderate this thread' });
     await mod.getByLabel('Put it back').check();
@@ -247,39 +225,9 @@ test.describe.serial('the main flow', () => {
     await expect(page.getByText('Only mods can see this thread.')).toHaveCount(0);
 
     await page.goto('/admin/audit');
-    const row = page.getByRole('row').filter({ hasText: reason });
-    await expect(row).toBeVisible();
-    await expect(row).toContainText('revealAuthor');
-    await expect(row).toContainText('sample.admin@nobles.edu');
     await expect(page.getByRole('row').filter({ hasText: 'Holding while we check' }).first()).toContainText(
       'hold',
     );
-  });
-
-  test('another student sees the legacy anonymous thread with no trace of who wrote it', async ({ page }) => {
-    await signIn(page, reader.email, reader);
-    const secrets = [authorUid, 'Zephyrine', author.email, 'e2e.author', '2031', '’31'];
-    const check = async (label: string) => {
-      const html = await page.content();
-      for (const secret of secrets) {
-        expect(html.includes(secret), `${label} must not contain "${secret}"`).toBe(false);
-      }
-    };
-    await page.goto(`/t/${threadId}`);
-    await expect(page.getByRole('heading', { level: 1, name: threadTitle })).toBeVisible();
-    // The author's own comment is still named; the thread itself reads "Anonymous".
-    const card = page.locator('.th-card').first();
-    await expect(card).toContainText('Anonymous');
-    await expect(card).not.toContainText('Zephyrine');
-    await expect(page.getByRole('button', { name: 'Who wrote this?' })).toHaveCount(0);
-
-    await page.goto('/s/middle-school?sort=new');
-    await expect(page.getByRole('link', { name: threadTitle })).toBeVisible();
-    await check('the feed');
-
-    await page.goto(`/search?q=${searchWord}`);
-    await expect(page.getByRole('link', { name: threadTitle })).toBeVisible();
-    await check('search results');
   });
 
   test('a post about self-harm is not published and the author gets a caring message', async ({ page }) => {

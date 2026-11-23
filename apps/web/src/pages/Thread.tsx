@@ -4,8 +4,8 @@ import {
   LIMITS,
   buildAuthorDisplay,
   commentKey,
-  isModeratorRole,
   postKey,
+  isModeratorRole,
   relativeTime,
   type AuthorDisplay,
   type SummaryResult,
@@ -15,7 +15,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api, errorMessage } from '../api';
 import { useMember } from '../auth/AuthContext';
 import { ReplyComposer, type PendingComment } from '../components/Composer';
-import { ModDialog, ReportDialog, RevealDialog, type ModTarget } from '../components/Dialogs';
+import { ModDialog, ReportDialog, type ModTarget } from '../components/Dialogs';
 import { Icon } from '../components/Icon';
 import { Avatar, Byline } from '../components/Identity';
 import { Page } from '../components/Layout';
@@ -100,7 +100,6 @@ export default function Thread() {
   const member = useMember();
   const toast = useToast();
   const isMod = isModeratorRole(member.role);
-  const isAdmin = member.role === 'admin';
   const { post, comments, load, commentsReady } = useThread(postId, isMod);
   const { byId } = useSpaces();
   const mine = useMine();
@@ -110,7 +109,6 @@ export default function Thread() {
   const [pending, setPending] = useState<PendingComment[]>([]);
   const [report, setReport] = useState<string | null>(null);
   const [modTarget, setModTarget] = useState<ModTarget | null>(null);
-  const [reveal, setReveal] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const [countDelta, setCountDelta] = useState<Record<string, number>>({});
@@ -257,17 +255,16 @@ export default function Thread() {
   const upvoteLabel = (contentKey: string, count: number) =>
     `${votes.thoughtful.has(contentKey) ? 'Upvoted, press again to undo' : 'Upvote'}. ${upvoteCount(contentKey, count)} so far`;
 
-  const pendingDisplay = (_mode: PendingComment['mode']): AuthorDisplay =>
-    buildAuthorDisplay(member.profile, 'named', 0);
+  const pendingDisplay: AuthorDisplay = buildAuthorDisplay(member.profile);
 
   const renderPending = (parentId: string | null) =>
     pending
       .filter((p) => p.parentId === parentId)
       .map((p) => (
         <div className="nb-comment nb-comment--pending" key={p.key} aria-busy="true">
-          <Avatar author={pendingDisplay(p.mode)} />
+          <Avatar author={pendingDisplay} />
           <div>
-            <Byline author={pendingDisplay(p.mode)} when="posting…" avatar={false} showLetter={false} />
+            <Byline author={pendingDisplay} when="posting…" avatar={false} />
             <SafeText className="nb-comment__body" text={p.body} />
           </div>
         </div>
@@ -385,11 +382,6 @@ export default function Thread() {
                 }
               >
                 <Icon name="shield" /> Moderate
-              </button>
-            )}
-            {isAdmin && c.authorDisplay.mode === 'anonymous' && (
-              <button type="button" onClick={() => setReveal(key)}>
-                Who wrote this?
               </button>
             )}
           </div>
@@ -576,15 +568,6 @@ export default function Thread() {
                 <Icon name="shield" /> Moderate
               </button>
             )}
-            {isAdmin && post.authorDisplay.mode === 'anonymous' && (
-              <button
-                className="nb-btn nb-btn--quiet nb-btn--sm"
-                type="button"
-                onClick={() => setReveal(pKey)}
-              >
-                Who wrote this?
-              </button>
-            )}
           </div>
         </div>
 
@@ -666,7 +649,6 @@ export default function Thread() {
 
       <ReportDialog contentKey={report} onClose={() => setReport(null)} />
       <ModDialog target={modTarget} onClose={() => setModTarget(null)} />
-      <RevealDialog contentKey={reveal} onClose={() => setReveal(null)} />
     </Page>
   );
 }

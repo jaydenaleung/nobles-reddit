@@ -68,7 +68,7 @@ try {
   }
 
   // A function must refuse a caller who is not signed in, with the expected error and nothing more.
-  for (const name of ['createPost', 'revealAuthor']) {
+  for (const name of ['createPost']) {
     const response = await fetch(`${functionsBase}/${name}`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },

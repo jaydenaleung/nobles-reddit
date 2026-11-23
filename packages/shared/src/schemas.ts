@@ -30,15 +30,6 @@ export const contentKeySchema = z
     'Not a valid content key',
   );
 
-export const identityModeSchema = z.enum(['named', 'anonymous']);
-/**
- * Neddit has no anonymous posting: everything new goes up under the writer's
- * name. Older anonymous content still reads as "Anonymous".
- */
-export const newContentIdentitySchema = z.literal('named', {
-  error: 'Anonymous posting is off. Everything goes up under your name.',
-});
-
 export const titleSchema = z
   .string()
   .transform(cleanLine)
@@ -105,7 +96,6 @@ export const onboardSchema = z
 
 const postBase = {
   spaceId: firestoreId,
-  identityMode: newContentIdentitySchema,
   title: titleSchema,
 };
 export const createPostSchema = z.discriminatedUnion('kind', [
@@ -132,7 +122,6 @@ export const createCommentSchema = z
   .object({
     postId: firestoreId,
     parentId: firestoreId.nullable(),
-    identityMode: newContentIdentitySchema,
     body: commentBodySchema,
   })
   .strict();
@@ -174,21 +163,6 @@ export const resolveReportSchema = z
     id: firestoreId,
     kind: z.enum(['report', 'queue']),
     note: z.string().max(LIMITS.reasonMax).optional(),
-  })
-  .strict();
-
-export const revealAuthorSchema = z
-  .object({
-    contentKey: contentKeySchema,
-    reason: z
-      .string()
-      .transform(cleanText)
-      .pipe(
-        z
-          .string()
-          .min(LIMITS.revealReasonMin, `Give a reason of at least ${LIMITS.revealReasonMin} characters`)
-          .max(LIMITS.reasonMax),
-      ),
   })
   .strict();
 
@@ -271,7 +245,6 @@ export type CreateCommentInput = z.input<typeof createCommentSchema>;
 export type EditOwnContentInput = z.input<typeof editOwnContentSchema>;
 export type ReportContentInput = z.input<typeof reportContentSchema>;
 export type ModActionInput = z.input<typeof modActionSchema>;
-export type RevealAuthorInput = z.input<typeof revealAuthorSchema>;
 export type SetRoleInput = z.input<typeof setRoleSchema>;
 export type ManageSpaceInput = z.input<typeof manageSpaceSchema>;
 export type DailyQuestionActionInput = z.input<typeof dailyQuestionActionSchema>;

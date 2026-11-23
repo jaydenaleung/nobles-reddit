@@ -39,14 +39,13 @@ The brief said: when something is not specified, pick the default given or the m
 | --- | --- | --- |
 | **New posts and comments are held until the automatic check has read them** (a few seconds) | The most conservative reading of "self-harm signals publish nothing new". The cost is a short wait after posting | `functions/src/content.ts`, `triggers.ts` |
 | **If the check is unavailable, posts are published** after a small phrase check for self-harm and violence | The brief: when the budget is exceeded "nothing else breaks", and the classifier is "never the only line". **The school may prefer to hold everything for a moderator instead** | `functions/src/triggers.ts` |
-| **No anonymous posting.** Every new post and comment goes up under the writer's name, and the server refuses `identityMode: "anonymous"` | Neddit is about learning to disagree respectfully, and the community values ask people to stand behind what they say | `packages/shared/src/schemas.ts` |
-| Content posted anonymously before that change still reads "Anonymous", and its author stays hidden from other students | Those people posted on the understanding that their name was hidden. Administrators can still look up the author, with a reason, logged | `apps/web/src/components/Identity.tsx`, `functions/src/adminFns.ts` |
+| **No anonymous posting.** Every post and comment goes up under the writer's name | Neddit is about learning to disagree respectfully, and the community values ask people to stand behind what they say | `packages/shared/src/schemas.ts` |
 | Top-level comments are depth 0 and replies go to depth 4 | "Max depth 4" was ambiguous; this allows four levels of reply | `packages/shared/src/constants.ts` |
 | Editing re-runs the automatic check, and the post is hidden for those seconds | Otherwise an edit would be a way round the check | `functions/src/content.ts` |
 | Poll options and links cannot be edited after posting | Changing a poll after people voted would be unfair | |
 | You can upvote your own post | Not specified; simplest | |
 | "Save" keeps a thread on this device only. "Share" copies the link | They are in the reference design but not in the data model; nothing new is collected | `apps/web/src/lib/storage.ts` |
-| Deleting an account keeps a small record (name, school email) next to the authorship record | Without it, "the administration can always see who wrote it" would stop being true for remaining posts. The page says so first | `functions/src/users.ts` |
+| Deleting an account keeps a small record (name, school email) next to the authorship record | Without it, the school could not tell who wrote what for posts that remain. The page says so first | `functions/src/users.ts` |
 | Moderators can read reports, which include the reporter's internal id but not their name | The brief's data model. Moderators cannot read profiles, so the id tells them nothing. **Worth a second look** | `firestore.rules` |
 
 ## Additions to the brief's data model and functions
@@ -104,6 +103,6 @@ The brief said: when something is not specified, pick the default given or the m
 
 1. **Privacy and families.** Review `docs/PRIVACY.md` with whoever is responsible for student data. Decide what families are told or asked, especially for the middle school, and whether student text may be sent to an outside model.
 2. **The wellbeing process.** Who gets the alert, how fast someone responds out of hours, the wording students see, and how email is delivered. Decide whether posts should wait for a moderator when the automatic check is down.
-3. **Who can look up authors, and when.** Name the administrators and moderators. Agree a reveal policy and who reviews the audit log.
+3. **Who reviews the audit log.** Name the administrators and moderators, and agree who reads the log.
 4. **Retention and deletion.** Whether 24 months is right, what happens to the archive, and whether keeping the authorship record after an account is deleted matches school policy.
 5. **Name, look and values.** The name "Neddit", use of the school's colours, the logo mark, how faculty names should appear, and how the community values page connects to the handbook.

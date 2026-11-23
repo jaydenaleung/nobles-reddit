@@ -171,10 +171,9 @@ export const approveDailyQuestion = callable(
         ...(data.pollOptions
           ? { poll: { options: data.pollOptions.map((label, i) => ({ id: `o${i + 1}`, label, count: 0 })) } }
           : {}),
-        authorDisplay: { mode: 'named', name: ADMIN_DISPLAY_NAME, role: 'admin' },
+        authorDisplay: { name: ADMIN_DISPLAY_NAME, role: 'admin' },
         thoughtfulCount: 0,
         commentCount: 0,
-        anonCommentCount: 0,
         hotScore: hotScore(0, 0, Math.floor(Date.now() / 1000)),
         pinned: true,
         pinnedBy: 'administration',

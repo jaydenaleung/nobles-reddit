@@ -362,7 +362,6 @@ textarea {
  * No highlighted text. The Administration and Faculty badges keep their gold;
  * every other badge, notice and chip is plain text with at most a thin rule.
  */
-.nb-badge--anon,
 .nb-badge--live,
 .nb-badge--kind,
 .nb-badge--ai {
@@ -373,14 +372,9 @@ textarea {
 }
 .nb-notice,
 .nb-notice--staff,
-.nb-notice--kind,
-.nb-notice--anon {
+.nb-notice--kind {
   background: none;
   border: 1px solid var(--rule);
-}
-.nb-byline--anon b {
-  font-style: normal;
-  color: var(--ink);
 }
 
 /* Feed rows: things the reference implies but does not spell out */
@@ -1259,9 +1253,6 @@ dialog.dlg::backdrop {
   .nb-input,
   .nb-select {
     min-height: 44px;
-  }
-  .nb-identity__opt span {
-    height: 40px;
   }
   .tabs button,
   .tabs a {

@@ -64,7 +64,7 @@ export default function NewPost() {
       setError('Pick a space.');
       return;
     }
-    const base = { spaceId, identityMode: 'named' as const, title };
+    const base = { spaceId, title };
     const input: CreatePostInput =
       kind === 'text'
         ? { ...base, kind, body }

@@ -1,19 +1,5 @@
 import type { Role } from './constants';
-import type { AuthorDisplay, IdentityMode } from './types';
-
-/** 0 -> "A", 25 -> "Z", 26 -> "AA". */
-export function anonLetter(index: number): string {
-  let n = Math.max(0, Math.floor(index));
-  let out = '';
-  do {
-    out = String.fromCharCode(65 + (n % 26)) + out;
-    n = Math.floor(n / 26) - 1;
-  } while (n >= 0);
-  return out;
-}
-export function anonLabel(index: number): string {
-  return `Anonymous ${anonLetter(index)}`;
-}
+import type { AuthorDisplay } from './types';
 
 export function formatDisplayName(firstName: string, lastInitial: string): string {
   return `${firstName.trim()} ${lastInitial.trim().toUpperCase()}.`;
@@ -26,23 +12,9 @@ export interface AuthorProfileForDisplay {
   role: Role;
 }
 
-/**
- * Builds what other people see about an author.
- *
- * Named: name, class year and role.
- * Anonymous: only the per-thread label. No name, no class year and no role,
- * so a faculty member posting anonymously is just "Anonymous", on purpose.
- */
-export function buildAuthorDisplay(
-  profile: AuthorProfileForDisplay,
-  mode: IdentityMode,
-  anonIndex: number,
-): AuthorDisplay {
-  if (mode === 'anonymous') {
-    return { mode: 'anonymous', anonLabel: anonLabel(anonIndex) };
-  }
+/** What other people see about an author: name, class year (students) and role. */
+export function buildAuthorDisplay(profile: AuthorProfileForDisplay): AuthorDisplay {
   const display: AuthorDisplay = {
-    mode: 'named',
     name: formatDisplayName(profile.firstName, profile.lastInitial),
     role: profile.role,
   };

@@ -20,7 +20,7 @@ Posts on Nobles Commons were written by students, many of them minors, to talk t
 
 1. **Consent.** Every person who wrote in the thread (the post and every comment) has agreed, knowing what it is for. For students under 18 the school decides whether a parent or guardian must agree as well. One person saying no means the thread is not used.
 2. **Moderator approval.** A moderator has read the thread and approved it for this use. Threads that were ever held, removed or flagged for wellbeing are never used.
-3. **Anonymised first.** Before the text leaves the site: no names, no anonymous letters, no class years, no roles, no ids, no timestamps finer than a month. Names and personal details that appear *inside* the text are removed or replaced by hand. If that cannot be done reliably for a thread, it is not used.
+3. **Anonymised first.** Before the text leaves the site: no names, no class years, no roles, no ids, no timestamps finer than a month. Names and personal details that appear *inside* the text are removed or replaced by hand. If that cannot be done reliably for a thread, it is not used.
 4. **Kept small and kept safe.** The export stays on school-approved storage, is not shared, is not uploaded to outside services, and is deleted when the project ends.
 5. **Reversible.** If someone withdraws consent, their thread is removed from the data and the model is retrained without it.
 

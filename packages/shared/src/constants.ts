@@ -29,7 +29,6 @@ export const LIMITS = {
   pollMaxOptions: 6,
   pollOptionMax: 80,
   reportNoteMax: 500,
-  revealReasonMin: 10,
   reasonMax: 500,
   nameMax: 40,
   /** Largest request body a callable accepts, in characters of JSON. */
@@ -163,8 +162,6 @@ export const NEDDIT_QUOTE = {
   text: 'Great minds discuss ideas; average minds discuss events; small minds discuss people.',
   by: 'Eleanor Roosevelt',
 } as const;
-
-export const AI_SUMMARY_LABEL = 'Summary. Written by a computer model, not a person.';
 
 export const REPORT_REASONS = [
   { id: 'unkind', label: 'It’s mean or goes after someone' },

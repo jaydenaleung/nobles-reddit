@@ -8,8 +8,8 @@ For administrators and moderators. No technical background needed.
 | --- | --- | --- |
 | Student | Anyone with a school email, by default | Read, post, comment, upvote, vote in polls, report |
 | Faculty | Set by an administrator | The same, with a "Faculty" badge when posting under their name |
-| Moderator | Faculty nominated by the administration | Everything above, plus: see reports and the queue, hold, remove, restore and pin posts, approve the question of the day, choose replies for the hall screen. **Cannot see who wrote anything** |
-| Administrator | The people listed at deployment, and anyone they promote | Everything a moderator can, plus: change roles, manage spaces, look up an author (logged), read the audit log, see AI usage, change settings |
+| Moderator | Faculty nominated by the administration | Everything above, plus: see reports and the queue, hold, remove, restore and pin posts, approve the question of the day, choose replies for the hall screen. |
+| Administrator | The people listed at deployment, and anyone they promote | Everything a moderator can, plus: change roles, manage spaces, read the audit log, see AI usage, change settings |
 
 Roles are changed under **Administration, Roles**. Type the person's school email, pick the role and give a reason. If they have an account it changes at once; if not, it applies the first time they sign in. You cannot change your own role: ask another administrator.
 
@@ -50,34 +50,16 @@ What a person needs to do:
 
 1. **Read it promptly.** Decide with the counseling office who responds and how fast. Write that down before launch.
 2. **Follow the school's existing steps for a student of concern.** This tool does not replace them.
-3. **If you need to know who wrote it,** an administrator can look it up (next section). That is exactly what the lookup is for.
+3. **If you need to know who wrote it,** every thread and comment shows the writer's name.
 4. When the person is safe and the right people know, mark the item as dealt with. Leave the post held.
 
 If a post was reported as a safety worry by another student, it is still visible. Read it and decide whether to hold it.
 
 The program misses things and flags things that are fine. It is a helper. People reading and reporting are the real safety net.
 
-## Looking up an author
-
-Only administrators can do this, and only on purpose.
-
-- New posts and comments already show the writer's name. Lookups are only needed for older content posted anonymously, before anonymous posting was turned off.
-- On such a thread or comment, choose **Who wrote this?** Or go to Administration, Who wrote it, and paste a thread link.
-- You must type a reason of at least ten characters.
-- You see the person's name, school email, class year and role, and a notice that **this view was logged**.
-
-The log entry records your name, the time, what you looked at and your reason. It cannot be edited or deleted by anyone.
-
-### A suggested policy (for the school to decide)
-
-- Look up an author only for safety, or for serious or repeated breaking of the community values.
-- Not for curiosity, not for disagreement, not because a post is critical of the school.
-- A second administrator reads the audit log every month.
-- Tell students that this is the policy, and that lookups are possible and logged.
-
 ## The audit log
 
-**Administration, Open the audit log.** It lists, newest first: author lookups, moderation actions, role changes, new and edited spaces, settings changes, question approvals, account deletions, and exports of the log itself. "Export" downloads it as a file for the school's records.
+**Administration, Open the audit log.** It lists, newest first: moderation actions, role changes, new and edited spaces, settings changes, question approvals, account deletions, and exports of the log itself. "Export" downloads it as a file for the school's records.
 
 ## The question of the day
 
@@ -95,7 +77,7 @@ Under Administration, Settings you can list topics the suggestions must avoid an
 
 ## When someone deletes their account
 
-Their profile and sign-in are removed. Posts under their name stay but show "Former member". **The record of who wrote each post is kept**, so an administrator can still look up the author of something that remains. The page tells the student this before they confirm.
+Their profile and sign-in are removed. Posts under their name stay but show "Former member". **The record of who wrote each post is kept**, and the posts show "Former member" in place of their name. The page tells the student this before they confirm.
 
 ## If something goes badly wrong
 

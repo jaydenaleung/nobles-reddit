@@ -104,7 +104,7 @@ for (const user of Object.values(users)) {
 
 const named = (who: keyof typeof users): AuthorDisplay => {
   const u = users[who];
-  const display: AuthorDisplay = { mode: 'named', name: `${u.firstName} ${u.lastInitial}.`, role: u.role };
+  const display: AuthorDisplay = { name: `${u.firstName} ${u.lastInitial}.`, role: u.role };
   if (u.classYear) display.classYear = u.classYear;
   return display;
 };
@@ -212,7 +212,7 @@ const posts: SeedPost[] = [
       'Neddit is the Nobles Discussion Board. Post about school stuff or the news, and talk it through.\n\n' +
       'Neddit is about learning to disagree respectfully. Focus on the ideas, not the people who wrote them. Everything goes up under your name.\n\n' +
       'If a post looks wrong, hit Report and a mod will look at it.',
-    author: { mode: 'named', name: ADMIN_DISPLAY_NAME, role: 'admin' },
+    author: { name: ADMIN_DISPLAY_NAME, role: 'admin' },
     uid: users.admin.uid,
     hours: 48,
     thoughtful: 12,
@@ -350,7 +350,6 @@ if (!already.empty) {
       authorDisplay: post.author,
       thoughtfulCount: post.thoughtful,
       commentCount: comments.length,
-      anonCommentCount: comments.filter((c) => c.author.mode === 'anonymous').length,
       hotScore: hotScore(post.thoughtful, comments.length, createdAt.seconds),
       pinned: false,
       status: 'visible',
@@ -445,18 +444,13 @@ if (questionPostId) {
     counts: {
       weighedIn: options.reduce((sum, o) => sum + o.count, 0),
       replies: questionComments.length,
-      anonymousPercent: Math.round(
-        (questionComments.filter((c) => c.author.mode === 'anonymous').length / questionComments.length) *
-          100,
-      ),
     },
     approvedReplies: questionComments
       .filter((c) => c.board)
       .reverse()
       .map((c) => ({
-        displayName: c.author.mode === 'named' ? c.author.name : 'Anonymous',
-        anonymous: c.author.mode !== 'named',
-        ...(c.author.mode === 'named' && c.author.role ? { role: c.author.role } : {}),
+        displayName: c.author.name,
+        ...(c.author.role ? { role: c.author.role } : {}),
         text: c.body,
       })),
     nobleman: [

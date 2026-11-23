@@ -37,32 +37,17 @@
 .nb-badge { display: inline-flex; align-items: center; gap: var(--space-1); height: 20px; padding: 0 6px; border-radius: var(--radius-sm); font: 600 12px/16px var(--font-sans); white-space: nowrap; }
 .nb-badge .nb-icon { width: 13px; height: 13px; }
 .nb-badge--staff { background: var(--gold); color: var(--on-gold); }
-.nb-badge--anon { background: var(--anon-tint); color: var(--anon); box-shadow: inset 0 0 0 1px var(--anon); }
 .nb-badge--live { background: var(--orange); color: var(--on-orange); }
 .nb-badge--kind { background: var(--kind-tint); color: var(--kind); }
 .nb-badge--ai { background: var(--auto-tint); color: var(--ink); box-shadow: inset 0 0 0 1px var(--rule); font-weight: 500; font-style: italic; }
 
 /* Avatar + Byline */
 .nb-avatar { width: 28px; height: 28px; flex: none; border-radius: var(--radius-pill); display: inline-grid; place-items: center; background: var(--sky); color: var(--on-sky); font: 700 11px/1 var(--font-sans); }
-.nb-avatar--anon { background: var(--anon-tint); color: var(--anon); border: 1.5px dashed var(--anon); }
 .nb-avatar--staff { background: var(--gold); color: var(--on-gold); }
 .nb-avatar--sm { width: 22px; height: 22px; font-size: 10px; }
 .nb-avatar .nb-icon { width: 16px; height: 16px; }
 .nb-byline { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font: 400 13px/18px var(--font-sans); color: var(--ink-muted); }
 .nb-byline b { font-weight: 600; color: var(--ink); }
-.nb-byline--anon b { font-style: italic; color: var(--anon); }
-
-/* Identity toggle */
-.nb-identity { display: inline-flex; padding: 3px; gap: 3px; border: 1.5px solid var(--border-strong); border-radius: var(--radius-pill); background: var(--surface-raised); }
-.nb-identity__opt { position: relative; cursor: pointer; }
-.nb-identity__opt input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
-.nb-identity__opt span { display: inline-flex; align-items: center; gap: var(--space-2); height: 34px; padding: 0 var(--space-4) 0 var(--space-1); border-radius: var(--radius-pill); border: 2px solid transparent; font: 600 14px/20px var(--font-sans); color: var(--ink-muted); }
-.nb-identity__opt input:checked + span { background: var(--brand); color: var(--on-brand); }
-.nb-identity__opt--anon input:checked + span { background: var(--anon-tint); color: var(--ink); border: 2px dashed var(--anon); }
-.nb-identity__opt input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 2px; }
-.nb-identity__opt .nb-avatar { width: 26px; height: 26px; }
-.nb-identity__opt input:checked + span .nb-avatar { background: var(--on-brand); color: var(--brand); }
-.nb-identity__opt--anon input:checked + span .nb-avatar { background: transparent; border-color: var(--anon); color: var(--anon); }
 
 /* Notices */
 .nb-notice { display: flex; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); font: 400 13px/19px var(--font-sans); color: var(--ink); background: var(--surface-sunken); }
@@ -70,7 +55,6 @@
 .nb-notice b { font-weight: 700; }
 .nb-notice--staff { background: var(--staff-tint); } .nb-notice--staff .nb-icon { color: var(--staff); }
 .nb-notice--kind { background: var(--kind-tint); } .nb-notice--kind .nb-icon { color: var(--kind); }
-.nb-notice--anon { background: var(--anon-tint); } .nb-notice--anon .nb-icon { color: var(--anon); }
 
 /* Feed: one white column, ruled rows, vote rail on the left (the way people already read forums) */
 .nb-feed { background: var(--surface-raised); border: 1px solid var(--rule); border-radius: var(--radius-md); overflow: hidden; }

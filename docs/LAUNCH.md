@@ -27,7 +27,7 @@ Start with one grade or one club: enough people to have a conversation, few enou
 
 - Open one more space to the group and let them start their own threads.
 - Put two or three approved replies on the hall screen each day.
-- Try the hard paths on purpose with made-up posts: a report, a hold, a restore, an author lookup with a reason, and reading it back in the audit log.
+- Try the hard paths on purpose with made-up posts: a report, a hold, a restore, and reading it back in the audit log.
 - End of week: decide whether to open to a division, fix first, or stop.
 
 ## How to tell whether it is working

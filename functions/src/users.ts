@@ -136,7 +136,6 @@ async function loadMyContent(uid: string, limit: number): Promise<MyContentItem[
       kind: p.kind,
       title: p.kind === 'post' ? data.title : undefined,
       body: data.body ?? '',
-      identityMode: data.authorDisplay?.mode === 'anonymous' ? 'anonymous' : 'named',
       status: data.status,
       createdAtMs: data.createdAt?.toMillis?.() ?? 0,
     });
@@ -144,7 +143,7 @@ async function loadMyContent(uid: string, limit: number): Promise<MyContentItem[
   return items;
 }
 
-/** A person's own posts and comments, including their anonymous ones. Only ever returns the caller's own. */
+/** A person's own posts and comments. Only ever returns the caller's own. */
 export const listMyContent = callable(
   { name: 'listMyContent', schema: emptySchema, rate: 'reads' },
   async (_data, caller): Promise<{ items: MyContentItem[] }> => {
@@ -189,23 +188,21 @@ export const exportMyData = callable(
         const r = d.data();
         return { contentKey: r.contentKey, reason: r.reason, note: r.note ?? null, status: r.status };
       }),
-      note:
-        'Anonymous posts are included because the school keeps a record of who wrote every post. ' +
-        'Other students never see that record.',
+      note: 'The school keeps a record of who wrote every post. Other students never see that record.',
     };
   },
 );
 
 /**
- * "Delete my account". Named posts and comments stop showing the person's
+ * "Delete my account". Posts and comments stop showing the person's
  * name. The record of who wrote what is kept, as school policy requires, and
  * the page says so before the person confirms.
  */
 export const deleteMyAccount = callable(
   { name: 'deleteMyAccount', schema: emptySchema, rate: 'admin' },
-  async (_data, caller): Promise<{ deleted: true; anonymised: number }> => {
+  async (_data, caller): Promise<{ deleted: true; renamed: number }> => {
     const keys = await authoredKeys(caller.uid, 5000);
-    let anonymised = 0;
+    let renamed = 0;
     for (let i = 0; i < keys.length; i += 300) {
       const chunk = keys.slice(i, i + 300);
       const refs = chunk.flatMap((key) => {
@@ -216,9 +213,9 @@ export const deleteMyAccount = callable(
       const snaps = await db.getAll(...refs);
       const batch = db.batch();
       for (const snap of snaps) {
-        if (snap.exists && snap.data()?.authorDisplay?.mode === 'named') {
-          batch.update(snap.ref, { authorDisplay: { mode: 'anonymous', anonLabel: FORMER_MEMBER_LABEL } });
-          anonymised += 1;
+        if (snap.exists && snap.data()?.authorDisplay?.name !== FORMER_MEMBER_LABEL) {
+          batch.update(snap.ref, { authorDisplay: { name: FORMER_MEMBER_LABEL } });
+          renamed += 1;
         }
       }
       await batch.commit();
@@ -246,11 +243,11 @@ export const deleteMyAccount = callable(
       actorUid: caller.uid,
       actorEmail: caller.email,
       action: 'deleteOwnAccount',
-      reason: `Account deleted by its owner. ${anonymised} named items anonymised.`,
+      reason: `Account deleted by its owner. ${renamed} items renamed to the former-member label.`,
     });
     await batch.commit();
     await auth.deleteUser(caller.uid);
-    return { deleted: true, anonymised };
+    return { deleted: true, renamed };
   },
 );
 

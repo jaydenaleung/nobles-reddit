@@ -37,7 +37,6 @@ describe('createPost', () => {
     const data = (await adminDb.doc(`posts/${created.postId}`).get()).data()!;
     expect(data.status).toBe('visible');
     expect(data.authorDisplay).toEqual({
-      mode: 'named',
       name: 'Priyasample N.',
       classYear: 2027,
       role: 'student',
@@ -53,7 +52,6 @@ describe('createPost', () => {
     const raw = await priya.call<Record<string, unknown>>('createPost', {
       spaceId: spaces['clubs'],
       kind: 'text',
-      identityMode: 'named',
       title: 'What does the callable return?',
       body: '',
     });
@@ -109,7 +107,6 @@ describe('createPost', () => {
     const base = {
       spaceId: spaces['clubs'],
       kind: 'text',
-      identityMode: 'named',
       title: 'A fine title',
       body: '',
     };
@@ -117,7 +114,6 @@ describe('createPost', () => {
       await expectError(priya.call('createPost', { ...base, title: 'Hey' }), 'invalid-argument'),
     ).toMatch(/at least 5/);
     await expectError(priya.call('createPost', { ...base, body: 'x'.repeat(10_001) }), 'invalid-argument');
-    await expectError(priya.call('createPost', { ...base, identityMode: undefined }), 'invalid-argument');
     await expectError(priya.call('createPost', { ...base, identityMode: 'secret' }), 'invalid-argument');
     await expectError(priya.call('createPost', { ...base, identityMode: 'anonymous' }), 'invalid-argument');
     await expectError(
@@ -154,7 +150,6 @@ describe('createPost', () => {
       priya.call('createPost', {
         spaceId: staffOnly.id,
         kind: 'text',
-        identityMode: 'named',
         title: 'Let me in please',
         body: '',
       }),
@@ -181,7 +176,6 @@ describe('createComment', () => {
     const firstData = (await adminDb.doc(`posts/${thread.postId}/comments/${first.commentId}`).get()).data()!;
     expect(firstData).toMatchObject({ depth: 0, parentId: null, status: 'visible' });
     expect(firstData.authorDisplay).toEqual({
-      mode: 'named',
       name: 'Devsample S.',
       classYear: 2028,
       role: 'student',
@@ -204,19 +198,18 @@ describe('createComment', () => {
       parentId = created.commentId;
     }
     await expectError(
-      dev.call('createComment', { postId: thread.postId, parentId, identityMode: 'named', body: 'Too deep' }),
+      dev.call('createComment', { postId: thread.postId, parentId, body: 'Too deep' }),
       'invalid-argument',
     );
   });
 
   it('rejects comments on missing threads, missing parents and bad input', async () => {
     const thread = await post(priya, spaces['clubs']!, { title: 'Comment validation' });
-    const base = { postId: thread.postId, parentId: null, identityMode: 'named', body: 'Hello' };
+    const base = { postId: thread.postId, parentId: null, body: 'Hello' };
     await expectError(dev.call('createComment', { ...base, postId: 'missingPost' }), 'not-found');
     await expectError(dev.call('createComment', { ...base, parentId: 'missingParent' }), 'not-found');
     await expectError(dev.call('createComment', { ...base, body: '   ' }), 'invalid-argument');
     await expectError(dev.call('createComment', { ...base, body: 'x'.repeat(4001) }), 'invalid-argument');
-    await expectError(dev.call('createComment', { ...base, identityMode: undefined }), 'invalid-argument');
     await expectError(dev.call('createComment', { ...base, identityMode: 'anonymous' }), 'invalid-argument');
   });
 });
@@ -305,7 +298,7 @@ describe('editing and deleting your own content', () => {
 describe('rate limits', () => {
   it('allows 5 posts an hour and then says to wait', async () => {
     const eager = await member('content.eager@nobles.edu');
-    const base = { spaceId: spaces['clubs'], kind: 'text', identityMode: 'named', body: '' };
+    const base = { spaceId: spaces['clubs'], kind: 'text', body: '' };
     for (let i = 1; i <= 5; i++) {
       await eager.call('createPost', { ...base, title: `Eager post number ${i}` });
     }

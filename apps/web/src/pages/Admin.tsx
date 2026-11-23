@@ -3,8 +3,6 @@ import {
   ASSIGNABLE_ROLES,
   DEFAULT_WELLBEING_RESOURCES,
   ROLES,
-  contentKeySchema,
-  postKey,
   type AiUsageResult,
   type AuditLogEntry,
   type Role,
@@ -13,7 +11,6 @@ import { collection, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query } f
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { api, errorMessage } from '../api';
-import { RevealForm } from '../components/Dialogs';
 import { Page } from '../components/Layout';
 import { Empty, ErrorState, Loading, downloadJson, useToast } from '../components/Ui';
 import { useSpaces, type Load } from '../data/hooks';
@@ -64,7 +61,7 @@ function RolesTab() {
     <div className="stack">
       <p className="muted">
         Anyone with a school email is a student unless they’re listed here. Mods are teachers the
-        administration picks. Only admins can look up who wrote a post.
+        administration picks.
       </p>
       <form className="panel" onSubmit={(event) => void submit(event)}>
         <h2>Set a role</h2>
@@ -325,62 +322,6 @@ function SpacesTab() {
   );
 }
 
-function RevealTab() {
-  const [input, setInput] = useState('');
-  const [key, setKey] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const find = (event: FormEvent) => {
-    event.preventDefault();
-    setError(null);
-    const text = input.trim();
-    const fromLink = /\/t\/([A-Za-z0-9_-]{1,64})/.exec(text);
-    const candidate = fromLink ? postKey(fromLink[1]!) : text;
-    if (!contentKeySchema.safeParse(candidate).success) {
-      setKey(null);
-      setError('Paste a thread link, or a key that starts with post: or comment:.');
-      return;
-    }
-    setKey(candidate);
-  };
-  return (
-    <div className="stack">
-      <p className="muted">
-        Paste a thread link to see who wrote it. For a comment, open the thread and press “Who wrote this?”
-        under it. You have to give a reason, and the lookup goes in the log.
-      </p>
-      <form className="panel" onSubmit={find}>
-        <div className="field">
-          <label className="nb-label" htmlFor="reveal-key">
-            Thread link or content key
-          </label>
-          <input
-            className="nb-input"
-            id="reveal-key"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
-        </div>
-        {error && (
-          <p className="err" role="alert">
-            {error}
-          </p>
-        )}
-        <div className="row">
-          <button className="nb-btn" type="submit">
-            Continue
-          </button>
-        </div>
-      </form>
-      {key && (
-        <section className="panel" aria-label="Author lookup">
-          <h2>Who wrote {key}?</h2>
-          <RevealForm key={key} contentKey={key} />
-        </section>
-      )}
-    </div>
-  );
-}
-
 function UsageTab() {
   const [usage, setUsage] = useState<AiUsageResult | null>(null);
   const [load, setLoad] = useState<Load>('loading');
@@ -601,12 +542,11 @@ function SettingsTab() {
   );
 }
 
-type Tab = 'roles' | 'spaces' | 'question' | 'reveal' | 'usage' | 'settings';
+type Tab = 'roles' | 'spaces' | 'question' | 'usage' | 'settings';
 const TABS: [Tab, string][] = [
   ['roles', 'Roles'],
   ['spaces', 'Spaces'],
   ['question', 'Question of the day'],
-  ['reveal', 'Who wrote it'],
   ['usage', 'AI budget'],
   ['settings', 'Settings'],
 ];
@@ -641,7 +581,6 @@ export default function Admin() {
         {tab === 'roles' && <RolesTab />}
         {tab === 'spaces' && <SpacesTab />}
         {tab === 'question' && <QuestionApprovals />}
-        {tab === 'reveal' && <RevealTab />}
         {tab === 'usage' && <UsageTab />}
         {tab === 'settings' && <SettingsTab />}
       </div>
@@ -649,7 +588,7 @@ export default function Admin() {
   );
 }
 
-/** /admin/audit: every moderation action, role change and author lookup. Append-only. */
+/** /admin/audit: every moderation action, role change and role change. Append-only. */
 export function AuditLog() {
   const toast = useToast();
   const [entries, setEntries] = useState<(AuditLogEntry & { id: string })[]>([]);
@@ -692,7 +631,7 @@ export function AuditLog() {
           </div>
         </div>
         <p className="page-lede">
-          Every author lookup, mod action and role change, newest first. Nobody can edit or delete these.
+          Every mod action and role change, newest first. Nobody can edit or delete these.
         </p>
         {load === 'loading' ? (
           <Loading label="Loading the log" />

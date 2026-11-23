@@ -12,7 +12,7 @@
 | Role (student, faculty, moderator, administrator) | Set by the administration | You, administrators, and others as a badge on named posts |
 | Which part of the school (optional) | You tell us | You and administrators |
 | What you write | You | Other members, as you chose to sign it. Moderators see hidden posts too |
-| Who wrote each post and comment | Recorded automatically | **Administrators only**, through a logged lookup with a reason |
+| Who wrote each post and comment | Recorded automatically | Nobody through the website; it is stored privately |
 | Your upvotes and poll votes | You | Only you. Others see totals |
 | Reports you make | You | Moderators and administrators |
 | When you last signed in | Recorded automatically | You and administrators |
@@ -46,13 +46,13 @@ If the school would rather that student text never leaves its own project, set `
 - **Posts and comments:** until removed by their author or a moderator.
 - **Removed posts and comments:** kept hidden for `RETENTION_MONTHS` (default 24), then moved to an archive no client can read. They are not automatically destroyed. **The school should decide whether and when the archive is deleted.**
 - **The record of who wrote what:** kept as long as the post exists, and after it is removed.
-- **The audit log:** kept. It is the record that author lookups were proper.
+- **The audit log:** kept. It records moderation actions and role changes.
 - **AI usage counts:** one small total per day, no content.
 
 ## Your choices
 
-- **Everything you post goes up under your name** (first name and last initial, plus your class year if you are a student). There is no anonymous posting. Posts written anonymously before that change still read "Anonymous".
-- **Download your data** from the You page: your profile, everything you wrote (including any older anonymous posts), your marks and votes, and your reports.
+- **Everything you post goes up under your name** (first name and last initial, plus your class year if you are a student). There is no anonymous posting.
+- **Download your data** from the You page: your profile, everything you wrote, your marks and votes, and your reports.
 - **Delete your account** from the You page. What happens, exactly:
   - your profile and sign-in are removed;
   - posts and comments under your name stay, showing "Former member" in place of your name;

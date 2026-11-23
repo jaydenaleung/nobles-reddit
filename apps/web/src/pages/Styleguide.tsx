@@ -16,7 +16,6 @@ const base = {
   body: '',
   thoughtfulCount: 0,
   commentCount: 0,
-  anonCommentCount: 0,
   hotScore: 0,
   pinned: false,
   status: 'visible' as const,
@@ -24,9 +23,9 @@ const base = {
   searchTokens: [],
   sample: false,
 };
-const student: AuthorDisplay = { mode: 'named', name: 'Sample S.', classYear: 2028, role: 'student' };
-const faculty: AuthorDisplay = { mode: 'named', name: 'Sample T.', role: 'faculty' };
-const anon: AuthorDisplay = { mode: 'named', name: 'Sample R.', classYear: 2029, role: 'student' };
+const student: AuthorDisplay = { name: 'Sample S.', classYear: 2028, role: 'student' };
+const faculty: AuthorDisplay = { name: 'Sample T.', role: 'faculty' };
+const otherStudent: AuthorDisplay = { name: 'Sample R.', classYear: 2029, role: 'student' };
 
 const posts: PostView[] = [
   {
@@ -36,7 +35,7 @@ const posts: PostView[] = [
     spaceName: 'School news',
     title: 'Read this first: how Neddit works',
     body: 'Disagree freely. Be specific. Go after ideas, not people.',
-    authorDisplay: { mode: 'named', name: 'Administration', role: 'admin' },
+    authorDisplay: { name: 'Administration', role: 'admin' },
     pinned: true,
     pinnedBy: 'administration',
     thoughtfulCount: 212,
@@ -60,7 +59,6 @@ const posts: PostView[] = [
     },
     thoughtfulCount: 148,
     commentCount: 41,
-    anonCommentCount: 14,
     createdAt: ts(6),
   },
   {
@@ -83,7 +81,7 @@ const posts: PostView[] = [
     spaceName: 'Middle school',
     title: 'Is it okay to ask upperclassmen for help with homework?',
     body: 'I’m new this year and I don’t really know who to ask. I don’t want to bug anyone who’s busy.',
-    authorDisplay: anon,
+    authorDisplay: otherStudent,
     thoughtfulCount: 31,
     commentCount: 15,
     createdAt: ts(8),
@@ -126,7 +124,7 @@ const swatches = [
   'orange',
   'staff-tint',
   'kind-tint',
-  'anon-tint',
+
   'auto-tint',
 ];
 
@@ -226,7 +224,7 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
       <div className="stack">
         <Byline author={student} when="2 hours ago" />
         <Byline author={faculty} when="1 hour ago" />
-        <Byline author={anon} when="8 hours ago" />
+        <Byline author={otherStudent} when="8 hours ago" />
       </div>
 
       <h3 className="sg-h">Notices</h3>
@@ -270,9 +268,7 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
       </div>
 
       <h3 className="sg-h">Auto-summary</h3>
-      <SummaryBox
-        text="Most people agree a later start would help with sleep, as long as bedtimes move too. The disagreement is about practice schedules and long commutes."
-      />
+      <SummaryBox text="Most people agree a later start would help with sleep, as long as bedtimes move too. The disagreement is about practice schedules and long commutes." />
 
       <h3 className="sg-h">Comment</h3>
       <div className="nb-comment">
@@ -296,9 +292,9 @@ function Sheet({ theme }: { theme: 'paper' | 'night' | 'board' }) {
           </div>
           <div className="nb-comment__replies">
             <div className="nb-comment">
-              <Avatar author={anon} />
+              <Avatar author={otherStudent} />
               <div>
-                <Byline author={anon} when="1 hour ago" avatar={false} />
+                <Byline author={otherStudent} when="1 hour ago" avatar={false} />
                 <SafeText
                   className="nb-comment__body"
                   text="I commute 50 minutes. Thirty extra minutes is real for me."

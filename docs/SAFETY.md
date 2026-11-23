@@ -8,10 +8,7 @@ Give students and faculty a place to learn to disagree respectfully, under their
 
 ## Names: exactly what they mean here
 
-- **Everything new goes up under your name.** There is no anonymous posting. The composer says who you are posting as, and the server refuses anything that asks to be anonymous.
-- **Older anonymous posts stay anonymous.** Posts and comments written before anonymous posting was turned off still read "Anonymous". Other students and faculty cannot see who wrote them: not on the page, not in the data the page loads, not through search, not from ids or timestamps, and not from error messages. This is tested (see `docs/ARCHITECTURE.md`).
-- **The administration can look up the author of an older anonymous post.** Every post and comment has a private record of its author. Administrators can look it up by giving a reason, and each lookup is logged with their name, the time and the reason. The log cannot be edited.
-- **Moderators cannot look up authors.** They can remove a post without needing to know whose it is.
+- **Everything new goes up under your name.** There is no anonymous posting. The composer says who you are posting as.
 
 ### Honest limits
 
@@ -56,7 +53,7 @@ The alert email needs a mail service to be connected before it is delivered. Unt
 - **No downvotes and no negative scores.** The only reaction is an upvote.
 - **Editing** is possible for 10 minutes; edited text is checked again.
 - **The hall screen** shows only replies a moderator chose for it.
-- **Computer-written text is always labelled** ("Summary. Written by a computer model, not a person."), and the model is never told who wrote anything.
+- **Computer-written text carries an "Auto-summary" tag**, and the model is never told who wrote anything.
 
 ## Known gaps
 

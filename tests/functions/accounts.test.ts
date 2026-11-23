@@ -95,7 +95,6 @@ describe('every other function needs an onboarded member', () => {
       p.call('createPost', {
         spaceId: spaces['clubs'],
         kind: 'text',
-        identityMode: 'named',
         title: 'Hello there',
         body: '',
       }),
@@ -107,12 +106,8 @@ describe('every other function needs an onboarded member', () => {
   it('refuses another domain everywhere', async () => {
     const p = await signIn('outsider@example.com');
     for (const [name, data] of [
-      [
-        'createPost',
-        { spaceId: spaces['clubs'], kind: 'text', identityMode: 'named', title: 'Hello there', body: '' },
-      ],
+      ['createPost', { spaceId: spaces['clubs'], kind: 'text', title: 'Hello there', body: '' }],
       ['toggleThoughtful', { contentKey: 'post:abc' }],
-      ['revealAuthor', { contentKey: 'post:abc', reason: 'A long enough reason' }],
       ['modAction', { contentKey: 'post:abc', action: 'remove' }],
       ['requestSummary', { postId: 'abc' }],
     ] as const) {
@@ -181,12 +176,8 @@ describe('my data', () => {
     const mine = await post(me, spaces['clubs']!, { title: 'My own thread' });
     await post(other, spaces['clubs']!, { title: 'Somebody else wrote this' });
 
-    const list = await me.call<{ items: { contentKey: string; identityMode: string }[] }>(
-      'listMyContent',
-      {},
-    );
+    const list = await me.call<{ items: { contentKey: string }[] }>('listMyContent', {});
     expect(list.items.map((i) => i.contentKey)).toEqual([mine.contentKey]);
-    expect(list.items[0]!.identityMode).toBe('named');
 
     const exported = await me.call<{ profile: { email: string }; postsAndComments: unknown[] }>(
       'exportMyData',
@@ -197,14 +188,14 @@ describe('my data', () => {
     expect(JSON.stringify(exported)).not.toContain('Somebody else wrote this');
   });
 
-  it('deleting an account anonymises named posts and keeps the authorship record', async () => {
+  it('deleting an account relabels posts as Former member and keeps the authorship record', async () => {
     const leaver = await member('leaving.student@nobles.edu', { firstName: 'Leaver' });
     const named = await post(leaver, spaces['clubs']!, { title: 'A named thread before leaving' });
-    const result = await leaver.call<{ deleted: boolean; anonymised: number }>('deleteMyAccount', {});
-    expect(result).toEqual({ deleted: true, anonymised: 1 });
+    const result = await leaver.call<{ deleted: boolean; renamed: number }>('deleteMyAccount', {});
+    expect(result).toEqual({ deleted: true, renamed: 1 });
 
     const after = (await adminDb.doc(`posts/${named.postId}`).get()).data()!;
-    expect(after.authorDisplay).toEqual({ mode: 'anonymous', anonLabel: 'Former member' });
+    expect(after.authorDisplay).toEqual({ name: 'Former member' });
     expect(JSON.stringify(after)).not.toContain('Leaver');
     // The record of who wrote it stays, as the school requires, and the page says so.
     expect((await adminDb.doc(`authorship/${named.contentKey}`).get()).data()!.authorUid).toBe(leaver.uid);

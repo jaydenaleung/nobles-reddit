@@ -13,8 +13,7 @@ export function tokenize(text: string): string[] {
 
 /**
  * The search index for a post: its title, the first 200 characters of the body
- * and the space name. Author information is never indexed, so an anonymous
- * author cannot be found by searching.
+ * and the space name. Author information is never indexed.
  */
 export function buildSearchTokens(title: string, body: string, spaceName: string): string[] {
   return tokenize(`${title} ${body.slice(0, 200)} ${spaceName}`).slice(0, 80);

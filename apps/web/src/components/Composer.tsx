@@ -1,9 +1,4 @@
-import {
-  LIMITS,
-  type ContentStatusResult,
-  type IdentityMode,
-  type WellbeingResources,
-} from '@commons/shared';
+import { LIMITS, type ContentStatusResult, type WellbeingResources } from '@commons/shared';
 import { useId, useState, type FormEvent } from 'react';
 import { api, errorMessage, waitForOutcome } from '../api';
 import { useMember } from '../auth/AuthContext';
@@ -43,7 +38,6 @@ export interface PendingComment {
   key: string;
   parentId: string | null;
   body: string;
-  mode: IdentityMode;
 }
 
 /** The reply box. Every comment goes up under the writer's name. */
@@ -88,9 +82,9 @@ export function ReplyComposer({
     }
     const pendingKey = `pending-${Date.now()}`;
     setBusy(true);
-    onPending?.({ key: pendingKey, parentId, body: text, mode: 'named' });
+    onPending?.({ key: pendingKey, parentId, body: text });
     try {
-      const created = await api.createComment({ postId, parentId, identityMode: 'named', body: text });
+      const created = await api.createComment({ postId, parentId, body: text });
       setBody('');
       const result = await waitForOutcome(created.contentKey);
       if (result.outcome === 'held' || result.outcome === 'wellbeing') setOutcome(result);

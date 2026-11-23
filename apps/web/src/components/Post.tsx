@@ -5,6 +5,7 @@ import {
   shortClassYear,
   type PollOption,
   type Post,
+  FORMER_MEMBER_LABEL,
 } from '@commons/shared';
 import { Link } from 'react-router-dom';
 import { Icon } from './Icon';
@@ -62,7 +63,7 @@ function PostTop({ post, nowMs, spaceSlug }: { post: PostView; nowMs: number; sp
   ) : (
     <span className="nb-space">{post.spaceName}</span>
   );
-  if (author.mode === 'named' && author.role === 'admin' && post.pinnedBy === 'administration') {
+  if (author.role === 'admin' && post.pinnedBy === 'administration') {
     return (
       <div className="nb-post__top">
         {space}
@@ -76,17 +77,9 @@ function PostTop({ post, nowMs, spaceSlug }: { post: PostView; nowMs: number; sp
     <div className="nb-post__top">
       {space}
       {post.questionOfTheDay && <span className="nb-qotd">Question of the day</span>}
-      {author.mode === 'anonymous' ? (
-        <span>Anonymous</span>
-      ) : (
-        <>
-          <b>{author.name}</b>
-          {isStaffRole(author.role) && <StaffBadge role={author.role} />}
-        </>
-      )}
-      {author.mode === 'named' && author.classYear !== undefined && (
-        <span>{shortClassYear(author.classYear)}</span>
-      )}
+      <b>{author.name || FORMER_MEMBER_LABEL}</b>
+      {isStaffRole(author.role) && <StaffBadge role={author.role} />}
+      {author.classYear !== undefined && <span>{shortClassYear(author.classYear)}</span>}
       <span>{when}</span>
     </div>
   );

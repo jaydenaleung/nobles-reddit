@@ -73,30 +73,6 @@ export async function addComment(page: Page, body: string): Promise<void> {
   await expect(page.locator('.nb-comment--pending')).toHaveCount(0, { timeout: 30_000 });
 }
 
-/**
- * Turns a thread into one written before anonymous posting was turned off, by
- * writing to the Firestore emulator directly (the "owner" token bypasses the
- * rules). New posts can't be anonymous, but older ones still read "Anonymous".
- */
-export async function makeLegacyAnonymous(page: Page, postId: string): Promise<void> {
-  const url =
-    'http://127.0.0.1:8080/v1/projects/demo-nobles-commons/databases/(default)/documents/' +
-    `posts/${postId}?updateMask.fieldPaths=authorDisplay`;
-  const response = await page.request.patch(url, {
-    headers: { Authorization: 'Bearer owner' },
-    data: {
-      fields: {
-        authorDisplay: {
-          mapValue: {
-            fields: { mode: { stringValue: 'anonymous' }, anonLabel: { stringValue: 'Anonymous A' } },
-          },
-        },
-      },
-    },
-  });
-  expect(response.ok(), await response.text()).toBe(true);
-}
-
 export async function setTheme(page: Page, theme: 'paper' | 'night'): Promise<void> {
   await page.evaluate((value) => {
     window.localStorage.setItem('commons.theme', value);
